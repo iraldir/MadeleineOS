@@ -1,0 +1,337 @@
+.main {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.nav {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 80px;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: white;
+  font-size: 1.5rem;
+  gap: 2rem;
+}
+
+.loadingIcon {
+  font-size: 4rem;
+  animation: spin 2s linear infinite;
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: white;
+  font-size: 1.5rem;
+  gap: 2rem;
+}
+
+.retryButton {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid white;
+  border-radius: 50px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retryButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dateInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.day {
+  font-weight: bold;
+}
+
+.date {
+  opacity: 0.9;
+}
+
+/* Temperature Gauge Section */
+.temperatureSection {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 30px;
+  padding: 2rem 3rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.temperatureGauge {
+  margin: 2rem 0;
+}
+
+.gaugeContainer {
+  position: relative;
+  height: 100px;
+  margin: 0 auto;
+  max-width: 800px;
+}
+
+.gaugeTrack {
+  position: relative;
+  height: 60px;
+  background: #f0f0f0;
+  border-radius: 30px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+}
+
+.gaugeZone {
+  position: absolute;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gaugeLabel {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.2rem;
+}
+
+.gaugeEmoji {
+  font-size: 1.8rem;
+}
+
+.gaugePointer {
+  position: absolute;
+  top: -40px;
+  transform: translateX(-50%);
+  transition: left 0.5s ease;
+  z-index: 5;
+}
+
+.pointerDot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  background: white;
+  border: 5px solid #333;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.pointerEmoji {
+  font-size: 3rem;
+}
+
+.pointerArrow {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid #333;
+}
+
+/* Weather Display */
+.weatherDisplay {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 30px;
+  padding: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.weatherMain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+}
+
+.weatherAnimation {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weatherIcon {
+  color: #ffd93d;
+  animation: float 3s ease-in-out infinite;
+}
+
+.weatherAnimation.cloudy .weatherIcon {
+  color: #94a3b8;
+}
+
+.weatherAnimation.rainy .weatherIcon {
+  color: #64748b;
+  animation: float 3s ease-in-out infinite, rain 1s linear infinite;
+}
+
+.weatherEmoji {
+  position: absolute;
+  font-size: 4rem;
+  bottom: 0;
+  right: 0;
+}
+
+.weatherInfo {
+  text-align: center;
+}
+
+.temperature {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.tempNumber {
+  font-size: 7rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.tempUnit {
+  font-size: 3.5rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+/* Animations */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes rain {
+  0% { transform: translateY(-10px); }
+  100% { transform: translateY(10px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .weatherMain {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .weatherAnimation {
+    width: 200px;
+    height: 200px;
+  }
+
+  .weatherIcon {
+    width: 120px;
+    height: 120px;
+  }
+
+  .tempNumber {
+    font-size: 5rem;
+  }
+
+  .tempUnit {
+    font-size: 2.5rem;
+  }
+
+  .gaugeContainer {
+    margin: 0 1rem;
+  }
+
+  .pointerDot {
+    width: 60px;
+    height: 60px;
+  }
+
+  .pointerEmoji {
+    font-size: 2rem;
+  }
+
+  .gaugeLabel {
+    font-size: 0.9rem;
+  }
+
+  .gaugeEmoji {
+    font-size: 1.4rem;
+  }
+}

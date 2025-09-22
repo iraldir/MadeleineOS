@@ -1,0 +1,116 @@
+.gameArea {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.textDisplay {
+  font-size: 4rem;
+  font-family: var(--font-schoolbell), cursive;
+  display: flex;
+  gap: 0.5rem;
+  height: 5rem;
+  align-items: center;
+  color: #2A9D8F;
+}
+
+.letter {
+  animation: popIn 0.15s cubic-bezier(0.17, 0.67, 0.29, 1.24) forwards;
+  opacity: 0;
+  transform: scale(0.5) translateY(10px);
+}
+
+.space {
+  display: inline-block;
+  width: 1ch; /* Set a fixed width for spaces equal to a character width */
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.trashButton {
+  background-color: #fee2e2;
+  color: #ef4444;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.trashButton:hover {
+  background-color: #fecaca;
+}
+
+.cursor {
+  width: 3px;
+  height: 4rem;
+  background-color: #2A9D8F;
+  margin-left: 0.5rem;
+  animation: blink 1s step-end infinite;
+  transition: background-color 0.2s ease;
+}
+
+.cursor.waiting {
+  background-color: #94a3b8;
+  animation: none;
+  opacity: 0.5;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blink {
+  from, to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .textDisplay {
+    font-size: 2.5rem;
+    height: 3rem;
+    gap: 0.3rem;
+  }
+
+  .button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cursor {
+    height: 2.5rem;
+    width: 2px;
+  }
+}

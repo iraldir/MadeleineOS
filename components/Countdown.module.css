@@ -1,0 +1,20 @@
+.countdown {
+  position: fixed;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #4fd1c5;
+  font-family: var(--font-schoolbell), cursive;
+}
+
+.text {
+  font-size: 1.5rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.time {
+  font-size: 3rem;
+  font-weight: bold;
+} 

@@ -1,0 +1,221 @@
+/* Easy-to-use background presets - just add these classes to any element */
+
+/* Dreamy Floral Background */
+.bg-dreamy-floral {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-dreamy-floral::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/backgrounds/page-background.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.12;
+  filter: blur(3px) saturate(0.8);
+  z-index: -2;
+}
+
+.bg-dreamy-floral::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 192, 203, 0.05),
+    rgba(255, 255, 224, 0.05),
+    rgba(240, 248, 255, 0.05),
+    rgba(230, 230, 250, 0.05)
+  );
+  mix-blend-mode: screen;
+  z-index: -1;
+}
+
+/* Subtle Rainbow Gradient */
+.bg-rainbow-subtle {
+  position: relative;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 235, 235, 0.5),
+    rgba(255, 245, 235, 0.5),
+    rgba(255, 255, 235, 0.5),
+    rgba(235, 255, 235, 0.5),
+    rgba(235, 245, 255, 0.5),
+    rgba(245, 235, 255, 0.5),
+    rgba(255, 235, 250, 0.5)
+  );
+}
+
+/* Soft Floral Pattern */
+.bg-floral-pattern {
+  position: relative;
+}
+
+.bg-floral-pattern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/backgrounds/floral-pattern.webp');
+  background-size: 400px 400px;
+  background-repeat: repeat;
+  opacity: 0.08;
+  z-index: -1;
+}
+
+/* Rainbow Shimmer Animation */
+@keyframes rainbow-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-rainbow-animated {
+  position: relative;
+  background: linear-gradient(
+    -45deg,
+    rgba(238, 119, 119, 0.1),
+    rgba(238, 204, 119, 0.1),
+    rgba(204, 238, 119, 0.1),
+    rgba(119, 238, 204, 0.1),
+    rgba(119, 204, 238, 0.1),
+    rgba(204, 119, 238, 0.1),
+    rgba(238, 119, 204, 0.1)
+  );
+  background-size: 400% 400%;
+  animation: rainbow-shimmer 15s ease infinite;
+}
+
+/* Watercolor Effect */
+.bg-watercolor {
+  position: relative;
+}
+
+.bg-watercolor::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 192, 203, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(173, 216, 230, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 224, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 60% 60%, rgba(230, 230, 250, 0.15) 0%, transparent 50%);
+  filter: blur(40px);
+  z-index: -1;
+}
+
+/* Minimal Pastel */
+.bg-pastel-minimal {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 245, 245, 1) 0%,
+    rgba(245, 255, 250, 1) 50%,
+    rgba(245, 250, 255, 1) 100%
+  );
+}
+
+/* Floating Petals Animation */
+@keyframes float-petal {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.bg-with-petals {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-with-petals::before,
+.bg-with-petals::after {
+  content: '🌸';
+  position: absolute;
+  font-size: 20px;
+  opacity: 0.3;
+  animation: float-petal 20s linear infinite;
+  z-index: -1;
+}
+
+.bg-with-petals::before {
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.bg-with-petals::after {
+  left: 80%;
+  animation-delay: 10s;
+}
+
+/* Soft Focus Overlay */
+.bg-soft-focus {
+  position: relative;
+}
+
+.bg-soft-focus::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.3) 100%),
+    url('/images/backgrounds/page-background.webp');
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px);
+  opacity: 0.1;
+  z-index: -1;
+}
+
+/* Utility classes for combining effects */
+.bg-blur-xs { filter: blur(1px); }
+.bg-blur-sm { filter: blur(2px); }
+.bg-blur-md { filter: blur(4px); }
+.bg-blur-lg { filter: blur(8px); }
+
+.bg-opacity-10 { opacity: 0.1; }
+.bg-opacity-20 { opacity: 0.2; }
+.bg-opacity-30 { opacity: 0.3; }
+.bg-opacity-40 { opacity: 0.4; }
+.bg-opacity-50 { opacity: 0.5; }
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .bg-rainbow-animated,
+  .bg-with-petals::before,
+  .bg-with-petals::after {
+    animation: none;
+  }
+}

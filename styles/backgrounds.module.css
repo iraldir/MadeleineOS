@@ -1,0 +1,318 @@
+/* Subtle, flowery, and rainbow-themed backgrounds */
+
+.pageBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* Main background with blur effect */
+.subtleFloral {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/backgrounds/page-background.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.15;
+  filter: blur(2px);
+}
+
+/* Floating pattern overlay */
+.floralPattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/backgrounds/floral-pattern.webp');
+  background-size: 400px 400px;
+  background-repeat: repeat;
+  opacity: 0.08;
+  animation: floatPattern 60s linear infinite;
+  mix-blend-mode: multiply;
+}
+
+/* Rainbow gradient overlay */
+.rainbowGradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 182, 193, 0.1) 0%,
+    rgba(255, 218, 193, 0.1) 16%,
+    rgba(255, 253, 193, 0.1) 32%,
+    rgba(193, 255, 193, 0.1) 48%,
+    rgba(193, 218, 255, 0.1) 64%,
+    rgba(218, 193, 255, 0.1) 80%,
+    rgba(255, 193, 243, 0.1) 100%
+  );
+  animation: shiftGradient 30s ease-in-out infinite;
+}
+
+/* Animated flower petals */
+.petalOverlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.petal {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(255, 192, 203, 0.3), transparent);
+  border-radius: 0 100% 0 100%;
+  animation: fall linear infinite;
+}
+
+.petal:nth-child(1) {
+  left: 10%;
+  animation-duration: 15s;
+  animation-delay: 0s;
+  transform: scale(0.8);
+}
+
+.petal:nth-child(2) {
+  left: 30%;
+  animation-duration: 18s;
+  animation-delay: 3s;
+  transform: scale(1.2);
+}
+
+.petal:nth-child(3) {
+  left: 50%;
+  animation-duration: 20s;
+  animation-delay: 6s;
+  transform: scale(0.9);
+}
+
+.petal:nth-child(4) {
+  left: 70%;
+  animation-duration: 16s;
+  animation-delay: 9s;
+  transform: scale(1.1);
+}
+
+.petal:nth-child(5) {
+  left: 90%;
+  animation-duration: 22s;
+  animation-delay: 12s;
+  transform: scale(0.7);
+}
+
+/* CSS-only rainbow shimmer effect */
+.rainbowShimmer {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: translateX(-50%) translateY(-50%) rotate(45deg);
+  animation: shimmer 8s linear infinite;
+}
+
+/* Soft bokeh effect */
+.bokehEffect {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.bokeh {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.3;
+  animation: float 20s infinite ease-in-out;
+}
+
+.bokeh:nth-child(1) {
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 182, 193, 0.4);
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.bokeh:nth-child(2) {
+  width: 200px;
+  height: 200px;
+  background: rgba(193, 255, 193, 0.4);
+  top: 60%;
+  right: 20%;
+  animation-delay: 5s;
+}
+
+.bokeh:nth-child(3) {
+  width: 180px;
+  height: 180px;
+  background: rgba(193, 218, 255, 0.4);
+  bottom: 30%;
+  left: 30%;
+  animation-delay: 10s;
+}
+
+/* Animations */
+@keyframes floatPattern {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-50px, 50px);
+  }
+  50% {
+    transform: translate(0, 100px);
+  }
+  75% {
+    transform: translate(50px, 50px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes shiftGradient {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(1deg) scale(1.05);
+  }
+  50% {
+    transform: rotate(-1deg) scale(1);
+  }
+  75% {
+    transform: rotate(0.5deg) scale(1.02);
+  }
+}
+
+@keyframes fall {
+  0% {
+    top: -10%;
+    transform: translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    top: 110%;
+    transform: translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+/* Preset combinations for easy use */
+.dreamyFloral {
+  composes: pageBackground;
+}
+
+.dreamyFloral::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/backgrounds/page-background.webp');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.12;
+  filter: blur(3px) saturate(0.8);
+}
+
+.dreamyFloral::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 192, 203, 0.05),
+    rgba(255, 255, 224, 0.05),
+    rgba(240, 248, 255, 0.05),
+    rgba(230, 230, 250, 0.05)
+  );
+  mix-blend-mode: screen;
+}
+
+.subtleRainbow {
+  composes: pageBackground;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 235, 235, 0.4),
+    rgba(255, 245, 235, 0.4),
+    rgba(255, 255, 235, 0.4),
+    rgba(235, 255, 235, 0.4),
+    rgba(235, 245, 255, 0.4),
+    rgba(245, 235, 255, 0.4),
+    rgba(255, 235, 250, 0.4)
+  );
+  animation: shiftGradient 45s ease-in-out infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .floralPattern {
+    background-size: 300px 300px;
+  }
+  
+  .bokeh {
+    filter: blur(30px);
+  }
+  
+  .petal {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* Performance optimization for low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  .floralPattern,
+  .rainbowGradient,
+  .petal,
+  .rainbowShimmer,
+  .bokeh {
+    animation: none;
+  }
+  
+  .subtleFloral {
+    filter: none;
+    opacity: 0.1;
+  }
+}

@@ -1,0 +1,171 @@
+.main {
+  min-height: 100vh;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 2rem;
+}
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  z-index: 30;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  color: #2d3436;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.backButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.problem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-schoolbell), cursive;
+  padding-bottom: 50px;
+}
+
+.equation {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.numberGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* For absolute positioning of apples */
+}
+
+.number {
+  color: #2A9D8F;
+  font-size: 10rem;
+}
+
+.operation {
+  color: #2A9D8F;
+  font-size: 10rem;
+}
+
+.apples {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 300px;
+  margin-top: 2rem;
+}
+
+.apple {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.answer {
+  color: #2A9D8F;
+  font-size: 10rem;
+  display: flex;
+  align-items: center;
+}
+
+.cursor {
+  width: 6px;
+  height: 120px;
+  background-color: #2A9D8F;
+  margin-left: 1rem;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.error {
+  color: #ef4444;
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.success {
+  animation: success 0.5s ease-out forwards;
+}
+
+@media (max-width: 768px) {
+  .problem {
+    padding-bottom: 150px;
+  }
+
+  .equation {
+    gap: 1.5rem;
+    height: 100px;
+  }
+
+  .number, .operation, .answer {
+    font-size: 6rem;
+  }
+
+  .apples {
+    width: 200px;
+    display: flex;
+    margin-top: 1.5rem;
+  }
+
+  .apple {
+    margin-left: -1rem;
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Add dark mode styles */
+.darkMode {
+  background-color: #1a1a1a;
+}
+
+.darkMode .number,
+.darkMode .operation,
+.darkMode .answer {
+  color: #4fd1c5;
+}
+
+.darkMode .cursor {
+  background-color: #4fd1c5;
+}
+
+.darkMode .backButton {
+  background-color: #2d3748;
+  color: white;
+}
+
+.darkMode .backButton:hover {
+  background-color: #4a5568;
+} 
