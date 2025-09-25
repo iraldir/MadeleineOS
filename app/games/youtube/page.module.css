@@ -74,8 +74,19 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.categoryEmoji {
-  font-size: 6rem;
+.categoryIcon {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.categoryIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .categoryName {
@@ -94,8 +105,19 @@
   margin-bottom: 3rem;
 }
 
-.categoryIcon {
-  font-size: 4rem;
+.categoryHeaderIcon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.categoryHeaderIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .categoryTitle {
@@ -163,7 +185,7 @@
 .playerContainer {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 4rem);
+  height: calc(100vh - 8rem);
   max-height: 900px;
 }
 
@@ -173,7 +195,8 @@
   border-radius: 20px;
   overflow: hidden;
   position: relative;
-  max-height: 70vh;
+  min-height: 200px;
+  max-height: 60vh;
 }
 
 .player {
@@ -204,14 +227,15 @@
 .controlsContainer {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 30px;
-  padding: 2rem;
-  margin-top: 2rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .videoInfo {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .videoPlayerTitle {
@@ -258,8 +282,8 @@
 }
 
 .playPauseButton {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -268,14 +292,14 @@
 }
 
 .skipButton {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #4ECDC4 0%, #6EDDD5 100%);
 }
 
 .restartButton {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #FFD93D 0%, #FFE66D 100%);
 }
 
@@ -303,8 +327,14 @@
     padding: 2rem;
   }
   
-  .categoryEmoji {
-    font-size: 4rem;
+  .categoryIcon {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .categoryHeaderIcon {
+    width: 60px;
+    height: 60px;
   }
   
   .categoryName {
@@ -320,14 +350,39 @@
   }
   
   .playPauseButton {
-    width: 90px;
-    height: 90px;
+    width: 70px;
+    height: 70px;
   }
   
   .skipButton,
   .restartButton {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .playerContainer {
+    height: calc(100vh - 6rem);
+  }
+  
+  .videoWrapper {
+    max-height: 50vh;
+  }
+  
+  .controlsContainer {
+    padding: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .videoInfo {
+    margin-bottom: 0.5rem;
+  }
+  
+  .videoPlayerTitle {
+    font-size: 1.5rem;
+  }
+  
+  .timeDisplay {
+    font-size: 1.2rem;
   }
   
   .controlButton svg {

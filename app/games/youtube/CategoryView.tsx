@@ -26,7 +26,9 @@ export default function CategoryView({ category, videos, onSelectVideo }: Catego
   return (
     <>
       <div className={styles.categoryHeader}>
-        <span className={styles.categoryIcon}>{category.emoji}</span>
+        <div className={styles.categoryHeaderIcon}>
+          <img src={category.icon} alt={category.name} />
+        </div>
         <h1 className={styles.categoryTitle}>{category.name} Videos</h1>
       </div>
       

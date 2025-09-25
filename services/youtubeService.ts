@@ -11,6 +11,7 @@ export interface Category {
   id: string;
   name: string;
   emoji: string;
+  icon: string;
   color: string;
   thumbnail: string;
 }
@@ -23,6 +24,7 @@ class YouTubeService {
       id: 'yoga',
       name: 'Yoga',
       emoji: '🧘‍♀️',
+      icon: '/images/youtube/yoga-icon.webp',
       color: '#9C27B0',
       thumbnail: '/images/youtube/yoga-thumb.png'
     },
@@ -30,6 +32,7 @@ class YouTubeService {
       id: 'drawing',
       name: 'Drawing',
       emoji: '🎨',
+      icon: '/images/youtube/drawing-icon.webp',
       color: '#FF6B6B',
       thumbnail: '/images/youtube/drawing-thumb.png'
     }
@@ -39,84 +42,235 @@ class YouTubeService {
     // Yoga Videos - Kid-friendly yoga sessions
     {
       id: 'yoga-1',
-      youtubeId: 'X655B4ISakg', // Cosmic Kids Yoga - Frozen
-      title: 'Frozen Yoga Adventure',
-      thumbnail: 'https://img.youtube.com/vi/X655B4ISakg/maxresdefault.jpg',
-      duration: '10:30',
+      youtubeId: '2cxcGwDZNWQ',
+      title: '10 min Morning Yoga Full Body Stretch for Beginners',
+      thumbnail: 'https://img.youtube.com/vi/2cxcGwDZNWQ/maxresdefault.jpg',
       category: 'yoga'
     },
     {
       id: 'yoga-2',
-      youtubeId: '5y3gCrL_XIM', // Cosmic Kids Yoga - Moana
-      title: 'Moana Yoga Adventure',
-      thumbnail: 'https://img.youtube.com/vi/5y3gCrL_XIM/maxresdefault.jpg',
-      duration: '15:00',
+      youtubeId: 'LCVengYJHss',
+      title: 'Halloween Yoga for Kids | Cosmic Kids',
+      thumbnail: 'https://img.youtube.com/vi/LCVengYJHss/maxresdefault.jpg',
       category: 'yoga'
     },
     {
       id: 'yoga-3',
-      youtubeId: 'xlg052EKMtk', // Cosmic Kids Yoga - Dinosaur Disco
-      title: 'Dinosaur Disco Yoga',
-      thumbnail: 'https://img.youtube.com/vi/xlg052EKMtk/maxresdefault.jpg',
-      duration: '20:00',
+      youtubeId: 'Sjq2OPw3AMQ',
+      title: 'Dinosaur Yoga for Kids | Cosmic Kids',
+      thumbnail: 'https://img.youtube.com/vi/Sjq2OPw3AMQ/maxresdefault.jpg',
       category: 'yoga'
     },
     {
       id: 'yoga-4',
-      youtubeId: 'pT-s1-phgxs', // Cosmic Kids Yoga - Squish the Fish
-      title: 'Squish the Fish Yoga',
-      thumbnail: 'https://img.youtube.com/vi/pT-s1-phgxs/maxresdefault.jpg',
-      duration: '15:00',
+      youtubeId: 'Jw03oUANsZg',
+      title: 'Ariel Yoga | Mermaid Inspired',
+      thumbnail: 'https://img.youtube.com/vi/Jw03oUANsZg/maxresdefault.jpg',
       category: 'yoga'
     },
     {
       id: 'yoga-5',
-      youtubeId: '02E1468SdHg', // Cosmic Kids Yoga - We're Going on a Bear Hunt
-      title: 'Bear Hunt Yoga',
-      thumbnail: 'https://img.youtube.com/vi/02E1468SdHg/maxresdefault.jpg',
-      duration: '25:00',
+      youtubeId: '6ftVNC0_8Sw',
+      title: 'Grinch Summer Yoga',
+      thumbnail: 'https://img.youtube.com/vi/6ftVNC0_8Sw/maxresdefault.jpg',
+      category: 'yoga'
+    },
+    {
+      id: 'yoga-6',
+      youtubeId: 'YkqbXc84nVQ',
+      title: 'Disney Princess Yoga | Cosmic Yoga',
+      thumbnail: 'https://img.youtube.com/vi/YkqbXc84nVQ/maxresdefault.jpg',
       category: 'yoga'
     },
 
     // Drawing Videos - Simple drawing tutorials for kids
     {
       id: 'drawing-1',
-      youtubeId: 'wCqgU1kE-UM', // Art for Kids Hub - How to Draw a Unicorn
-      title: 'Draw a Unicorn',
-      thumbnail: 'https://img.youtube.com/vi/wCqgU1kE-UM/maxresdefault.jpg',
-      duration: '8:00',
+      youtubeId: 'NLD3QQSVUZE',
+      title: 'How To Draw A Giant Rainbow Lollipop',
+      thumbnail: 'https://img.youtube.com/vi/NLD3QQSVUZE/maxresdefault.jpg',
       category: 'drawing'
     },
     {
       id: 'drawing-2',
-      youtubeId: '3lOz1C3rDsU', // Art for Kids Hub - How to Draw a Rainbow
-      title: 'Draw a Rainbow',
-      thumbnail: 'https://img.youtube.com/vi/3lOz1C3rDsU/maxresdefault.jpg',
-      duration: '6:00',
+      youtubeId: 'ST5GG-zS1BE',
+      title: 'How To Draw A Cute Raccoon',
+      thumbnail: 'https://img.youtube.com/vi/ST5GG-zS1BE/maxresdefault.jpg',
       category: 'drawing'
     },
     {
       id: 'drawing-3',
-      youtubeId: 'bBMT_LdKUZA', // Art for Kids Hub - How to Draw a Butterfly
-      title: 'Draw a Butterfly',
-      thumbnail: 'https://img.youtube.com/vi/bBMT_LdKUZA/maxresdefault.jpg',
-      duration: '7:00',
+      youtubeId: '6lfV3XDfA64',
+      title: 'How To Draw POKEMON | VULPIX Step By Step Tutorial',
+      thumbnail: 'https://img.youtube.com/vi/6lfV3XDfA64/maxresdefault.jpg',
       category: 'drawing'
     },
     {
       id: 'drawing-4',
-      youtubeId: 'By4eLUdfgAQ', // Art for Kids Hub - How to Draw a Cat
-      title: 'Draw a Cat',
-      thumbnail: 'https://img.youtube.com/vi/By4eLUdfgAQ/maxresdefault.jpg',
-      duration: '10:00',
+      youtubeId: 'Iy-qngRwYxU',
+      title: 'HOW TO DRAW VULPIX - Easy Pokémon Drawing',
+      thumbnail: 'https://img.youtube.com/vi/Iy-qngRwYxU/maxresdefault.jpg',
       category: 'drawing'
     },
     {
       id: 'drawing-5',
-      youtubeId: 'LRsiK1kBGPI', // Art for Kids Hub - How to Draw a House
-      title: 'Draw a House',
-      thumbnail: 'https://img.youtube.com/vi/LRsiK1kBGPI/maxresdefault.jpg',
-      duration: '9:00',
+      youtubeId: 'jCCPBGOCo6Q',
+      title: 'How to Draw Vulpix | Pokemon',
+      thumbnail: 'https://img.youtube.com/vi/jCCPBGOCo6Q/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-6',
+      youtubeId: '-RRw77w183w',
+      title: 'How To Draw Charizard',
+      thumbnail: 'https://img.youtube.com/vi/-RRw77w183w/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-7',
+      youtubeId: 'yLmPwjDtMnQ',
+      title: 'How To Draw Pokemon | Charizard || Step by Step',
+      thumbnail: 'https://img.youtube.com/vi/yLmPwjDtMnQ/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-8',
+      youtubeId: 'bJZQYRywEAc',
+      title: 'Handwriting name #calligraphy #art',
+      thumbnail: 'https://img.youtube.com/vi/bJZQYRywEAc/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-9',
+      youtubeId: 'qN6bXtsBBsI',
+      title: 'How to Draw a CHICK',
+      thumbnail: 'https://img.youtube.com/vi/qN6bXtsBBsI/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-10',
+      youtubeId: 'VzX-xntLpL0',
+      title: 'How to Draw a BUTTERFLY',
+      thumbnail: 'https://img.youtube.com/vi/VzX-xntLpL0/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-11',
+      youtubeId: '8qrq6ZIX0W0',
+      title: 'How to Draw a MOUSE (Easy for Kids)',
+      thumbnail: 'https://img.youtube.com/vi/8qrq6ZIX0W0/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-12',
+      youtubeId: 'hky2ggpPM88',
+      title: 'How To Draw A Cartoon Belle (Beauty and the Beast)',
+      thumbnail: 'https://img.youtube.com/vi/hky2ggpPM88/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-13',
+      youtubeId: 'aeJQsbPAEhc',
+      title: 'How to Draw Cinderella',
+      thumbnail: 'https://img.youtube.com/vi/aeJQsbPAEhc/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-14',
+      youtubeId: 'RWtrnnvNBGc',
+      title: 'How To Draw A Cartoon Mouse',
+      thumbnail: 'https://img.youtube.com/vi/RWtrnnvNBGc/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-15',
+      youtubeId: 'UDzGI6KFBrY',
+      title: 'How to Draw a Penguin (Beginner)',
+      thumbnail: 'https://img.youtube.com/vi/UDzGI6KFBrY/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-16',
+      youtubeId: 'eEenczJV_l8',
+      title: 'How to Draw a Penguin | Easy Step-by-Step',
+      thumbnail: 'https://img.youtube.com/vi/eEenczJV_l8/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-17',
+      youtubeId: 'MilR2D3cJRY',
+      title: 'How To Draw A Cartoon Penguin',
+      thumbnail: 'https://img.youtube.com/vi/MilR2D3cJRY/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-18',
+      youtubeId: 'tQNbRUuzLXw',
+      title: 'How to Draw a Horse',
+      thumbnail: 'https://img.youtube.com/vi/tQNbRUuzLXw/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-19',
+      youtubeId: 'l_4ZAq5zyJM',
+      title: 'How to Draw Bluey the Puppy (Disney)',
+      thumbnail: 'https://img.youtube.com/vi/l_4ZAq5zyJM/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-20',
+      youtubeId: 'laVebaRmKdA',
+      title: 'How To Draw A Cartoon Horse',
+      thumbnail: 'https://img.youtube.com/vi/laVebaRmKdA/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-21',
+      youtubeId: 'mSAlNhm0F-8',
+      title: 'Horse Drawing from 243 Number',
+      thumbnail: 'https://img.youtube.com/vi/mSAlNhm0F-8/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-22',
+      youtubeId: 'cDlA1QmDVUs',
+      title: 'How to Draw a Horse Rider',
+      thumbnail: 'https://img.youtube.com/vi/cDlA1QmDVUs/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-23',
+      youtubeId: 'YPB2R8YqWXc',
+      title: 'How to draw a cat! (Kids)',
+      thumbnail: 'https://img.youtube.com/vi/YPB2R8YqWXc/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-24',
+      youtubeId: 'nuyrn3WWDKA',
+      title: 'How to Draw a Cow - Easy',
+      thumbnail: 'https://img.youtube.com/vi/nuyrn3WWDKA/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-25',
+      youtubeId: 'cZrQRg-yWS0',
+      title: 'How To Draw A Frog Prince',
+      thumbnail: 'https://img.youtube.com/vi/cZrQRg-yWS0/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-26',
+      youtubeId: 'CGXCyzcXsYk',
+      title: 'How To Draw A Cute Cupcake Monster Folding Surprise',
+      thumbnail: 'https://img.youtube.com/vi/CGXCyzcXsYk/maxresdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-27',
+      youtubeId: '21jWNVrcrw4',
+      title: 'How To Draw A Mario Mushroom',
+      thumbnail: 'https://img.youtube.com/vi/21jWNVrcrw4/maxresdefault.jpg',
       category: 'drawing'
     }
   ];

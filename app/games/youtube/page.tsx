@@ -85,7 +85,9 @@ export default function YouTubeApp() {
                   className={styles.categoryCard}
                   style={{ backgroundColor: category.color }}
                 >
-                  <div className={styles.categoryEmoji}>{category.emoji}</div>
+                  <div className={styles.categoryIcon}>
+                    <img src={category.icon} alt={category.name} />
+                  </div>
                   <div className={styles.categoryName}>{category.name}</div>
                 </button>
               ))}
