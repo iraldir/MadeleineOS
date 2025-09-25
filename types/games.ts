@@ -39,7 +39,7 @@ export const games: Game[] = [
   {
     id: "weather",
     title: "Today's Weather",
-    thumbnailUrl: "/images/games/weather.png",
+    thumbnailUrl: "/images/games/weather.webp",
     path: "/games/weather",
   },
   {
@@ -55,10 +55,10 @@ export const games: Game[] = [
     path: "/games/vocabulary",
   },
   {
-    id: "coming-soon-1",
-    title: "Coming Soon",
-    thumbnailUrl: "/images/games/placeholder1.png",
-    path: "#",
+    id: "coupon",
+    title: "Redeem Coupon",
+    thumbnailUrl: "/images/games/coupon.webp",
+    path: "/games/coupon",
   },
   {
     id: "coming-soon-2",

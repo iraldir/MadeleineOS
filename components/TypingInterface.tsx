@@ -47,13 +47,27 @@ export default function TypingInterface({
         return;
       }
 
-      // Only accept letters a-z or A-Z
+      // Accept letters a-z or A-Z
       if (/^[a-zA-Z]$/.test(e.key)) {
         const upperLetter = e.key.toUpperCase();
         const newText = text + upperLetter;
         setText(newText);
         onTextChange?.(newText);
         playLetterSound(upperLetter);
+
+        // Start cooldown
+        setCanType(false);
+        setTimeout(() => {
+          setCanType(true);
+        }, cooldown);
+      }
+
+      // Accept numbers 0-9
+      if (/^[0-9]$/.test(e.key)) {
+        const newText = text + e.key;
+        setText(newText);
+        onTextChange?.(newText);
+        playLetterSound(e.key);
 
         // Start cooldown
         setCanType(false);
