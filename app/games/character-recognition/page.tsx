@@ -57,7 +57,7 @@ export default function CharacterRecognition() {
       .map((char) => char?.name || "");
 
     setOptions(allOptions);
-  }, [currentIndex, completed]);
+  }, [currentIndex, completed, orderedCharacters]);
 
 
   const handleOptionClick = (selectedName: string) => {

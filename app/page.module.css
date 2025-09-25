@@ -166,6 +166,46 @@ div.gameCard .gameTitle {
   font-weight: 500;
 }
 
+/* Blocked game styles */
+.blockedCard {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.blockedCard .gameCardInner {
+  position: relative;
+}
+
+.blockedOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  border-radius: 12px;
+}
+
+/* Hidden terminal - visible but subtle */
+.hiddenTerminal {
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+}
+
+.hiddenTerminal:hover {
+  opacity: 0.8;
+}
+
+.hiddenTerminal .gameThumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .main ol {
   font-family: var(--font-schoolbell), cursive;
   padding-left: 0;
