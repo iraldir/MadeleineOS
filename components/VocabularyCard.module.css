@@ -1,89 +1,44 @@
 .card {
-  width: 280px;
-  height: 420px;
+  width: 100%;
+  min-width: 180px;
+  max-width: 220px;
+  height: 320px;
   background: var(--card-gradient, linear-gradient(145deg, #ffffff, #f0f0f0));
-  border-radius: 20px;
-  padding: 20px;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 15px;
+  padding: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  transform-style: preserve-3d;
-  perspective: 1000px;
+  gap: 12px;
   box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.2),
-    0 5px 15px rgba(0, 0, 0, 0.1),
-    inset 0 -2px 0 rgba(255, 255, 255, 0.5),
-    inset 0 2px 0 rgba(0, 0, 0, 0.1);
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
 }
 
 .card::before {
   content: '';
   position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: linear-gradient(
-    45deg,
-    #ff0080,
-    #ff8c00,
-    #ffd700,
-    #00ff00,
-    #00ffff,
-    #0080ff,
-    #ff0080
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    transparent
   );
-  background-size: 400% 400%;
-  border-radius: 20px;
-  opacity: 0;
-  z-index: -1;
-  transition: opacity 0.3s;
-  animation: rainbowShift 4s linear infinite;
-}
-
-@keyframes rainbowShift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
-}
-
-.card::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 70%
-  );
-  transform: rotate(45deg) translateY(-100%);
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
 
-.card:hover::after {
-  transform: rotate(45deg) translateY(100%);
-}
-
-.card:hover::before {
-  opacity: 0.8;
-  animation: rainbowShift 1s linear infinite;
-}
-
 .card:hover {
-  transform: translateY(-10px) rotateX(-5deg) scale(1.02);
+  transform: translateY(-5px) scale(1.02);
   box-shadow: 
-    0 15px 40px rgba(0, 0, 0, 0.3),
-    0 10px 20px rgba(0, 0, 0, 0.2),
-    inset 0 -2px 0 rgba(255, 255, 255, 0.8),
-    inset 0 2px 0 rgba(0, 0, 0, 0.2);
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .shinyBorder {
@@ -92,232 +47,141 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 20px;
-  padding: 3px;
+  border-radius: 15px;
+  padding: 2px;
   background: linear-gradient(
     135deg,
     #ff0080,
     #ff8c00,
     #40e0d0,
-    #ff0080,
-    #ff8c00,
-    #40e0d0
+    #ff0080
   );
-  background-size: 600% 600%;
-  animation: gradientShimmer 5s ease infinite;
+  background-size: 300% 300%;
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;
 }
 
 .card:hover .shinyBorder {
-  opacity: 1;
-  animation: gradientShimmer 1.5s ease infinite;
+  opacity: 0.5;
+  animation: shimmerOnce 0.6s ease-out;
+}
+
+@keyframes shimmerOnce {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
 .shinyBorder::before {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 3px;
-  right: 3px;
-  bottom: 3px;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
   background: var(--card-gradient, linear-gradient(145deg, #ffffff, #f0f0f0));
-  border-radius: 17px;
+  border-radius: 13px;
   z-index: -1;
-}
-
-@keyframes gradientShimmer {
-  0% { 
-    background-position: 0% 0%;
-    filter: hue-rotate(0deg);
-  }
-  50% { 
-    background-position: 100% 100%;
-    filter: hue-rotate(180deg);
-  }
-  100% { 
-    background-position: 0% 0%;
-    filter: hue-rotate(360deg);
-  }
 }
 
 .categoryBadge {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   background: linear-gradient(135deg, #ff0080, #ff8c00);
   color: white;
-  padding: 6px 14px;
-  border-radius: 25px;
-  font-size: 11px;
-  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 
-    0 4px 15px rgba(255, 0, 128, 0.5),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(255, 0, 128, 0.3);
   z-index: 10;
-  transform: translateZ(20px);
-  transition: all 0.3s;
-}
-
-.card:hover .categoryBadge {
-  transform: translateZ(40px) scale(1.1);
-  box-shadow: 
-    0 8px 25px rgba(255, 0, 128, 0.7),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .imageContainer {
   width: 100%;
-  height: 240px;
-  aspect-ratio: 1;
+  height: 160px;
   background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-  border-radius: 15px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 
-    inset 0 4px 8px rgba(0, 0, 0, 0.2),
-    0 8px 20px rgba(0, 0, 0, 0.15);
-  transform: translateZ(0);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.card:hover .imageContainer {
-  transform: translateZ(30px) rotateY(5deg);
-  box-shadow: 
-    inset 0 4px 12px rgba(0, 0, 0, 0.3),
-    0 15px 35px rgba(0, 0, 0, 0.25),
-    0 0 50px rgba(255, 255, 255, 0.1);
-}
-
-.imageContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
+.imageContainer img {
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.card:hover .imageContainer::before {
-  left: 100%;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   text-align: center;
-  padding: 20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  padding: 10px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .wordDisplay {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 15px;
+  border-radius: 10px;
+  padding: 10px;
   box-shadow: 
-    inset 0 2px 8px rgba(0, 0, 0, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateZ(10px);
-  transition: all 0.3s;
-}
-
-.card:hover .wordDisplay {
-  transform: translateZ(25px);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 
-    inset 0 2px 12px rgba(0, 0, 0, 0.15),
-    0 8px 20px rgba(0, 0, 0, 0.2);
+    inset 0 1px 3px rgba(0, 0, 0, 0.05),
+    0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .languageRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: background-color 0.2s ease;
   position: relative;
-  overflow: hidden;
 }
 
-.languageRow::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 215, 0, 0.3),
-    transparent
-  );
-  transition: left 0.5s;
+.languageRow:hover {
+  background-color: rgba(255, 255, 255, 0.5);
 }
-
-.languageRow:hover::before {
-  left: 100%;
-}
-
 
 .flag {
-  width: 28px;
-  height: 28px;
-  font-size: 24px;
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-  animation: wave 2s ease-in-out infinite;
-  animation-delay: var(--flag-delay, 0s);
-}
-
-.languageRow:nth-child(1) .flag { --flag-delay: 0s; }
-.languageRow:nth-child(2) .flag { --flag-delay: 0.2s; }
-.languageRow:nth-child(3) .flag { --flag-delay: 0.4s; }
-
-@keyframes wave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  75% { transform: rotate(5deg); }
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .word {
   flex: 1;
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 600;
   color: #2d3748;
   text-transform: capitalize;
-  letter-spacing: 0.5px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
+  letter-spacing: 0.3px;
+  transition: transform 0.2s;
   user-select: none;
 }
 
@@ -327,7 +191,6 @@
 
 .word:not(.disabled):hover {
   transform: scale(1.05);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .word.disabled {
@@ -338,42 +201,67 @@
 .english { 
   color: #1a365d;
   font-weight: 700;
-  background: linear-gradient(90deg, #1a365d, #2563eb);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .french { 
   color: #2c5282;
   font-style: italic;
-  background: linear-gradient(90deg, #2c5282, #3182ce);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .italian { 
   color: #2d3748;
   font-style: italic;
-  background: linear-gradient(90deg, #059669, #10b981);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
-@media (max-width: 768px) {
+/* Tablet optimizations */
+@media (max-width: 1024px) {
   .card {
-    width: 100%;
-    max-width: 320px;
-    height: 400px;
+    height: 300px;
+    padding: 12px;
   }
   
   .imageContainer {
-    height: 220px;
+    height: 140px;
   }
   
   .word {
-    font-size: 17px;
+    font-size: 14px;
+  }
+  
+  .categoryBadge {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .card {
+    height: 280px;
+    max-width: 200px;
+  }
+  
+  .imageContainer {
+    height: 130px;
+  }
+  
+  .wordDisplay {
+    padding: 8px;
+    gap: 6px;
+  }
+  
+  .languageRow {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+  
+  .word {
+    font-size: 13px;
+  }
+  
+  .flag {
+    font-size: 16px;
+    width: 18px;
+    height: 18px;
   }
 }
