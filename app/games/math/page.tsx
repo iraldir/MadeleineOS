@@ -5,24 +5,11 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { mathProgression } from "@/types/math";
 import { Howl } from "howler";
-import Image from "next/image";
 import { currencyService } from "@/services";
 
 const STORAGE_KEY = "mathGame_progress";
 
-interface MathGameProps {
-  darkMode?: boolean;
-  onComplete?: () => void;
-  onFail?: () => void;
-  isLockScreen?: boolean;
-}
-
-export default function MathGame({
-  darkMode = false,
-  onComplete,
-  onFail,
-  isLockScreen = false,
-}: MathGameProps) {
+export default function MathGame() {
   const [level, setLevel] = useState<number>(0);
   const [answer, setAnswer] = useState<string>("");
   const [error, setError] = useState(false);
@@ -79,30 +66,24 @@ export default function MathGame({
       });
       success.play();
       setIsTransitioning(true);
-      
+
       // Track questions answered and award coins
       const newQuestionsAnswered = questionsAnswered + 1;
       setQuestionsAnswered(newQuestionsAnswered);
-      
+
       // Award 1 coin for every 5 questions answered
-      if (newQuestionsAnswered % 5 === 0 && !isLockScreen) {
+      if (newQuestionsAnswered % 5 === 0) {
         currencyService.addCoins(1);
       }
 
       setTimeout(() => {
         const nextLevel = level + 1;
-        // When in lock screen mode, complete after first correct answer
-        if (isLockScreen && onComplete) {
-          onComplete();
-        }
-        // Otherwise continue with normal progression
-        else if (nextLevel < mathProgression.length) {
+        // Continue with normal progression
+        if (nextLevel < mathProgression.length) {
           setLevel(nextLevel);
           if (fromColoringGame) {
             localStorage.setItem(STORAGE_KEY, nextLevel.toString());
           }
-        } else if (onComplete) {
-          onComplete();
         }
         setAnswer("");
         setIsTransitioning(false);
@@ -115,46 +96,23 @@ export default function MathGame({
       reject.play();
       setError(true);
 
-      if (isLockScreen && onFail) {
-        setTimeout(() => {
-          onFail();
-        }, 1000);
-      } else {
-        setTimeout(() => {
-          setError(false);
-          setAnswer("");
-        }, 500);
-      }
+      setTimeout(() => {
+        setError(false);
+        setAnswer("");
+      }, 500);
     }
   };
 
-  const renderApples = (count: number) => {
-    return Array(count)
-      .fill(0)
-      .map((_, i) => (
-        <Image
-          key={i}
-          src="/images/math/apple.webp"
-          alt="apple"
-          width={120}
-          height={120}
-          className={styles.apple}
-        />
-      ));
-  };
-
   return (
-    <main className={`${styles.main} ${darkMode ? styles.darkMode : ""}`}>
-      {!isLockScreen && (
-        <nav className={styles.nav}>
+    <main className={styles.main}>
+      <nav className={styles.nav}>
           <Link
             href={fromColoringGame ? "/games/coloring-search" : "/"}
             className={styles.backButton}
           >
             <ArrowLeft size={32} />
           </Link>
-        </nav>
-      )}
+      </nav>
 
       <div className={styles.problem}>
         <div className={styles.equation}>

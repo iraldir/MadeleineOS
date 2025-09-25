@@ -11,11 +11,17 @@ const VocabularyGame: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const categories = useMemo(() => {
+    if (!vocabularyWords || !Array.isArray(vocabularyWords)) {
+      return ['all'];
+    }
     const cats = new Set(vocabularyWords.map(word => word.category));
     return ['all', ...Array.from(cats)];
   }, []);
 
   const filteredWords = useMemo(() => {
+    if (!vocabularyWords || !Array.isArray(vocabularyWords)) {
+      return [];
+    }
     let filtered = vocabularyWords;
 
     if (selectedCategory !== 'all') {
@@ -66,14 +72,14 @@ const VocabularyGame: React.FC = () => {
 
       <div className={styles.stats}>
         <div className={styles.statItem}>
-          Total Words: {vocabularyWords.length}
+          Total Words: {vocabularyWords?.length || 0}
         </div>
         <div className={styles.statItem}>
           Showing: {filteredWords.length}
         </div>
       </div>
 
-      {filteredWords.length > 0 ? (
+      {filteredWords && filteredWords.length > 0 ? (
         <div className={styles.cardGrid}>
           {filteredWords.map(word => (
             <VocabularyCard key={word.id} word={word} />

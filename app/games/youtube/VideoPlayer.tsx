@@ -1,15 +1,11 @@
-'use client';
-import { useEffect, useRef, useState } from 'react';
-import styles from './page.module.css';
-import { Video } from '@/services/youtubeService';
-import { youtubeService } from '@/services/youtubeService';
-import { 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  SkipBack, 
-  SkipForward 
-} from 'lucide-react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+import { useEffect, useRef, useState } from "react";
+import styles from "./page.module.css";
+import { Video } from "@/services/youtubeService";
+import { youtubeService } from "@/services/youtubeService";
+import { Play, Pause, RotateCcw, SkipBack, SkipForward } from "lucide-react";
 
 interface VideoPlayerProps {
   video: Video;
@@ -33,22 +29,22 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
 
   useEffect(() => {
     // Load YouTube IFrame API
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
     // Initialize player when API is ready
     window.onYouTubeIframeAPIReady = () => {
       if (!playerRef.current && containerRef.current) {
         const options = youtubeService.getPlayerOptions();
-        playerRef.current = new window.YT.Player('youtube-player', {
+        playerRef.current = new window.YT.Player("youtube-player", {
           videoId: video.youtubeId,
           ...options,
           events: {
             onReady: onPlayerReady,
-            onStateChange: onPlayerStateChange
-          }
+            onStateChange: onPlayerStateChange,
+          },
         });
       }
     };
@@ -85,7 +81,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
 
   const handlePlayPause = () => {
     if (!playerRef.current) return;
-    
+
     if (isPlaying) {
       playerRef.current.pauseVideo();
     } else {
@@ -114,15 +110,19 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
     <div className={styles.playerContainer}>
       <div className={styles.videoWrapper}>
-        <div id="youtube-player" ref={containerRef} className={styles.player}></div>
+        <div
+          id="youtube-player"
+          ref={containerRef}
+          className={styles.player}
+        ></div>
       </div>
-      
+
       <div className={styles.controlsContainer}>
         <div className={styles.videoInfo}>
           <h2 className={styles.videoPlayerTitle}>{video.title}</h2>
@@ -130,7 +130,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
         </div>
-        
+
         <div className={styles.controls}>
           <button
             onClick={handleRestart}
@@ -140,7 +140,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
           >
             <RotateCcw size={40} />
           </button>
-          
+
           <button
             onClick={handleSkipBack}
             className={`${styles.controlButton} ${styles.skipButton}`}
@@ -150,16 +150,18 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
             <SkipBack size={40} />
             <span className={styles.skipText}>10</span>
           </button>
-          
+
           <button
             onClick={handlePlayPause}
-            className={`${styles.controlButton} ${styles.playPauseButton} ${isPlaying ? styles.pauseButton : ''}`}
+            className={`${styles.controlButton} ${styles.playPauseButton} ${
+              isPlaying ? styles.pauseButton : ""
+            }`}
             disabled={!isReady}
-            title={isPlaying ? 'Pause' : 'Play'}
+            title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? <Pause size={60} /> : <Play size={60} />}
           </button>
-          
+
           <button
             onClick={handleSkipForward}
             className={`${styles.controlButton} ${styles.skipButton}`}

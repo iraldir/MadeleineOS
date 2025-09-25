@@ -170,7 +170,7 @@ export const CONFIG = {
 
 // Helper functions
 export function validateApiKeys(): boolean {
-  const errors = [];
+  const errors: string[] = [];
 
   if (!CONFIG.api.geminiKey) {
     errors.push("GEMINI_KEY not found in environment variables");

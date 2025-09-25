@@ -56,7 +56,7 @@ export class BatchVocabulary {
           console.log(formatSuccess(`Operation ${i + 1} completed`));
         } catch (error) {
           progress.failedOperations++;
-          console.error(formatError(`Operation ${i + 1} failed: ${error.message}`));
+          console.error(formatError(`Operation ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`));
         }
 
         progress.lastProcessedIndex = i;
@@ -75,7 +75,7 @@ export class BatchVocabulary {
       // Clean up progress file
       await this.clearProgress();
     } catch (error) {
-      console.error(formatError(`Batch processing failed: ${error.message}`));
+      console.error(formatError(`Batch processing failed: ${error instanceof Error ? error.message : String(error)}`));
       throw error;
     }
   }
@@ -226,7 +226,7 @@ export class BatchVocabulary {
         await this.processOperation(operation);
         console.log(formatSuccess(`Added ${operation.data.english}`));
       } catch (error) {
-        console.error(formatError(`Failed to add ${operation.data.english}: ${error.message}`));
+        console.error(formatError(`Failed to add ${operation.data.english}: ${error instanceof Error ? error.message : String(error)}`));
       }
 
       // Rate limiting

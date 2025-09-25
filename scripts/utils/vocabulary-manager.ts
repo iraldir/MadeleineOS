@@ -251,7 +251,7 @@ Make it cheerful and easy to understand for young children learning languages.`;
       });
       console.log(`✅ Generated image for ${word.id} (${word.english})`);
     } catch (error) {
-      console.error(`❌ Failed to generate image for ${word.id}: ${error.message}`);
+      console.error(`❌ Failed to generate image for ${word.id}: ${error instanceof Error ? error.message : String(error)}`);
       // Create placeholder
       await mediaGenerator.generatePlaceholderImage(word.english, outputPath);
       console.log(`📝 Created placeholder image for ${word.id}`);
@@ -293,7 +293,7 @@ Make it cheerful and easy to understand for young children learning languages.`;
       });
       console.log(`✅ Generated ${language} audio for ${word.id} (${text})`);
     } catch (error) {
-      console.error(`❌ Failed to generate ${language} audio for ${word.id}: ${error.message}`);
+      console.error(`❌ Failed to generate ${language} audio for ${word.id}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -315,7 +315,7 @@ Make it cheerful and easy to understand for young children learning languages.`;
     }
   }
 
-  async generateNextId(category: string): string {
+  async generateNextId(category: string): Promise<string> {
     await this.loadVocabulary();
 
     const categoryWords = this.vocabularyWords.filter(w => w.category === category);

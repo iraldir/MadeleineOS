@@ -69,7 +69,7 @@ export class BatchMedia {
           await vocabularyManager.regenerateMedia(word.id, "image");
           progress.processedCount++;
         } catch (error) {
-          console.error(formatError(`Failed for ${word.id}: ${error.message}`));
+          console.error(formatError(`Failed for ${word.id}: ${error instanceof Error ? error.message : String(error)}`));
           progress.errorCount++;
         }
       }
@@ -154,7 +154,7 @@ export class BatchMedia {
             console.log(formatSuccess(`Generated ${lang} audio for ${word.id}`));
             hasNewAudio = true;
           } catch (error) {
-            console.error(formatError(`Failed ${lang} audio for ${word.id}: ${error.message}`));
+            console.error(formatError(`Failed ${lang} audio for ${word.id}: ${error instanceof Error ? error.message : String(error)}`));
             progress.errorCount++;
           }
         }

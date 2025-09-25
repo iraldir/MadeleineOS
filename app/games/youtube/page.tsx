@@ -1,24 +1,25 @@
-'use client';
-import { useState } from 'react';
-import styles from './page.module.css';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { youtubeService } from '@/services/youtubeService';
-import { currencyService } from '@/services';
-import CategoryView from './CategoryView';
-import VideoPlayer from './VideoPlayer';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+import { useState } from "react";
+import styles from "./page.module.css";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { youtubeService } from "@/services/youtubeService";
+import { currencyService } from "@/services";
+import CategoryView from "./CategoryView";
+import VideoPlayer from "./VideoPlayer";
 
-type ViewMode = 'categories' | 'videos' | 'player';
+type ViewMode = "categories" | "videos" | "player";
 
 export default function YouTubeApp() {
-  const [viewMode, setViewMode] = useState<ViewMode>('categories');
+  const [viewMode, setViewMode] = useState<ViewMode>("categories");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
-  const [showInsufficientCoins, setShowInsufficientCoins] = useState(false);
+  const [_showInsufficientCoins, setShowInsufficientCoins] = useState(false);
 
   const handleSelectCategory = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    setViewMode('videos');
+    setViewMode("videos");
   };
 
   const handleSelectVideo = (videoId: string) => {
@@ -28,40 +29,40 @@ export default function YouTubeApp() {
       setTimeout(() => setShowInsufficientCoins(false), 2000);
       return;
     }
-    
+
     // Spend 1 coin to watch the video
     if (currencyService.spendCoins(1)) {
       setSelectedVideoId(videoId);
-      setViewMode('player');
+      setViewMode("player");
     }
   };
 
   const handleBackFromVideos = () => {
-    setViewMode('categories');
+    setViewMode("categories");
     setSelectedCategory(null);
   };
 
   const handleBackFromPlayer = () => {
-    setViewMode('videos');
+    setViewMode("videos");
     setSelectedVideoId(null);
   };
 
   const categories = youtubeService.getCategories();
-  const videos = selectedCategory 
-    ? youtubeService.getVideosByCategory(selectedCategory as 'yoga' | 'drawing')
+  const videos = selectedCategory
+    ? youtubeService.getVideosByCategory(selectedCategory as "yoga" | "drawing")
     : [];
-  const currentVideo = selectedVideoId 
+  const currentVideo = selectedVideoId
     ? youtubeService.getVideo(selectedVideoId)
     : null;
 
   return (
     <main className={styles.main}>
       <nav className={styles.nav}>
-        {viewMode === 'categories' ? (
+        {viewMode === "categories" ? (
           <Link href="/" className={styles.backButton}>
             <ArrowLeft size={32} />
           </Link>
-        ) : viewMode === 'videos' ? (
+        ) : viewMode === "videos" ? (
           <button onClick={handleBackFromVideos} className={styles.backButton}>
             <ArrowLeft size={32} />
           </button>
@@ -73,11 +74,11 @@ export default function YouTubeApp() {
       </nav>
 
       <div className={styles.container}>
-        {viewMode === 'categories' && (
+        {viewMode === "categories" && (
           <>
             <h1 className={styles.title}>Choose What to Watch! 📺</h1>
             <div className={styles.categoriesGrid}>
-              {categories.map(category => (
+              {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleSelectCategory(category.id)}
@@ -92,7 +93,7 @@ export default function YouTubeApp() {
           </>
         )}
 
-        {viewMode === 'videos' && selectedCategory && (
+        {viewMode === "videos" && selectedCategory && (
           <CategoryView
             category={youtubeService.getCategory(selectedCategory)!}
             videos={videos}
@@ -100,11 +101,8 @@ export default function YouTubeApp() {
           />
         )}
 
-        {viewMode === 'player' && currentVideo && (
-          <VideoPlayer
-            video={currentVideo}
-            onBack={handleBackFromPlayer}
-          />
+        {viewMode === "player" && currentVideo && (
+          <VideoPlayer video={currentVideo} onBack={handleBackFromPlayer} />
         )}
       </div>
     </main>

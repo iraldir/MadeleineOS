@@ -50,7 +50,7 @@ vocab
       await vocabularyManager.addWord(word);
       console.log(formatSuccess(`Added word: ${word.id} (${word.english})`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -79,7 +79,7 @@ vocab
       });
       console.log(formatSuccess(`Updated word: ${id}`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -94,7 +94,7 @@ vocab
     try {
       await vocabularyManager.replaceText(oldText, newText, options.language);
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -108,7 +108,7 @@ vocab
       await vocabularyManager.deleteWord(id);
       console.log(formatSuccess(`Deleted word: ${id}`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -129,7 +129,7 @@ vocab
         });
       }
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -155,7 +155,7 @@ vocab
         }
       }
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -170,7 +170,7 @@ vocab
       await vocabularyManager.regenerateMedia(id, options.type);
       console.log(formatSuccess(`Regenerated ${options.type} for word: ${id}`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -204,7 +204,7 @@ media
       });
       console.log(formatSuccess(`Image saved to: ${output}`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -227,7 +227,7 @@ media
       });
       console.log(formatSuccess(`Audio saved to: ${output}`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -248,7 +248,7 @@ media
       await mediaGenerator.generateAppIcon(prompt, outputDir);
       console.log(formatSuccess(`Icons saved to: ${outputDir}`));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -290,7 +290,7 @@ batch
             await new Promise(resolve => setTimeout(resolve, CONFIG.rateLimit.imageGeneration.delayMs));
           }
         } catch (error) {
-          console.error(formatError(`Failed for ${word.id}: ${error.message}`));
+          console.error(formatError(`Failed for ${word.id}: ${error instanceof Error ? error.message : String(error)}`));
         }
 
         // Batch delay
@@ -302,7 +302,7 @@ batch
 
       console.log(formatSuccess("Batch regeneration complete"));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });
@@ -332,7 +332,7 @@ batch
             await new Promise(resolve => setTimeout(resolve, CONFIG.rateLimit.ttsGeneration.delayMs));
           }
         } catch (error) {
-          console.error(formatError(`Failed for ${word.id}: ${error.message}`));
+          console.error(formatError(`Failed for ${word.id}: ${error instanceof Error ? error.message : String(error)}`));
         }
 
         // Batch delay
@@ -344,7 +344,7 @@ batch
 
       console.log(formatSuccess("Batch regeneration complete"));
     } catch (error) {
-      console.error(formatError(error.message));
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
     }
   });

@@ -28,7 +28,7 @@ export default function SolarSystemGame() {
   const [isCuteMode, setIsCuteMode] = useState(false);
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
   const startTimeRef = useRef<number>(Date.now());
   const pausedTimeRef = useRef<number>(0);
   const canvasRef = useRef<HTMLDivElement>(null);

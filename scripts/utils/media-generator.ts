@@ -86,8 +86,17 @@ export class MediaGenerator {
 
       let imageFound = false;
 
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
+      if (!response.candidates || response.candidates.length === 0) {
+        throw new Error("No candidates in response");
+      }
+      
+      const candidate = response.candidates[0];
+      if (!candidate || !candidate.content || !candidate.content.parts) {
+        throw new Error("Invalid response structure");
+      }
+
+      for (const part of candidate.content.parts) {
+        if (part.inlineData && part.inlineData.data) {
           imageFound = true;
           const imageData = part.inlineData.data;
           const imageBuffer = Buffer.from(imageData, "base64");
@@ -111,7 +120,7 @@ export class MediaGenerator {
 
       return false;
     } catch (error) {
-      console.error(`Error generating image: ${error.message}`);
+      console.error(`Error generating image: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -182,7 +191,7 @@ export class MediaGenerator {
         throw new Error("No audio content in response");
       }
     } catch (error) {
-      console.error(`Error generating TTS: ${error.message}`);
+      console.error(`Error generating TTS: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }

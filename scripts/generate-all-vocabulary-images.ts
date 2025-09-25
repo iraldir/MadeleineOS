@@ -56,10 +56,19 @@ Make it cheerful and easy to understand for young children learning languages.`;
     // Check if we have image data in the response
     let imageFound = false;
     
-    for (const part of response.candidates[0].content.parts) {
+    if (!response.candidates || response.candidates.length === 0) {
+      throw new Error("No candidates in response");
+    }
+    
+    const candidate = response.candidates[0];
+    if (!candidate || !candidate.content || !candidate.content.parts) {
+      throw new Error("Invalid response structure");
+    }
+    
+    for (const part of candidate.content.parts) {
       if (part.text) {
         console.log(`📝 Text response: ${part.text.substring(0, 100)}...`);
-      } else if (part.inlineData) {
+      } else if (part.inlineData && part.inlineData.data) {
         imageFound = true;
         const imageData = part.inlineData.data;
         const imageBuffer = Buffer.from(imageData, "base64");
@@ -138,7 +147,7 @@ Make it cheerful and easy to understand for young children learning languages.`;
 }
 
 async function processBatch(words: VocabularyWord[]) {
-  const results = [];
+  const results: any[] = [];
   let batchHasNewImages = false;
   
   for (const word of words) {
