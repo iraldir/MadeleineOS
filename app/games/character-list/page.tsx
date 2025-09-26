@@ -1,33 +1,25 @@
 'use client';
 import { Character } from '@/types/characters';
 import styles from './page.module.css';
-import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, Medal } from 'lucide-react';
 import Link from 'next/link';
 import { characterService, progressService } from '@/services';
+import { Howl } from 'howler';
 
 export default function CharacterList() {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [visibleCharacters, setVisibleCharacters] = useState<Character[]>([]);
+  const [allCharacters, setAllCharacters] = useState<Character[]>([]);
+  const [unlockedCharacterIds, setUnlockedCharacterIds] = useState<string[]>([]);
 
   useEffect(() => {
+    // Show all characters
     const characters = characterService.getAllCharacters();
+    setAllCharacters(characters);
+    
+    // Get unlocked characters for medal display
     const unlockedIds = progressService.getUnlockedCharacters();
-    
-    // Find the index of the last unlocked character
-    let lastUnlockedIndex = -1;
-    for (let i = characters.length - 1; i >= 0; i--) {
-      if (unlockedIds.includes(characters[i].id)) {
-        lastUnlockedIndex = i;
-        break;
-      }
-    }
-    
-    // Show all unlocked characters + 3 more
-    const maxVisibleIndex = Math.min(lastUnlockedIndex + 3, characters.length - 1);
-    const visible = characters.slice(0, maxVisibleIndex + 1);
-    
-    setVisibleCharacters(visible);
+    setUnlockedCharacterIds(unlockedIds);
   }, []);
 
   const handleBack = () => {
@@ -35,6 +27,17 @@ export default function CharacterList() {
       setSelectedCharacter(null);
     }
   };
+
+  const playLetterSound = useCallback((letter: string) => {
+    if (/^[a-zA-Z]$/.test(letter)) {
+      const upperLetter = letter.toUpperCase();
+      const sound = new Howl({
+        src: [`/sounds/alphabet/english/${upperLetter}.mp3`],
+        volume: 1.0,
+      });
+      sound.play();
+    }
+  }, []);
 
   return (
     <main className={`${styles.main} ${selectedCharacter ? styles.hasSelected : ''}`}>
@@ -53,30 +56,46 @@ export default function CharacterList() {
         )}
       </nav>
       <div className={styles.grid}>
-        {visibleCharacters.map((character) => (
-          <div 
-            key={character.id} 
-            className={`${styles.characterWrapper} ${selectedCharacter === character ? styles.selected : ''}`}
-          >
+        {allCharacters.map((character) => {
+          const isUnlocked = unlockedCharacterIds.includes(character.id);
+          return (
             <div 
-              className={styles.characterCard}
-              onClick={() => setSelectedCharacter(character === selectedCharacter ? null : character)}
+              key={character.id} 
+              className={`${styles.characterWrapper} ${selectedCharacter === character ? styles.selected : ''}`}
             >
-              <div className={styles.cardContent}>
-                <img
-                  src={character.imageUrl}
-                  alt={character.name}
-                  className={styles.characterImage}
-                />
+              <div 
+                className={styles.characterCard}
+                onClick={() => setSelectedCharacter(character === selectedCharacter ? null : character)}
+              >
+                <div className={styles.cardContent}>
+                  <img
+                    src={character.imageUrl}
+                    alt={character.name}
+                    className={styles.characterImage}
+                  />
+                  {isUnlocked && (
+                    <div className={styles.medalBadge}>
+                      <Medal size={24} color="#FFD700" />
+                    </div>
+                  )}
+                </div>
               </div>
+              {selectedCharacter === character && (
+                <div className={styles.characterName}>
+                  {character.name.toLowerCase().split('').map((letter, index) => (
+                    <span
+                      key={index}
+                      className={styles.letterSpan}
+                      onClick={() => playLetterSound(letter)}
+                    >
+                      {letter}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-            {selectedCharacter === character && (
-              <div className={styles.characterName}>
-                {character.name.toLowerCase()}
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </main>
   );

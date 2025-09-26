@@ -207,18 +207,18 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1rem;
+  padding: 0.5rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
-  padding-top: 3rem;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  padding-top: 1.5rem;
 }
 
 .characterIcon {
-  width: 80px;
-  height: 80px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -231,11 +231,13 @@
 }
 
 .characterIcon.completed {
-  box-shadow: 0 2px 8px rgba(42, 157, 143, 0.4);
+  box-shadow: 0 1px 4px rgba(42, 157, 143, 0.4);
+  border: 2px solid #2A9D8F;
 }
 
 .characterIcon:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  z-index: 10;
 }
 
 .characterImage {
@@ -254,6 +256,16 @@
 
 .secretIcon {
   color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.secretIcon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .characterIcon.secret:not(.completed) {
@@ -306,8 +318,13 @@
   }
 
   .characterIcon {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .secretIcon svg {
+    width: 20px;
+    height: 20px;
   }
 
   .printAction {

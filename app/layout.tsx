@@ -5,7 +5,7 @@ import LockProtection from '@/components/LockProtection';
 import ClientLayout from '@/components/ClientLayout';
 
 const schoolbell = localFont({
-  src: '../public/Schoolbell-pMMy.ttf',
+  src: '../public/fonts/Twinkl-webfont.woff',
   variable: '--font-schoolbell',
   display: 'swap',
 });

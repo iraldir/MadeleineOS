@@ -10,8 +10,10 @@ import confetti from "canvas-confetti";
 import { isLocked, incrementLockCounter, resetLock } from "@/types/lock";
 import MathProblem from "@/components/MathProblem";
 import { mathService } from "@/services";
+import { currencyService } from "@/services/currencyService";
+import { progressService } from "@/services/progressService";
 
-const STORAGE_KEY = "coloringSearch_completedCharacters";
+// Removed STORAGE_KEY - now using progressService for tracking unlocked characters
 
 export default function ColoringSearch() {
   const [selectedCharacter, setSelectedCharacter] = useState<
@@ -19,7 +21,7 @@ export default function ColoringSearch() {
   >(null);
   const [error, setError] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [completedCharacters, setCompletedCharacters] = useState<string[]>([]);
+  const [unlockedCharacters, setUnlockedCharacters] = useState<string[]>([]);
   const [printMode, setPrintMode] = useState<{
     imagePath: string;
     index: number;
@@ -30,11 +32,9 @@ export default function ColoringSearch() {
   );
 
   useEffect(() => {
-    // Load completed characters from localStorage
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setCompletedCharacters(JSON.parse(saved));
-    }
+    // Load unlocked characters from progressService
+    const unlocked = progressService.getUnlockedCharacters();
+    setUnlockedCharacters(unlocked);
   }, []);
 
   const celebrate = () => {
@@ -93,11 +93,14 @@ export default function ColoringSearch() {
       success.play();
       celebrate();
 
-      // Add to completed characters if not already completed
-      if (!completedCharacters.includes(character.id)) {
-        const newCompleted = [...completedCharacters, character.id];
-        setCompletedCharacters(newCompleted);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newCompleted));
+      // Unlock character if not already unlocked
+      if (!unlockedCharacters.includes(character.id)) {
+        progressService.unlockCharacter(character.id);
+        const newUnlocked = [...unlockedCharacters, character.id];
+        setUnlockedCharacters(newUnlocked);
+        
+        // Award a coin for unlocking
+        currencyService.addCoins(1);
       }
 
       setTimeout(() => {
@@ -143,9 +146,9 @@ export default function ColoringSearch() {
     const shouldLock = incrementLockCounter();
     console.log("Print attempted, should lock:", shouldLock); // Debug
 
-    // Verify the current state
-    const currentState = localStorage.getItem(STORAGE_KEY);
-    console.log("Current state after increment:", currentState); // Debug
+    // Verify the current lock state
+    const lockState = localStorage.getItem('madeleine_lock_state');
+    console.log("Current lock state after increment:", lockState); // Debug
 
     if (shouldLock) {
       console.log("Locking system and showing math game"); // Debug
@@ -238,25 +241,25 @@ export default function ColoringSearch() {
             <div
               key={character.id}
               className={`${styles.characterIcon} ${
-                completedCharacters.includes(character.id)
+                unlockedCharacters.includes(character.id)
                   ? styles.completed
                   : ""
               } ${character.isSecret ? styles.secret : ""}`}
               title={
-                completedCharacters.includes(character.id)
+                unlockedCharacters.includes(character.id)
                   ? character.name
                   : "???"
               }
             >
               {character.isSecret &&
-              !completedCharacters.includes(character.id) ? (
+              !unlockedCharacters.includes(character.id) ? (
                 <div className={styles.secretIcon}>
-                  <HelpCircle size={40} />
+                  <HelpCircle />
                 </div>
               ) : (
                 <img
                   src={
-                    completedCharacters.includes(character.id)
+                    unlockedCharacters.includes(character.id)
                       ? character.imageUrl.replace(
                           "question-mark.webp",
                           `${character.id}.webp`
@@ -264,7 +267,7 @@ export default function ColoringSearch() {
                       : character.imageUrl
                   }
                   alt={
-                    completedCharacters.includes(character.id)
+                    unlockedCharacters.includes(character.id)
                       ? character.name
                       : "???"
                   }
