@@ -53,11 +53,11 @@
 .hasSelected .characterWrapper.selected {
   opacity: 1;
   position: fixed;
-  top: 50%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%) scale(1);
-  width: 80vw;
-  max-width: 1000px;
+  width: 50vw;
+  max-width: 600px;
   z-index: 10;
   pointer-events: auto;
 }
@@ -75,35 +75,39 @@
 .characterName {
   position: absolute;
   width: 100%;
-  top: 100%;
+  top: calc(100% + 1rem);
   left: 0;
-  padding: 2rem;
+  padding: 2rem 1rem;
   color: white;
   font-family: var(--font-schoolbell), cursive;
-  font-size: 3rem;
+  font-size: 4rem;
   text-align: center;
   transform-origin: top;
   animation: slideUp 0.4s ease-out;
-  text-shadow: 0 0 20px rgba(0, 0, 0, 0.8),
-               2px 2px 4px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.9),
+               3px 3px 6px rgba(0, 0, 0, 1),
+               0 0 80px rgba(0, 0, 0, 0.5);
   font-weight: bold;
   z-index: 20;
   display: flex;
   justify-content: center;
-  gap: 0.1rem;
+  gap: 0.2rem;
+  letter-spacing: 0.15rem;
 }
 
 .letterSpan {
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-block;
+  padding: 0 0.1rem;
 }
 
 .letterSpan:hover {
-  transform: scale(1.2) translateY(-4px);
+  transform: scale(1.3) translateY(-8px);
   color: #FFD700;
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
-               2px 2px 4px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 0 40px rgba(255, 215, 0, 0.9),
+               3px 3px 6px rgba(0, 0, 0, 1),
+               0 0 100px rgba(255, 215, 0, 0.4);
 }
 
 @keyframes slideUp {
@@ -124,12 +128,16 @@
   }
   
   .hasSelected .characterWrapper.selected {
-    width: 90vw;
+    width: 60vw;
+    max-width: 400px;
+    top: 35%;
   }
 
   .characterName {
-    font-size: 2.2rem;
-    padding: 1.5rem;
+    font-size: 3rem;
+    padding: 1.5rem 1rem;
+    top: calc(100% + 0.5rem);
+    letter-spacing: 0.1rem;
   }
 }
 
