@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
@@ -16,7 +16,7 @@ const getOrderedCharacters = () => {
 };
 
 export default function CharacterRecognition() {
-  const orderedCharacters = getOrderedCharacters();
+  const orderedCharacters = useMemo(() => getOrderedCharacters(), []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [error, setError] = useState(false);

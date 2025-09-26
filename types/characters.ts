@@ -269,18 +269,6 @@ export const characters: Character[] = [
       "/images/coloring/peach4.webp",
     ],
   },
-  {
-    id: "doggy",
-    name: "DOGGY",
-    imageUrl: "/images/characters/doggy.webp",
-    franchise: "101 Dalmatians",
-    coloringPages: [
-      "/images/coloring/pongo1.webp",
-      "/images/coloring/pongo2.webp",
-      "/images/coloring/pongo3.webp",
-      "/images/coloring/pongo4.webp",
-    ],
-  },
   // Zelda
   {
     id: "link",
@@ -497,13 +485,6 @@ export const characters: Character[] = [
       "/images/coloring/squirtle4.webp",
     ],
   },
-
-
-
-
-
-
-
 ];
 
 export const secretCharacters: Character[] = [
@@ -533,11 +514,4 @@ export const secretCharacters: Character[] = [
       "/images/coloring/mama4.webp",
     ],
   },
-
-
-
-
-
-
-
 ];

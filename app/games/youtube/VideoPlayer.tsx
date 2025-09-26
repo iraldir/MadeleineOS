@@ -124,13 +124,6 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
       </div>
 
       <div className={styles.controlsContainer}>
-        <div className={styles.videoInfo}>
-          <h2 className={styles.videoPlayerTitle}>{video.title}</h2>
-          <div className={styles.timeDisplay}>
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </div>
-        </div>
-
         <div className={styles.controls}>
           <button
             onClick={handleRestart}
@@ -138,7 +131,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
             disabled={!isReady}
             title="Start Over"
           >
-            <RotateCcw size={40} />
+            <RotateCcw size={20} />
           </button>
 
           <button
@@ -147,7 +140,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
             disabled={!isReady}
             title="Back 10 seconds"
           >
-            <SkipBack size={40} />
+            <SkipBack size={20} />
             <span className={styles.skipText}>10</span>
           </button>
 
@@ -159,7 +152,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
             disabled={!isReady}
             title={isPlaying ? "Pause" : "Play"}
           >
-            {isPlaying ? <Pause size={60} /> : <Play size={60} />}
+            {isPlaying ? <Pause size={25} /> : <Play size={25} />}
           </button>
 
           <button
@@ -168,7 +161,7 @@ export default function VideoPlayer({ video, onBack }: VideoPlayerProps) {
             disabled={!isReady}
             title="Forward 10 seconds"
           >
-            <SkipForward size={40} />
+            <SkipForward size={20} />
             <span className={styles.skipText}>10</span>
           </button>
         </div>

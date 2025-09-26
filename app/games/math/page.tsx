@@ -211,7 +211,7 @@ export default function MathGame() {
             <div className={styles.number}>{currentProblem?.num2}</div>
           </div>
 
-          <div className={styles.operation}>=</div>
+          <div className={styles.equals}>=</div>
 
           <div
             className={`${styles.answer} ${error ? styles.error : ""} ${

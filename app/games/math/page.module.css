@@ -67,6 +67,14 @@
   font-size: 10rem;
 }
 
+.equals {
+  color: #2A9D8F;
+  font-size: 10rem;
+  font-family: Arial, sans-serif;
+  position: relative;
+  top: 0.1em;
+}
+
 .apples {
   position: absolute;
   top: 100%;
@@ -129,7 +137,7 @@
     height: 100px;
   }
 
-  .number, .operation, .answer {
+  .number, .operation, .equals, .answer {
     font-size: 6rem;
   }
 
@@ -153,6 +161,7 @@
 
 .darkMode .number,
 .darkMode .operation,
+.darkMode .equals,
 .darkMode .answer {
   color: #4fd1c5;
 }
