@@ -78,12 +78,12 @@ export default function WeatherGame() {
   const WeatherIcon = () => {
     switch (weather.weatherType) {
       case "sunny":
-        return <Sun className={styles.weatherIcon} size={150} />;
+        return <Sun className={styles.weatherIcon} size={100} />;
       case "rainy":
-        return <CloudRain className={styles.weatherIcon} size={150} />;
+        return <CloudRain className={styles.weatherIcon} size={100} />;
       case "cloudy":
       default:
-        return <Cloud className={styles.weatherIcon} size={150} />;
+        return <Cloud className={styles.weatherIcon} size={100} />;
     }
   };
 

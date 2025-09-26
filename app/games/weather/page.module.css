@@ -1,15 +1,17 @@
 .main {
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
+  padding: 1rem;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
 .nav {
   position: absolute;
-  top: 2rem;
-  left: 2rem;
+  top: 1rem;
+  left: 1rem;
   z-index: 10;
 }
 
@@ -17,8 +19,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 50%;
@@ -32,9 +34,14 @@
 }
 
 .container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1024px;
   margin: 0 auto;
-  padding-top: 80px;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
 }
 
 .loading {
@@ -84,13 +91,13 @@
 /* Header */
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .title {
-  font-size: 3rem;
+  font-size: 2rem;
   color: white;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -98,8 +105,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
-  font-size: 1.5rem;
+  gap: 1.5rem;
+  font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -114,31 +121,32 @@
 /* Temperature Gauge Section */
 .temperatureSection {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 30px;
-  padding: 2rem 3rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .temperatureGauge {
-  margin: 2rem 0;
+  margin: 0;
+  padding: 45px 0 15px;
 }
 
 .gaugeContainer {
   position: relative;
-  height: 100px;
+  height: 45px;
   margin: 0 auto;
-  max-width: 800px;
+  max-width: 700px;
 }
 
 .gaugeTrack {
   position: relative;
-  height: 60px;
+  width: 100%;
+  height: 45px;
   background: #f0f0f0;
-  border-radius: 30px;
+  border-radius: 25px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  display: flex;
 }
 
 .gaugeZone {
@@ -151,20 +159,20 @@
 }
 
 .gaugeLabel {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   color: white;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0;
 }
 
 .gaugeEmoji {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
 }
 
 .gaugePointer {
   position: absolute;
-  top: -40px;
+  top: -70px;
   transform: translateX(-50%);
   transition: left 0.5s ease;
   z-index: 5;
@@ -175,52 +183,52 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: white;
-  border: 5px solid #333;
+  border: 4px solid #333;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .pointerEmoji {
-  font-size: 3rem;
+  font-size: 2.2rem;
 }
 
 .pointerArrow {
   position: absolute;
-  top: 80px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-top: 20px solid #333;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 16px solid #333;
 }
 
 /* Weather Display */
 .weatherDisplay {
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 30px;
-  padding: 3rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .weatherMain {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4rem;
+  gap: 3rem;
 }
 
 .weatherAnimation {
   position: relative;
-  width: 250px;
-  height: 250px;
+  width: 150px;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -229,6 +237,8 @@
 .weatherIcon {
   color: #ffd93d;
   animation: float 3s ease-in-out infinite;
+  width: 100px;
+  height: 100px;
 }
 
 .weatherAnimation.cloudy .weatherIcon {
@@ -242,7 +252,7 @@
 
 .weatherEmoji {
   position: absolute;
-  font-size: 4rem;
+  font-size: 2.5rem;
   bottom: 0;
   right: 0;
 }
@@ -258,13 +268,13 @@
 }
 
 .tempNumber {
-  font-size: 7rem;
+  font-size: 5rem;
   font-weight: bold;
   color: #333;
 }
 
 .tempUnit {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   color: #666;
   margin-left: 0.5rem;
 }
