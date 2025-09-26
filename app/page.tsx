@@ -4,7 +4,7 @@ import Link from 'next/link';
 import styles from "./page.module.css";
 import { games } from '@/types/games';
 import PageBackground from '@/components/PageBackground';
-import { X } from 'lucide-react';
+import { X, RotateCw } from 'lucide-react';
 
 const BLOCKED_GAMES_KEY = "madeleine_blocked_games";
 
@@ -25,9 +25,24 @@ export default function Home() {
     return blockedGames.includes(gameName);
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <main className={styles.main}>
       <PageBackground type="floralWithPetals" animated={true} />
+      
+      {/* Discreet refresh button for kiosk mode */}
+      <button 
+        onClick={handleRefresh}
+        className={styles.refreshButton}
+        aria-label="Refresh page"
+        title="Refresh"
+      >
+        <RotateCw size={20} />
+      </button>
+      
       <h1 className={styles.title}>Madeleine&apos;s Learning Games</h1>
       
       <div className={styles.gameGrid}>
