@@ -74,6 +74,24 @@ npm run batch:images -- -s 50       # Start from index 50
 npm run batch:audio -- -c greetings -l fr  # French audio for greetings category
 ```
 
+### YouTube Video Management
+
+```bash
+# Search YouTube and add videos to a category
+npm run youtube:search -- "Unicorn drawing tutorial" --category drawing --top 3
+
+# Import all videos from a YouTube playlist
+npm run youtube:import-playlist -- "https://www.youtube.com/playlist?list=PLAYLIST_ID" --category yoga
+npm run youtube:import-playlist -- "PLAYLIST_ID" --category drawing  # Playlist ID also works
+
+# List all videos in a category
+npm run youtube:list -- --category yoga
+npm run youtube:list  # List all categories with video counts
+
+# List available categories
+npm run youtube:categories
+```
+
 ### Using the Main CLI
 
 ```bash
@@ -86,11 +104,12 @@ npm run cli -- batch regenerate-images
 ### Configuration
 
 The toolkit uses the following configuration:
-- **API Keys**: Set `GEMINI_KEY` in `.env` for image generation
+- **API Keys**: Set `GEMINI_KEY` in `.env` for image generation and YouTube API access
 - **Google Cloud**: Configure `gcloud` CLI for TTS generation
 - **Voice Models**: Journey voices for English/Italian, Wavenet for French
 - **Rate Limits**: Automatic rate limiting and batch processing
 - **File Formats**: WebP for images (512x512), MP3 for audio
+- **YouTube**: The GEMINI_KEY is also used for YouTube Data API v3 access
 
 ## Architecture Overview
 

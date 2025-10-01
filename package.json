@@ -19,7 +19,11 @@
     "media:tts": "tsx scripts/cli.ts media tts",
     "media:app-icon": "tsx scripts/cli.ts media app-icon",
     "batch:images": "tsx scripts/cli.ts batch regenerate-images",
-    "batch:audio": "tsx scripts/cli.ts batch regenerate-audio"
+    "batch:audio": "tsx scripts/cli.ts batch regenerate-audio",
+    "youtube:search": "tsx scripts/cli.ts youtube search",
+    "youtube:list": "tsx scripts/cli.ts youtube list",
+    "youtube:categories": "tsx scripts/cli.ts youtube categories",
+    "youtube:import-playlist": "tsx scripts/cli.ts youtube import-playlist"
   },
   "dependencies": {
     "@google/genai": "^1.20.0",

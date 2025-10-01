@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import { vocabularyManager } from "./utils/vocabulary-manager";
 import { mediaGenerator } from "./utils/media-generator";
+import { youtubeManager } from "./utils/youtube-manager";
 import { CONFIG, formatSuccess, formatError, formatInfo, formatWarning, validateApiKeys } from "./config";
 import { VocabularyWord } from "../types/vocabulary";
 import * as path from "node:path";
@@ -343,6 +344,90 @@ batch
       }
 
       console.log(formatSuccess("Batch regeneration complete"));
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+// YouTube commands
+const youtube = program
+  .command("youtube")
+  .description("Manage YouTube videos");
+
+youtube
+  .command("search")
+  .description("Search YouTube and add videos to a category")
+  .argument("<query>", "Search query")
+  .option("-c, --category <category>", "Target category (e.g., yoga, drawing)", "drawing")
+  .option("-t, --top <number>", "Number of top results to add", "3")
+  .action(async (query, options) => {
+    try {
+      if (!validateApiKeys()) {
+        process.exit(1);
+      }
+
+      const maxResults = parseInt(options.top);
+      if (isNaN(maxResults) || maxResults < 1 || maxResults > 50) {
+        throw new Error("Top results must be between 1 and 50");
+      }
+
+      await youtubeManager.searchAndAdd(query, options.category, maxResults);
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+youtube
+  .command("list")
+  .description("List videos by category")
+  .option("-c, --category <category>", "Filter by category")
+  .action(async (options) => {
+    try {
+      await youtubeManager.listVideos(options.category);
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+youtube
+  .command("categories")
+  .description("List all available categories")
+  .action(async () => {
+    try {
+      const categories = await youtubeManager.listCategories();
+      console.log(formatInfo("Available categories:"));
+      categories.forEach(cat => {
+        console.log(`  - ${cat}`);
+      });
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+youtube
+  .command("import-playlist")
+  .description("Import all videos from a YouTube playlist")
+  .argument("<playlist-id>", "YouTube playlist ID or URL")
+  .option("-c, --category <category>", "Target category (e.g., yoga, drawing)", "yoga")
+  .action(async (playlistIdOrUrl, options) => {
+    try {
+      if (!validateApiKeys()) {
+        process.exit(1);
+      }
+
+      // Extract playlist ID from URL if needed
+      let playlistId = playlistIdOrUrl;
+      const urlMatch = playlistIdOrUrl.match(/[?&]list=([^&]+)/);
+      if (urlMatch) {
+        playlistId = urlMatch[1];
+      }
+
+      console.log(formatInfo(`Importing playlist: ${playlistId}`));
+      await youtubeManager.importPlaylist(playlistId, options.category);
     } catch (error) {
       console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
