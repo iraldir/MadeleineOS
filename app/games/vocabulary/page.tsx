@@ -6,8 +6,9 @@ import styles from "./page.module.css";
 import VocabularyCard from "@/components/VocabularyCard";
 import { vocabularyWords } from "@/types/vocabulary";
 import PageBackground from "@/components/PageBackground";
+import VocabCategoryPreloader from "@/components/VocabCategoryPreloader";
 
-type ViewState = "menu" | "categories" | "cards";
+type ViewState = "menu" | "categories" | "preloading" | "cards";
 
 interface CategoryInfo {
   id: string;
@@ -222,11 +223,15 @@ const VocabularyGame: React.FC = () => {
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    setViewState("preloading");
+  };
+
+  const handlePreloadingComplete = () => {
     setViewState("cards");
   };
 
   const handleBackButton = () => {
-    if (viewState === "cards") {
+    if (viewState === "cards" || viewState === "preloading") {
       setViewState("categories");
       setSelectedCategory("");
     } else if (viewState === "categories") {
@@ -306,6 +311,13 @@ const VocabularyGame: React.FC = () => {
             ))}
           </div>
         </>
+      )}
+
+      {viewState === "preloading" && (
+        <VocabCategoryPreloader 
+          category={selectedCategory} 
+          onComplete={handlePreloadingComplete} 
+        />
       )}
 
       {viewState === "cards" && (
