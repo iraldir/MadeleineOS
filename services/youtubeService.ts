@@ -308,6 +308,13 @@ class YouTubeService {
       title: 'How To Draw A Funny Summer Dragon',
       thumbnail: 'https://i.ytimg.com/vi/4lc82nvj7bo/hqdefault.jpg',
       category: 'drawing'
+    },
+    {
+      id: 'drawing-32',
+      youtubeId: 'O0_2y4G6eAs',
+      title: 'How To Draw A Funny Turkey',
+      thumbnail: 'https://img.youtube.com/vi/O0_2y4G6eAs/maxresdefault.jpg',
+      category: 'drawing'
     }
   ,
     {
