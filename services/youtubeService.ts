@@ -2249,6 +2249,28 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/Dn41j2pAN9o/hqdefault.jpg',
       category: 'drawing'
     }
+  ,
+    {
+      id: 'drawing-254',
+      youtubeId: 'LNJqyHm95w0',
+      title: 'How To Draw A Cartoon Harry Potter And Hedwig',
+      thumbnail: 'https://i.ytimg.com/vi/LNJqyHm95w0/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-255',
+      youtubeId: 'fqYdXMtm8cE',
+      title: 'How to Draw Harry Potter Easy Chibi',
+      thumbnail: 'https://i.ytimg.com/vi/fqYdXMtm8cE/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-256',
+      youtubeId: 'Gnj02dDKYFc',
+      title: 'How To Draw Harry Potter',
+      thumbnail: 'https://i.ytimg.com/vi/Gnj02dDKYFc/hqdefault.jpg',
+      category: 'drawing'
+    }
   ];
 
   private constructor() {}
