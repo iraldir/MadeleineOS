@@ -2271,6 +2271,57 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/Gnj02dDKYFc/hqdefault.jpg',
       category: 'drawing'
     }
+  ,
+    {
+      id: 'drawing-257',
+      youtubeId: 'T90B5oZ2DVM',
+      title: 'How to Draw Pokemon | Butterfree | Step-by-Step Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/T90B5oZ2DVM/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-258',
+      youtubeId: 'NK1Jt87PZ7w',
+      title: 'How to Draw Butterfree | Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/NK1Jt87PZ7w/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-259',
+      youtubeId: 'rEdna7P-uPo',
+      title: 'How To Draw  Butterfree From Pokemon | Coloring and Drawing For Kids',
+      thumbnail: 'https://i.ytimg.com/vi/rEdna7P-uPo/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-260',
+      youtubeId: 'TDINek931wY',
+      title: 'Pokemon Butterfree | How to Draw | Pokemon Coloring Book | ARTSY KIDS',
+      thumbnail: 'https://i.ytimg.com/vi/TDINek931wY/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-261',
+      youtubeId: 'zHynB8Ykq5k',
+      title: 'How To Draw Butterfree | Pokemon #012 | Easy Step By Step Drawing Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/zHynB8Ykq5k/hqdefault.jpg',
+      category: 'drawing'
+    }
+  ,
+    {
+      id: 'drawing-262',
+      youtubeId: 'SAmoCUCQr84',
+      title: '🦋 How to Draw Butterfree EASY!  Step by Step Pokémon Tutorial ✏️',
+      thumbnail: 'https://i.ytimg.com/vi/SAmoCUCQr84/hqdefault.jpg',
+      category: 'drawing'
+    },
+    {
+      id: 'drawing-263',
+      youtubeId: 'JqY7qbKwons',
+      title: 'How to Draw #012 BUTTERFREE | Narrated Easy Step-by-Step Tutorial | Pokemon Drawing Project',
+      thumbnail: 'https://i.ytimg.com/vi/JqY7qbKwons/hqdefault.jpg',
+      category: 'drawing'
+    }
   ];
 
   private constructor() {}

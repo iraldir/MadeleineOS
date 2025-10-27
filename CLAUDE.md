@@ -90,6 +90,10 @@ npm run youtube:list  # List all categories with video counts
 
 # List available categories
 npm run youtube:categories
+
+# Example: Add Butterfree drawing tutorials for kids
+npm run youtube:search -- "how to draw Butterfree pokemon for kids" --category drawing --top 5
+npm run youtube:search -- "easy Butterfree drawing tutorial" --category drawing --top 3
 ```
 
 ### Using the Main CLI
