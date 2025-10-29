@@ -2323,10 +2323,10 @@ class YouTubeService {
       category: 'drawing'
     },
     {
-      id: 'drawing-263',
+      id: 'drawing-264',
       youtubeId: 'fgr9KZ64TXc',
-      title: 'How to Draw #012 BUTTERFREE | Narrated Easy Step-by-Step Tutorial | Pokemon Drawing Project',
-      thumbnail: 'https://i.ytimg.com/vi/JqY7qbKwons/hqdefault.jpg',
+      title: 'How to draw a T-REX',
+      thumbnail: 'https://i.ytimg.com/vi/fgr9KZ64TXc/hqdefault.jpg',
       category: 'drawing'
     },
 
