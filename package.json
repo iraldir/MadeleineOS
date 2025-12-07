@@ -36,9 +36,9 @@
     "dotenv": "^17.2.2",
     "howler": "^2.2.4",
     "lucide-react": "^0.475.0",
-    "next": "15.1.7",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "next": "^15.5.7",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
     "sharp": "^0.34.4"
   },
   "devDependencies": {
@@ -47,7 +47,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.1.7",
+    "eslint-config-next": "^15.5.7",
     "tsx": "^4.20.5",
     "typescript": "^5"
   }
