@@ -4,7 +4,7 @@ export interface Video {
   title: string;
   thumbnail: string;
   duration?: string;
-  category: 'yoga' | 'drawing';
+  category: 'yoga' | 'drawing' | 'songs';
 }
 
 export interface Category {
@@ -35,6 +35,14 @@ class YouTubeService {
       icon: '/images/youtube/drawing-icon.webp',
       color: '#FF6B6B',
       thumbnail: '/images/youtube/drawing-thumb.png'
+    },
+    {
+      id: 'songs',
+      name: 'Songs',
+      emoji: '🎵',
+      icon: '/images/youtube/songs-icon.webp',
+      color: '#E91E63',
+      thumbnail: '/images/youtube/songs-thumb.png'
     }
   ];
 
@@ -2330,7 +2338,140 @@ class YouTubeService {
       category: 'drawing'
     },
 
-    
+    // ===== SONGS CATEGORY =====
+    // --- Frozen ---
+    {
+      id: 'songs-1',
+      youtubeId: 'L0MK7qz13bU',
+      title: 'FROZEN | Let It Go Sing-along | Official Disney UK',
+      thumbnail: 'https://i.ytimg.com/vi/L0MK7qz13bU/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-2',
+      youtubeId: 'h9nB5ZzbSO8',
+      title: 'DISNEY SING-ALONGS | Do You Want To Build A Snowman? | Official Disney UK',
+      thumbnail: 'https://i.ytimg.com/vi/h9nB5ZzbSO8/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-3',
+      youtubeId: 'rnEB2F_v_cE',
+      title: 'FROZEN | In Summer - Sing-a-long with Olaf | Official Disney UK',
+      thumbnail: 'https://i.ytimg.com/vi/rnEB2F_v_cE/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-4',
+      youtubeId: 'Jn76I_rFd7g',
+      title: 'Frozen Do You Want To Build A Snowman? | Disney Kids Sing-Along',
+      thumbnail: 'https://i.ytimg.com/vi/Jn76I_rFd7g/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-5',
+      youtubeId: 'qSU560anReg',
+      title: 'Let It Go (From Frozen Soundtrack)',
+      thumbnail: 'https://i.ytimg.com/vi/qSU560anReg/hqdefault.jpg',
+      category: 'songs'
+    },
+
+    // --- Moana ---
+    {
+      id: 'songs-6',
+      youtubeId: 'rDhlGc6OcR8',
+      title: 'How Far I\'ll Go | Moana Lyric Video | DISNEY SING-ALONGS',
+      thumbnail: 'https://i.ytimg.com/vi/rDhlGc6OcR8/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-7',
+      youtubeId: 'r6xYtt1v9Ek',
+      title: 'Moana You\'re Welcome Sing-along | Disney Kids',
+      thumbnail: 'https://i.ytimg.com/vi/r6xYtt1v9Ek/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-8',
+      youtubeId: 'y5dpfFfcQ3E',
+      title: 'DISNEY SING-ALONGS | You\'re Welcome - Moana Lyric Video | Official Disney UK',
+      thumbnail: 'https://i.ytimg.com/vi/y5dpfFfcQ3E/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-9',
+      youtubeId: '6BZ6hO5QGzA',
+      title: 'Moana - You\'re Welcome - Dwayne Johnson | Disney Animation',
+      thumbnail: 'https://i.ytimg.com/vi/6BZ6hO5QGzA/hqdefault.jpg',
+      category: 'songs'
+    },
+
+    // --- Rapunzel / Tangled ---
+    {
+      id: 'songs-10',
+      youtubeId: 'h9SAUq5-V7o',
+      title: 'I See the Light (From Tangled Soundtrack)',
+      thumbnail: 'https://i.ytimg.com/vi/h9SAUq5-V7o/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-11',
+      youtubeId: 'zLVrbFB7Xlc',
+      title: 'When Will My Life Begin? (From Tangled Soundtrack)',
+      thumbnail: 'https://i.ytimg.com/vi/zLVrbFB7Xlc/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-12',
+      youtubeId: 'AkFSSFFtGM4',
+      title: 'When Will My Life Begin Music Video! | Disney Princess',
+      thumbnail: 'https://i.ytimg.com/vi/AkFSSFFtGM4/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-13',
+      youtubeId: '_hedDikCr2w',
+      title: 'Tangled | When Will My Life Begin | Disney Princess',
+      thumbnail: 'https://i.ytimg.com/vi/_hedDikCr2w/hqdefault.jpg',
+      category: 'songs'
+    },
+
+    // --- K-Pop Demon Hunters ---
+    {
+      id: 'songs-14',
+      youtubeId: 'cWppAbqm9I8',
+      title: 'Your Idol | Official Song Clip | KPop Demon Hunters | Sony Animation',
+      thumbnail: 'https://i.ytimg.com/vi/cWppAbqm9I8/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-15',
+      youtubeId: 'QGsevnbItdU',
+      title: 'How It\'s Done Official Lyric Video | KPop Demon Hunters | Sony Animation',
+      thumbnail: 'https://i.ytimg.com/vi/QGsevnbItdU/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-16',
+      youtubeId: 'l8Dr7vzMSVE',
+      title: 'Takedown Official Lyric Video feat. TWICE | KPop Demon Hunters',
+      thumbnail: 'https://i.ytimg.com/vi/l8Dr7vzMSVE/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-17',
+      youtubeId: 'yebNIHKAC4A',
+      title: 'Golden Official Lyric Video | KPop Demon Hunters | Sony Animation',
+      thumbnail: 'https://i.ytimg.com/vi/yebNIHKAC4A/hqdefault.jpg',
+      category: 'songs'
+    },
+    {
+      id: 'songs-18',
+      youtubeId: 'TbMEMCvFbZk',
+      title: 'What It Sounds Like | Official Song Clip | KPop Demon Hunters | Sony Animation',
+      thumbnail: 'https://i.ytimg.com/vi/TbMEMCvFbZk/hqdefault.jpg',
+      category: 'songs'
+    }
   ];
 
   private constructor() {}
@@ -2350,7 +2491,7 @@ class YouTubeService {
     return this.categories.find(cat => cat.id === id);
   }
 
-  public getVideosByCategory(category: 'yoga' | 'drawing'): Video[] {
+  public getVideosByCategory(category: 'yoga' | 'drawing' | 'songs'): Video[] {
     return this.videos.filter(video => video.category === category);
   }
 
