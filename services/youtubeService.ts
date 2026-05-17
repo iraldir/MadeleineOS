@@ -48,6 +48,246 @@ class YouTubeService {
   ];
 
   private readonly videos: Video[] = [
+    {
+      id: 'drawing-265',
+      youtubeId: 'zY1269CaCFk',
+      title: 'How To Draw A Tulip In A Pot - Plant A Flower Day',
+      thumbnail: 'https://i.ytimg.com/vi/zY1269CaCFk/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-266',
+      youtubeId: 'NLWNOafqfh0',
+      title: 'How To Draw A Monarch Butterfly',
+      thumbnail: 'https://i.ytimg.com/vi/NLWNOafqfh0/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-267',
+      youtubeId: 'jkkJNhsrhKo',
+      title: 'How To Draw Cute Mushroom Friends',
+      thumbnail: 'https://i.ytimg.com/vi/jkkJNhsrhKo/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-268',
+      youtubeId: 'i_pQWFkZJrc',
+      title: 'How To Draw A Sunflower',
+      thumbnail: 'https://i.ytimg.com/vi/i_pQWFkZJrc/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-269',
+      youtubeId: 'Dt4SD4e2Z6E',
+      title: 'How to Draw a Rainbow and Clouds Easy with Coloring',
+      thumbnail: 'https://i.ytimg.com/vi/Dt4SD4e2Z6E/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-270',
+      youtubeId: 'hTOnVBgpPNE',
+      title: 'How To Draw A Robin Bird - Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/hTOnVBgpPNE/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-271',
+      youtubeId: 'jBfMs-YskHo',
+      title: 'How To Draw Ariel The Little Mermaid',
+      thumbnail: 'https://i.ytimg.com/vi/jBfMs-YskHo/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-272',
+      youtubeId: 'R4TgExfr12I',
+      title: 'How to Draw Rapunzel from Tangled Cute and Easy',
+      thumbnail: 'https://i.ytimg.com/vi/R4TgExfr12I/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-273',
+      youtubeId: 'twAox47nBes',
+      title: 'How To Draw A Cartoon Moana',
+      thumbnail: 'https://i.ytimg.com/vi/twAox47nBes/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-274',
+      youtubeId: 'kvpkTj-6EZw',
+      title: 'How To Draw Princess Jasmine From Aladdin',
+      thumbnail: 'https://i.ytimg.com/vi/kvpkTj-6EZw/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-275',
+      youtubeId: 's9c_ZISjh-8',
+      title: 'How To Draw Cute Cinderella Kawaii',
+      thumbnail: 'https://i.ytimg.com/vi/s9c_ZISjh-8/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-276',
+      youtubeId: 'YBwoGTvsA2Q',
+      title: 'How To Draw Princess Tiana From Princess And The Frog',
+      thumbnail: 'https://i.ytimg.com/vi/YBwoGTvsA2Q/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-277',
+      youtubeId: 'ySdXMv7PY6I',
+      title: 'How To Draw Pikachu for Beginners',
+      thumbnail: 'https://i.ytimg.com/vi/ySdXMv7PY6I/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-278',
+      youtubeId: 'aN-HP2z2MF4',
+      title: 'How To Draw Eevee | Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/aN-HP2z2MF4/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-279',
+      youtubeId: 'x7cVh0ddaCs',
+      title: 'How To Draw Super Mario for Beginners',
+      thumbnail: 'https://i.ytimg.com/vi/x7cVh0ddaCs/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-280',
+      youtubeId: '_aHGaUZnRJc',
+      title: 'How to Draw Princess Peach from Super Mario',
+      thumbnail: 'https://i.ytimg.com/vi/_aHGaUZnRJc/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-281',
+      youtubeId: '2iUpNsSaWds',
+      title: 'How To Draw Toad | Super Mario',
+      thumbnail: 'https://i.ytimg.com/vi/2iUpNsSaWds/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-282',
+      youtubeId: 'mDqV3sFDpcU',
+      title: 'How to Draw Yoshi from Super Mario Bros',
+      thumbnail: 'https://i.ytimg.com/vi/mDqV3sFDpcU/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-283',
+      youtubeId: 'YwV9I9RbvAw',
+      title: 'How To Draw Link Kirby',
+      thumbnail: 'https://i.ytimg.com/vi/YwV9I9RbvAw/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-284',
+      youtubeId: '7x5v_tt1az0',
+      title: 'How to Draw Link | The Legend of Zelda | Breath of the Wild',
+      thumbnail: 'https://i.ytimg.com/vi/7x5v_tt1az0/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-285',
+      youtubeId: 'UW6H5dAPuhY',
+      title: 'How To Draw A Cute Ice Cream Cone',
+      thumbnail: 'https://i.ytimg.com/vi/UW6H5dAPuhY/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-286',
+      youtubeId: 'WonItzkHl9g',
+      title: 'How To Draw a Castle - VERY EASY For Kids',
+      thumbnail: 'https://i.ytimg.com/vi/WonItzkHl9g/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-287',
+      youtubeId: 'WLoPNgIp6go',
+      title: 'How To Draw A Cute Unicorn Doughnut',
+      thumbnail: 'https://i.ytimg.com/vi/WLoPNgIp6go/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-288',
+      youtubeId: 'iBcLL9y3FSw',
+      title: 'How To Draw A Cute Birthday Cake',
+      thumbnail: 'https://i.ytimg.com/vi/iBcLL9y3FSw/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-289',
+      youtubeId: 'OF2Oe7_QFdU',
+      title: 'How to Draw a Cute Cat Very Very Easy',
+      thumbnail: 'https://i.ytimg.com/vi/OF2Oe7_QFdU/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-290',
+      youtubeId: '7fTwIhTI2q8',
+      title: 'How To Draw A Capybara Holding A Heart',
+      thumbnail: 'https://i.ytimg.com/vi/7fTwIhTI2q8/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-291',
+      youtubeId: 'bmYHe083qt4',
+      title: 'How To Draw A Hello Kitty Valentine',
+      thumbnail: 'https://i.ytimg.com/vi/bmYHe083qt4/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-292',
+      youtubeId: 'QlPxeBM1ioE',
+      title: 'How To Draw A Baby Deer Fawn For Spring',
+      thumbnail: 'https://i.ytimg.com/vi/QlPxeBM1ioE/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-293',
+      youtubeId: 'F6fzGD2aOmg',
+      title: 'How To Draw A Baby Chick Hatching Out Of An Egg',
+      thumbnail: 'https://i.ytimg.com/vi/F6fzGD2aOmg/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
+    {
+      id: 'drawing-294',
+      youtubeId: 'wdNcCvRvsUQ',
+      title: 'How to Draw My Melody | Sanrio',
+      thumbnail: 'https://i.ytimg.com/vi/wdNcCvRvsUQ/hqdefault.jpg',
+      category: 'drawing',
+      addedDate: '2026-05-17'
+    },
     // Yoga Videos - Kid-friendly yoga sessions
     {
       id: 'yoga-1',
@@ -2847,6 +3087,21 @@ class YouTubeService {
 
   public getAllVideos(): Video[] {
     return this.videos.slice().sort(this.compareByAddedDateDesc);
+  }
+
+  /**
+   * The most recent addedDate across all videos in a category — videos
+   * matching this date are considered the current "new batch".
+   */
+  public getLatestAddedDate(category?: 'yoga' | 'drawing' | 'songs'): string | undefined {
+    const pool = category
+      ? this.videos.filter(v => v.category === category)
+      : this.videos;
+    let latest: string | undefined;
+    for (const v of pool) {
+      if (v.addedDate && (!latest || v.addedDate > latest)) latest = v.addedDate;
+    }
+    return latest;
   }
 
   private compareByAddedDateDesc = (a: Video, b: Video): number => {

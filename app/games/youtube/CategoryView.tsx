@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './page.module.css';
 import { Category, Video } from '@/services/youtubeService';
 import { currencyService } from '@/services';
@@ -13,13 +13,21 @@ interface CategoryViewProps {
 export default function CategoryView({ category, videos, onSelectVideo }: CategoryViewProps) {
   const [currentCoins, setCurrentCoins] = useState(0);
 
+  const latestAddedDate = useMemo(() => {
+    let latest: string | undefined;
+    for (const v of videos) {
+      if (v.addedDate && (!latest || v.addedDate > latest)) latest = v.addedDate;
+    }
+    return latest;
+  }, [videos]);
+
   useEffect(() => {
     setCurrentCoins(currencyService.getCoins());
-    
+
     const unsubscribe = currencyService.subscribe((coins) => {
       setCurrentCoins(coins);
     });
-    
+
     return unsubscribe;
   }, []);
 
@@ -44,6 +52,9 @@ export default function CategoryView({ category, videos, onSelectVideo }: Catego
               <img src={video.thumbnail} alt={video.title} />
               {video.duration && (
                 <span className={styles.videoDuration}>{video.duration}</span>
+              )}
+              {latestAddedDate && video.addedDate === latestAddedDate && (
+                <span className={styles.newBadge}>NEW</span>
               )}
               <div className={styles.coinCost}>
                 <span>🪙 1</span>
