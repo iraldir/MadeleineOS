@@ -5,8 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { MathLevel } from "@/types/math";
 import { Howl } from "howler";
-import { currencyService } from "@/services";
-import { celebrationService } from "@/services";
+import { audioService, celebrationService, currencyService } from "@/services";
 
 const STORAGE_KEY = "mathGame_progress";
 const HIGH_SCORE_KEY = "mathGame_highScore";
@@ -101,11 +100,7 @@ export default function MathGame() {
     const correctAnswer = currentProblem.num1 + currentProblem.num2;
 
     if (numAnswer === correctAnswer) {
-      const success = new Howl({
-        src: ["/sounds/success.mp3"],
-        volume: 1.0,
-      });
-      success.play();
+      audioService.playSuccess();
       setIsTransitioning(true);
 
       // Track questions answered and streak
@@ -149,13 +144,9 @@ export default function MathGame() {
         setIsTransitioning(false);
       }, 1000);
     } else {
-      const reject = new Howl({
-        src: ["/sounds/reject.mp3"],
-        volume: 1.0,
-      });
-      reject.play();
+      audioService.playFailure();
       setError(true);
-      setStreak(0); // Reset streak on error
+      setStreak(0);
 
       setTimeout(() => {
         setError(false);

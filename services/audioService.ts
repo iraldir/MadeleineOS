@@ -19,9 +19,8 @@ class AudioService {
   private initializeSounds(): void {
     const soundFiles = {
       success: '/sounds/success.mp3',
-      failure: '/sounds/failure.mp3',
-      click: '/sounds/click.mp3',
-      complete: '/sounds/complete.mp3',
+      failure: '/sounds/reject.mp3',
+      reset: '/sounds/reset.mp3',
     };
 
     Object.entries(soundFiles).forEach(([key, src]) => {
@@ -48,14 +47,6 @@ class AudioService {
 
   public playFailure(): void {
     this.play('failure');
-  }
-
-  public playClick(): void {
-    this.play('click');
-  }
-
-  public playComplete(): void {
-    this.play('complete');
   }
 
   public playLetter(letter: string): void {

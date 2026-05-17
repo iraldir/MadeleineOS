@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Howl } from 'howler';
-import confetti from 'canvas-confetti';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { currencyService } from '@/services/currencyService';
+import { audioService, celebrationService } from '@/services';
 import TypingInterface from '@/components/TypingInterface';
 import styles from './CouponGame.module.css';
 
@@ -57,43 +56,29 @@ const CouponGame = () => {
       setMessage('This code has already been used!');
       setIsError(true);
       setInputValue('');
-      new Howl({
-        src: ['/sounds/failure.mp3'],
-        volume: 0.5,
-      }).play();
+      audioService.playFailure();
       return;
     }
 
     if (validateCode(normalizedCode)) {
       const newUsedCodes = [...usedCodes, normalizedCode];
-      
+
       setUsedCodes(newUsedCodes);
       localStorage.setItem('usedCouponCodes', JSON.stringify(newUsedCodes));
-      
+
       currencyService.addCoins(1);
-      
+
       setMessage('Success! You earned 1 coin! 🪙');
       setIsError(false);
       setInputValue('');
-      
-      new Howl({
-        src: ['/sounds/success.mp3'],
-        volume: 0.5,
-      }).play();
-      
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+
+      audioService.playSuccess();
+      celebrationService.celebrate();
     } else {
       setMessage('Invalid code. Please check and try again.');
       setIsError(true);
       setInputValue('');
-      new Howl({
-        src: ['/sounds/failure.mp3'],
-        volume: 0.5,
-      }).play();
+      audioService.playFailure();
     }
   }, [usedCodes]);
 
