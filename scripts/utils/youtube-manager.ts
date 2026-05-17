@@ -10,6 +10,7 @@ interface VideoEntry {
   thumbnail: string;
   duration?: string;
   category: string;
+  addedDate?: string;
 }
 
 interface ServiceFileData {
@@ -94,9 +95,15 @@ class YouTubeManager {
           if (categoryMatch) {
             currentVideo.category = categoryMatch[1];
           }
-          
+
+          // Extract addedDate
+          const addedDateMatch = line.match(/addedDate:\s*'([^']+)'/);
+          if (addedDateMatch) {
+            currentVideo.addedDate = addedDateMatch[1];
+          }
+
           // Check if we completed a video object
-          if (line.includes('}') && currentVideo.id && currentVideo.youtubeId && 
+          if (line.includes('}') && currentVideo.id && currentVideo.youtubeId &&
               currentVideo.title && currentVideo.thumbnail && currentVideo.category) {
             videos.push(currentVideo as VideoEntry);
             currentVideo = {};
@@ -150,6 +157,7 @@ class YouTubeManager {
       // Check for duplicates
       const existingYoutubeIds = new Set(serviceData.videos.map(v => v.youtubeId));
       const newVideos: VideoEntry[] = [];
+      const today = new Date().toISOString().slice(0, 10);
 
       for (const video of videos) {
         if (existingYoutubeIds.has(video.youtubeId)) {
@@ -165,6 +173,7 @@ class YouTubeManager {
           thumbnail: video.thumbnail,
           duration: video.duration,
           category,
+          addedDate: today,
         });
       }
 
@@ -176,14 +185,14 @@ class YouTubeManager {
       // Read the current file content
       let content = await fs.readFile(this.servicePath, "utf-8");
 
-      // Find the position to insert new videos (at the end of the videos array)
-      const videosArrayMatch = content.match(/private readonly videos: Video\[\] = \[([\s\S]*?)\];/);
+      // Find the position to insert new videos (at the top of the videos array)
+      const videosArrayMatch = content.match(/private readonly videos: Video\[\] = \[/);
       if (!videosArrayMatch) {
         throw new Error("Could not find videos array in service file");
       }
 
-      const videosEndIndex = content.indexOf("];", videosArrayMatch.index!);
-      
+      const insertionStart = videosArrayMatch.index! + videosArrayMatch[0].length;
+
       // Generate the new video entries
       const newVideoEntries = newVideos.map(video => {
         const lines: string[] = [];
@@ -192,18 +201,18 @@ class YouTubeManager {
         lines.push(`      youtubeId: '${video.youtubeId}',`);
         lines.push(`      title: '${video.title}',`);
         lines.push(`      thumbnail: '${video.thumbnail}',`);
-        lines.push(`      category: '${video.category}'`);
+        lines.push(`      category: '${video.category}',`);
+        lines.push(`      addedDate: '${video.addedDate}'`);
         lines.push("    }");
         return lines.join("\n");
       }).join(",\n");
 
-      // Insert the new videos
-      const beforeVideos = content.substring(0, videosEndIndex);
-      const afterVideos = content.substring(videosEndIndex);
-
-      // Check if there are existing videos to add comma
-      const needsComma = beforeVideos.trim().endsWith("}");
-      const newContent = beforeVideos + (needsComma ? ",\n" : "\n") + newVideoEntries + "\n  " + afterVideos;
+      // Insert new videos at the top of the array so they appear first.
+      const beforeArray = content.substring(0, insertionStart);
+      const afterArray = content.substring(insertionStart);
+      const hasExistingEntries = /\{/.test(afterArray);
+      const separator = hasExistingEntries ? "," : "";
+      const newContent = beforeArray + "\n" + newVideoEntries + separator + afterArray;
 
       // Write the updated content
       await fs.writeFile(this.servicePath, newContent, "utf-8");
