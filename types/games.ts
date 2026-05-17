@@ -61,10 +61,10 @@ export const games: Game[] = [
     path: "/games/coupon",
   },
   {
-    id: "coming-soon-2",
-    title: "Coming Soon",
-    thumbnailUrl: "/images/games/placeholder2.png",
-    path: "#",
+    id: "phonics",
+    title: "Phonics",
+    thumbnailUrl: "/images/games/phonics.webp",
+    path: "/games/phonics",
   },
   {
     id: "coming-soon-3",

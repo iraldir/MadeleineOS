@@ -1,0 +1,364 @@
+.main {
+  min-height: 100vh;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  z-index: 30;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+  color: #2d3436;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.backButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.streakIndicator {
+  position: fixed;
+  top: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 2rem;
+  color: #2a9d8f;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 20;
+}
+
+.coinReward {
+  animation: coinPop 0.5s ease-out;
+  color: #ffd700;
+}
+
+@keyframes coinPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.gameArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding-bottom: 140px;
+  padding-top: 2rem;
+}
+
+.wordCard {
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 7rem;
+  color: #2a9d8f;
+  background-color: #f8f9fa;
+  border-radius: 24px;
+  padding: 1.5rem 4rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  min-width: 320px;
+  text-align: center;
+}
+
+.interim {
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  min-height: 2.4rem;
+  text-align: center;
+  max-width: 80vw;
+}
+
+.micButton {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ef4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.micButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
+}
+
+.micButton:active {
+  transform: scale(0.97);
+}
+
+.micButton.listening {
+  background-color: #2a9d8f;
+  box-shadow: 0 6px 20px rgba(42, 157, 143, 0.4);
+  animation: micPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes micPulse {
+  0%,
+  100% {
+    box-shadow: 0 6px 20px rgba(42, 157, 143, 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(42, 157, 143, 0.4),
+      0 0 0 20px rgba(42, 157, 143, 0.15);
+  }
+}
+
+.timerRing {
+  position: absolute;
+  inset: -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 16px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.timerRingTrack {
+  fill: none;
+  stroke: rgba(42, 157, 143, 0.15);
+  stroke-width: 4;
+}
+
+.timerRingProgress {
+  fill: none;
+  stroke: #2a9d8f;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 289;
+  stroke-dashoffset: 0;
+  animation-name: drain;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes drain {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 289;
+  }
+}
+
+.retryButton {
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 2rem;
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 1rem 2.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.retryButton:hover {
+  transform: scale(1.05);
+}
+
+.successOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 25;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.successImageWrap {
+  position: relative;
+  width: min(60vh, 80vw);
+  height: min(60vh, 80vw);
+}
+
+.successImage {
+  object-fit: contain;
+}
+
+.successWord {
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 5rem;
+  color: #2a9d8f;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.gameOver {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  font-family: var(--font-schoolbell), cursive;
+  color: #2a9d8f;
+  text-align: center;
+  padding-bottom: 120px;
+}
+
+.gameOver h1 {
+  font-size: 5rem;
+  margin: 0;
+}
+
+.gameOver p {
+  font-size: 2.5rem;
+  margin: 0;
+  color: #475569;
+}
+
+.playAgain {
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 2rem;
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 1rem 2.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 16px rgba(42, 157, 143, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.playAgain:hover {
+  transform: scale(1.05);
+}
+
+.unsupported {
+  text-align: center;
+  font-family: var(--font-schoolbell), cursive;
+  color: #475569;
+  max-width: 500px;
+}
+
+.unsupported h1 {
+  color: #2a9d8f;
+  font-size: 2.5rem;
+}
+
+.progressBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  padding-top: 3rem;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0)
+  );
+  z-index: 10;
+}
+
+.progressInner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.highScoreBar {
+  position: absolute;
+  height: 22px;
+  background-color: #36ff0080;
+  border-radius: 6px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 1;
+  transition: width 0.5s ease-out;
+  pointer-events: none;
+}
+
+.progressDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.progressDot.current {
+  background-color: #2a9d8f;
+  transform: scale(1.2);
+}
+
+.progressDot.completed {
+  background-color: #2a9d8f;
+}
+
+@media (max-width: 768px) {
+  .wordCard {
+    font-size: 4.5rem;
+    padding: 1rem 2.5rem;
+    min-width: 240px;
+  }
+
+  .micButton {
+    width: 120px;
+    height: 120px;
+  }
+
+  .successWord {
+    font-size: 3.5rem;
+  }
+
+  .gameOver h1 {
+    font-size: 3.5rem;
+  }
+}
