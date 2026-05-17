@@ -71,7 +71,7 @@ export class MediaGenerator {
       width = 512,
       height = 512,
       quality = 85,
-      model = "gemini-2.5-flash-image-preview",
+      model = "gemini-2.5-flash-image",
     } = options;
 
     if (!this.ai) {

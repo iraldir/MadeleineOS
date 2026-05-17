@@ -49,7 +49,7 @@ Make it cheerful and easy to understand for young children learning languages.`;
     console.log(`🎨 Generating image for ${word.id} (${word.english})...`);
     
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image-preview",
+      model: "gemini-2.5-flash-image",
       contents: prompt,
     });
     
@@ -172,7 +172,7 @@ async function generateAllImages() {
   console.log(`⏱️  Rate limit: ${RATE_LIMIT_DELAY}ms between requests`);
   console.log(`📦 Batch size: ${BATCH_SIZE} images per batch`);
   console.log(`⏸️  Batch delay: ${BATCH_DELAY}ms between batches`);
-  console.log(`🎨 Using model: gemini-2.5-flash-image-preview (Nano Banana)\n`);
+  console.log(`🎨 Using model: gemini-2.5-flash-image (Nano Banana)\n`);
   
   // Ensure output directory exists
   try {

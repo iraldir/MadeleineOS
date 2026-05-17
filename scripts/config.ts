@@ -13,7 +13,7 @@ export const CONFIG = {
 
   // Model Configuration
   models: {
-    imageGeneration: "gemini-2.5-flash-image-preview",
+    imageGeneration: "gemini-2.5-flash-image",
     textGeneration: "gemini-2.5-flash",
   },
 
