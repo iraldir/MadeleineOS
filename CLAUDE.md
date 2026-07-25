@@ -118,7 +118,9 @@ npm run char:search -- "Ron Weasley"
 #    poorly (off-center, clipped), view the original at full size and set the
 #    window yourself with --portrait-crop "left,top,width" (source pixels,
 #    height = width/2). Coloring: prefer high resolution
-#    (printed on A4), bold simple lines for a young child, no watermarks.
+#    (printed on A4), no watermarks. Detailed/fine-lined pages are fine —
+#    Madeleine punches above her age in colouring; favour a mix of simple
+#    and detailed over all-chibi.
 #    ALWAYS verify the final portraits in the running app (screenshot
 #    /games/character-list) — crops can look fine in preview and wrong in situ.
 
