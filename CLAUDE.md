@@ -96,6 +96,46 @@ npm run youtube:search -- "how to draw Butterfree pokemon for kids" --category d
 npm run youtube:search -- "easy Butterfree drawing tutorial" --category drawing --top 3
 ```
 
+### Adding Characters from Google/Web Images (agent workflow)
+
+When the user says "Add <character>" (e.g. "Add Ron Weasley"), follow this pipeline. It sources real images from the web (DuckDuckGo image search — full-res URLs, no captchas), lets Claude pick candidates visually, and installs them in the game's formats.
+
+```bash
+# 1. Search: fetches 25 candidates each for the character portrait and for
+#    printable coloring pages. Produces numbered contact sheets.
+npm run char:search -- "Ron Weasley"
+# Optional: --type thumbnail|coloring|both, -n <count>,
+#           --thumbnail-query / --coloring-query to override the default queries
+#           ("<name> character" and "<name> coloring page printable")
+
+# 2. Review: Read these PNGs with vision and choose candidates by number.
+#    .character-search/<slug>/thumbnail/sheet.png
+#    .character-search/<slug>/coloring/sheet.png
+#    Portrait: pick an image whose subject survives a 2:1 landscape cover-crop
+#    (face-aware). For full-body art of tall/skinny characters on a plain
+#    background, the crop WILL decapitate them — use --portrait-fit contain
+#    (letterbox on white) in step 3 instead. If the auto-crop frames the face
+#    poorly (off-center, clipped), view the original at full size and set the
+#    window yourself with --portrait-crop "left,top,width" (source pixels,
+#    height = width/2). Coloring: prefer high resolution
+#    (printed on A4), bold simple lines for a young child, no watermarks.
+#    ALWAYS verify the final portraits in the running app (screenshot
+#    /games/character-list) — crops can look fine in preview and wrong in situ.
+
+# 3. Pick: downloads full-res, converts to game formats, stages a preview.
+npm run char:pick -- "Ron Weasley" --thumbnail 2 --coloring 7,9,10,14
+#    --lineart <n,n> optionally runs colour images through experimental
+#    edge-detection line-art conversion (prefer real coloring pages).
+#    Review .character-search/<slug>/selected/preview.png, then show the user
+#    the preview and WAIT for their approval before installing.
+
+# 4. Install (only after user approval): copies images into public/images/
+#    and appends the character entry to types/characters.ts.
+npm run char:install -- "Ron Weasley" --franchise "Harry Potter"
+```
+
+Formats produced: portrait 1024x512 webp (cover-crop, attention positioning), coloring pages 2480x3508 webp (A4, contained on white). Staging lives in `.character-search/` (gitignored). Implementation: `scripts/utils/character-search.ts`.
+
 ### Using the Main CLI
 
 ```bash

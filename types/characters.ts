@@ -485,6 +485,175 @@ export const characters: Character[] = [
       "/images/coloring/squirtle4.webp",
     ],
   },
+  // Harry Potter
+  {
+    id: "harry-potter",
+    name: "HARRY POTTER",
+    imageUrl: "/images/characters/harry-potter.webp",
+    franchise: "Harry Potter",
+    coloringPages: [
+      "/images/coloring/harry-potter1.webp",
+      "/images/coloring/harry-potter2.webp",
+      "/images/coloring/harry-potter3.webp",
+      "/images/coloring/harry-potter4.webp",
+    ],
+  },
+  // Ron Weasley
+  {
+    id: "ron-weasley",
+    name: "RON WEASLEY",
+    imageUrl: "/images/characters/ron-weasley.webp",
+    franchise: "Harry Potter",
+    coloringPages: [
+      "/images/coloring/ron-weasley1.webp",
+      "/images/coloring/ron-weasley2.webp",
+      "/images/coloring/ron-weasley3.webp",
+      "/images/coloring/ron-weasley4.webp",
+    ],
+  },
+  // Hermione Granger
+  {
+    id: "hermione-granger",
+    name: "HERMIONE GRANGER",
+    imageUrl: "/images/characters/hermione-granger.webp",
+    franchise: "Harry Potter",
+    coloringPages: [
+      "/images/coloring/hermione-granger1.webp",
+      "/images/coloring/hermione-granger2.webp",
+      "/images/coloring/hermione-granger3.webp",
+      "/images/coloring/hermione-granger4.webp",
+    ],
+  },
+  // Hagrid
+  {
+    id: "hagrid",
+    name: "HAGRID",
+    imageUrl: "/images/characters/hagrid.webp",
+    franchise: "Harry Potter",
+    coloringPages: [
+      "/images/coloring/hagrid1.webp",
+      "/images/coloring/hagrid2.webp",
+      "/images/coloring/hagrid3.webp",
+      "/images/coloring/hagrid4.webp",
+    ],
+  },
+  // Hedwig
+  {
+    id: "hedwig",
+    name: "HEDWIG",
+    imageUrl: "/images/characters/hedwig.webp",
+    franchise: "Harry Potter",
+    coloringPages: [
+      "/images/coloring/hedwig1.webp",
+      "/images/coloring/hedwig2.webp",
+      "/images/coloring/hedwig3.webp",
+      "/images/coloring/hedwig4.webp",
+    ],
+  },
+  // Rumi
+  {
+    id: "rumi",
+    name: "RUMI",
+    imageUrl: "/images/characters/rumi.webp",
+    franchise: "KPop Demon Hunters",
+    coloringPages: [
+      "/images/coloring/rumi1.webp",
+      "/images/coloring/rumi2.webp",
+      "/images/coloring/rumi3.webp",
+      "/images/coloring/rumi4.webp",
+    ],
+  },
+  // Mira
+  {
+    id: "mira",
+    name: "MIRA",
+    imageUrl: "/images/characters/mira.webp",
+    franchise: "KPop Demon Hunters",
+    coloringPages: [
+      "/images/coloring/mira1.webp",
+      "/images/coloring/mira2.webp",
+      "/images/coloring/mira3.webp",
+      "/images/coloring/mira4.webp",
+    ],
+  },
+  // Zoey
+  {
+    id: "zoey",
+    name: "ZOEY",
+    imageUrl: "/images/characters/zoey.webp",
+    franchise: "KPop Demon Hunters",
+    coloringPages: [
+      "/images/coloring/zoey1.webp",
+      "/images/coloring/zoey2.webp",
+      "/images/coloring/zoey3.webp",
+      "/images/coloring/zoey4.webp",
+    ],
+  },
+  // Beep
+  {
+    id: "beep",
+    name: "BEEP",
+    imageUrl: "/images/characters/beep.webp",
+    franchise: "StoryBots",
+    coloringPages: [
+      "/images/coloring/beep1.webp",
+      "/images/coloring/beep2.webp",
+      "/images/coloring/beep3.webp",
+      "/images/coloring/beep4.webp",
+    ],
+  },
+  // Boop
+  {
+    id: "boop",
+    name: "BOOP",
+    imageUrl: "/images/characters/boop.webp",
+    franchise: "StoryBots",
+    coloringPages: [
+      "/images/coloring/boop1.webp",
+      "/images/coloring/boop2.webp",
+      "/images/coloring/boop3.webp",
+      "/images/coloring/boop4.webp",
+    ],
+  },
+  // Bing
+  {
+    id: "bing",
+    name: "BING",
+    imageUrl: "/images/characters/bing.webp",
+    franchise: "StoryBots",
+    coloringPages: [
+      "/images/coloring/bing1.webp",
+      "/images/coloring/bing2.webp",
+      "/images/coloring/bing3.webp",
+      "/images/coloring/bing4.webp",
+    ],
+  },
+  // Bang
+  {
+    id: "bang",
+    name: "BANG",
+    imageUrl: "/images/characters/bang.webp",
+    franchise: "StoryBots",
+    coloringPages: [
+      "/images/coloring/bang1.webp",
+      "/images/coloring/bang2.webp",
+      "/images/coloring/bang3.webp",
+      "/images/coloring/bang4.webp",
+    ],
+  },
+  // Bo
+  {
+    id: "bo",
+    name: "BO",
+    imageUrl: "/images/characters/bo.webp",
+    franchise: "StoryBots",
+    coloringPages: [
+      "/images/coloring/bo1.webp",
+      "/images/coloring/bo2.webp",
+      "/images/coloring/bo3.webp",
+      "/images/coloring/bo4.webp",
+    ],
+  },
 ];
 
 export const secretCharacters: Character[] = [

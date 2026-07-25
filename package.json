@@ -23,7 +23,10 @@
     "youtube:search": "tsx scripts/cli.ts youtube search",
     "youtube:list": "tsx scripts/cli.ts youtube list",
     "youtube:categories": "tsx scripts/cli.ts youtube categories",
-    "youtube:import-playlist": "tsx scripts/cli.ts youtube import-playlist"
+    "youtube:import-playlist": "tsx scripts/cli.ts youtube import-playlist",
+    "char:search": "tsx scripts/cli.ts char search",
+    "char:pick": "tsx scripts/cli.ts char pick",
+    "char:install": "tsx scripts/cli.ts char install"
   },
   "dependencies": {
     "@google/genai": "^1.20.0",
@@ -48,6 +51,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.7",
+    "playwright-core": "^1.62.0",
     "tsx": "^4.20.5",
     "typescript": "^5"
   }

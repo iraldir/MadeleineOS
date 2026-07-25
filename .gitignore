@@ -20,6 +20,9 @@
 # production
 /build
 
+# character image search staging
+/.character-search/
+
 # misc
 .DS_Store
 *.pem

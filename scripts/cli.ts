@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { vocabularyManager } from "./utils/vocabulary-manager";
 import { mediaGenerator } from "./utils/media-generator";
 import { youtubeManager } from "./utils/youtube-manager";
+import { searchImages, pickCandidates, installCharacter, slugify } from "./utils/character-search";
 import { CONFIG, formatSuccess, formatError, formatInfo, formatWarning, validateApiKeys } from "./config";
 import { VocabularyWord } from "../types/vocabulary";
 import * as path from "node:path";
@@ -428,6 +429,91 @@ youtube
 
       console.log(formatInfo(`Importing playlist: ${playlistId}`));
       await youtubeManager.importPlaylist(playlistId, options.category);
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+// Character image sourcing commands
+const char = program
+  .command("char")
+  .description("Source character images from Google Images");
+
+char
+  .command("search")
+  .description("Search Google Images for character thumbnail and coloring page candidates")
+  .argument("<name>", "Character name, e.g. \"Ron Weasley\"")
+  .option("-t, --type <type>", "thumbnail | coloring | both", "both")
+  .option("-n, --count <count>", "Number of candidates per search", "25")
+  .option("--thumbnail-query <query>", "Override the thumbnail search query")
+  .option("--coloring-query <query>", "Override the coloring page search query")
+  .action(async (name, options) => {
+    try {
+      const count = parseInt(options.count, 10);
+      const searches: { type: "thumbnail" | "coloring"; query: string }[] = [];
+      if (options.type === "thumbnail" || options.type === "both") {
+        searches.push({ type: "thumbnail", query: options.thumbnailQuery || `${name} character` });
+      }
+      if (options.type === "coloring" || options.type === "both") {
+        searches.push({ type: "coloring", query: options.coloringQuery || `${name} coloring page printable` });
+      }
+      for (const search of searches) {
+        console.log(formatInfo(`Searching (${search.type}): ${search.query}`));
+        const result = await searchImages(name, search.type, search.query, count);
+        console.log(formatSuccess(`${result.found} candidates → ${result.sheetPng}`));
+      }
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+char
+  .command("pick")
+  .description("Download and process selected candidates into game formats (staged, not installed)")
+  .argument("<name>", "Character name or slug")
+  .option("--thumbnail <n>", "Candidate number for the character portrait")
+  .option("--coloring <n,n,n,n>", "Comma-separated candidate numbers for coloring pages")
+  .option("--lineart <n,n>", "Coloring candidates to run through colour→line-art conversion")
+  .option("--portrait-fit <fit>", "Portrait framing: cover (face-aware crop) or contain (letterbox on white)", "cover")
+  .option("--portrait-crop <left,top,width>", "Manual 2:1 crop window in source pixels (height = width/2)")
+  .action(async (name, options) => {
+    try {
+      const thumbnailIndex = options.thumbnail ? parseInt(options.thumbnail, 10) : null;
+      const coloringIndexes: number[] = options.coloring
+        ? options.coloring.split(",").map((s: string) => parseInt(s.trim(), 10))
+        : [];
+      const lineartIndexes: number[] = options.lineart
+        ? options.lineart.split(",").map((s: string) => parseInt(s.trim(), 10))
+        : [];
+      let portraitCrop;
+      if (options.portraitCrop) {
+        const [left, top, width] = options.portraitCrop.split(",").map((s: string) => parseInt(s.trim(), 10));
+        portraitCrop = { left, top, width };
+      }
+      const result = await pickCandidates(name, thumbnailIndex, coloringIndexes, {
+        lineartIndexes,
+        portraitFit: options.portraitFit === "contain" ? "contain" : "cover",
+        portraitCrop,
+      });
+      console.log(formatSuccess(`Staged in ${result.dir}`));
+      console.log(formatInfo(`Preview: ${result.previewPng}`));
+    } catch (error) {
+      console.error(formatError(error instanceof Error ? error.message : String(error)));
+      process.exit(1);
+    }
+  });
+
+char
+  .command("install")
+  .description("Copy staged images into the game and register the character")
+  .argument("<name>", "Character display name, e.g. \"Ron Weasley\"")
+  .option("-f, --franchise <franchise>", "Franchise name", "Misc")
+  .action(async (name, options) => {
+    try {
+      await installCharacter(name, name, options.franchise);
+      console.log(formatSuccess(`${name} installed (id: ${slugify(name)})`));
     } catch (error) {
       console.error(formatError(error instanceof Error ? error.message : String(error)));
       process.exit(1);
