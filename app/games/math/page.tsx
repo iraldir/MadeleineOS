@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { MathLevel } from "@/types/math";
 import { Howl } from "howler";
-import { audioService, celebrationService, currencyService } from "@/services";
+import { audioService, celebrationService, currencyService, challengeService } from "@/services";
 
 const STORAGE_KEY = "mathGame_progress";
 const HIGH_SCORE_KEY = "mathGame_highScore";
@@ -101,6 +101,7 @@ export default function MathGame() {
 
     if (numAnswer === correctAnswer) {
       audioService.playSuccess();
+      challengeService.recordProgress("math");
       setIsTransitioning(true);
 
       // Track questions answered and streak

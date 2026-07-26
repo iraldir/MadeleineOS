@@ -4,7 +4,7 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight, Send } from "lucide-react";
 import TypingInterface from "@/components/TypingInterface";
-import { characterService, audioService, celebrationService, currencyService } from "@/services";
+import { characterService, audioService, celebrationService, currencyService, challengeService } from "@/services";
 
 // No longer using localStorage to store progress
 
@@ -47,6 +47,7 @@ export default function CharacterWriting() {
       setIsTransitioning(true);
       audioService.playSuccess();
       celebrationService.celebrate();
+      challengeService.recordProgress("character-writing");
 
       setTimeout(() => {
         if (currentIndex < orderedCharacters.length - 1) {

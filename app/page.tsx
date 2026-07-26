@@ -4,6 +4,7 @@ import Link from 'next/link';
 import styles from "./page.module.css";
 import { games } from '@/types/games';
 import PageBackground from '@/components/PageBackground';
+import DailyChallengeBanner from '@/components/DailyChallengeBanner';
 import { X, RotateCw } from 'lucide-react';
 
 const BLOCKED_GAMES_KEY = "madeleine_blocked_games";
@@ -44,7 +45,9 @@ export default function Home() {
       </button>
       
       <h1 className={styles.title}>Madeleine&apos;s Learning Games</h1>
-      
+
+      <DailyChallengeBanner />
+
       <div className={styles.gameGrid}>
         {games.map((game) => {
           const isBlocked = game.path !== '#' && isGameBlocked(game.path);

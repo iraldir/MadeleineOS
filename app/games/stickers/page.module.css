@@ -1,0 +1,108 @@
+.main {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 10;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.backButton:hover {
+  transform: scale(1.1);
+}
+
+.title {
+  margin: 8px 0 0;
+  font-size: 2.8rem;
+  color: #d946a6;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+  z-index: 2;
+}
+
+.count {
+  margin: 4px 0 20px;
+  min-height: 1.8rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #7c5c2b;
+  position: relative;
+  z-index: 2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 18px;
+  width: min(1100px, 100%);
+  position: relative;
+  z-index: 2;
+  padding-bottom: 40px;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.stickerWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.stickerImage {
+  object-fit: contain;
+}
+
+/* Not-yet-earned stickers render as dark silhouettes */
+.missing .stickerImage {
+  filter: brightness(0);
+  opacity: 0.22;
+}
+
+.owned .stickerImage {
+  animation: popIn 0.35s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); }
+  to { transform: scale(1); }
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #4a2c00;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.missing .name {
+  color: #b0a58f;
+}

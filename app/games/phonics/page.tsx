@@ -11,7 +11,7 @@ import {
   imageFilename,
 } from "./words";
 import { useSpeechRecognition } from "./useSpeechRecognition";
-import { audioService, celebrationService, currencyService } from "@/services";
+import { audioService, celebrationService, currencyService, challengeService } from "@/services";
 
 const HIGH_SCORE_KEY = "phonicsGame_highScore";
 const LISTEN_MS = 6000;
@@ -58,6 +58,7 @@ export default function PhonicsGame() {
     const word = currentWordRef.current;
     if (!word) return;
     audioService.playSuccess();
+    challengeService.recordProgress("phonics");
     const newStreak = streak + 1;
     setStreak(newStreak);
     if (newStreak > highScore) {

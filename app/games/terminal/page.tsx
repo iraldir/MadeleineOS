@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { stickerService } from "@/services";
 
 const BLOCKED_GAMES_KEY = "madeleine_blocked_games";
 
@@ -110,11 +111,23 @@ export default function Terminal() {
         }
         break;
 
+      case "UNLOCK_STICKERS":
+        stickerService.unlockAll();
+        output = `All ${stickerService.getTotalCount()} stickers unlocked`;
+        break;
+
+      case "RESET_STICKERS":
+        stickerService.reset();
+        output = "Sticker collection cleared";
+        break;
+
       case "HELP":
         output = `Available commands:
 SET_CURRENCY [number] - Set coin amount
 BLOCK [0-6] - Block a game by index
 UNBLOCK [0-6] - Unblock a game by index
+UNLOCK_STICKERS - Unlock the whole sticker collection
+RESET_STICKERS - Clear the sticker collection
 RESET - Clear all data (requires confirmation)
 STATUS - Show current system status
 HELP - Show this message`;
@@ -124,6 +137,7 @@ HELP - Show this message`;
         const coins = localStorage.getItem("madeleine_coins") || "10";
         output = `System Status:
 Coins: ${coins}
+Stickers: ${stickerService.getOwnedCount()}/${stickerService.getTotalCount()}
 Blocked Games: ${blockedGames.length > 0 ? blockedGames.join(", ") : "None"}`;
         break;
 

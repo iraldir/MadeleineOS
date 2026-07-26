@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { characterService, audioService, celebrationService } from "@/services";
+import { characterService, audioService, celebrationService, challengeService } from "@/services";
 
 // Get ordered characters from centralized service
 const getOrderedCharacters = () => {
@@ -64,6 +64,7 @@ export default function CharacterRecognition() {
       setIsTransitioning(true);
       audioService.playSuccess();
       celebrationService.celebrate();
+      challengeService.recordProgress("character-recognition");
 
       setTimeout(() => {
         if (currentIndex < orderedCharacters.length - 1) {

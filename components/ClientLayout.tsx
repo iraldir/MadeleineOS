@@ -3,6 +3,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import CoinDisplay from './CoinDisplay';
 import CoinAnimationManager from './CoinAnimationManager';
 import AppPreloader from './AppPreloader';
+import StickerRewardPopup from './StickerRewardPopup';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -37,6 +38,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         <>
           <CoinDisplay />
           <CoinAnimationManager />
+          <StickerRewardPopup />
           {children}
         </>
       )}

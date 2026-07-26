@@ -5,3 +5,5 @@ export { characterService } from './characterService';
 export { weatherService } from './weatherService';
 export { youtubeService } from './youtubeService';
 export { currencyService } from './currencyService';
+export { stickerService } from './stickerService';
+export { challengeService } from './challengeService';

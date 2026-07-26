@@ -1,0 +1,114 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(680px, calc(100% - 32px));
+  margin: 0 auto 24px;
+  padding: 14px 22px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffd166 0%, #ff9e6d 50%, #ff7eb3 100%);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 6px 20px rgba(255, 126, 179, 0.4);
+  text-decoration: none;
+  color: #4a2c00;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.banner:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 26px rgba(255, 126, 179, 0.55);
+}
+
+.trophy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #f59e0b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  animation: trophyWiggle 3s ease-in-out infinite;
+}
+
+@keyframes trophyWiggle {
+  0%, 88%, 100% { transform: rotate(0deg); }
+  90% { transform: rotate(-10deg); }
+  94% { transform: rotate(10deg); }
+  98% { transform: rotate(-6deg); }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.heading {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.75;
+}
+
+.label {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.progressDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+}
+
+.progressDone {
+  background: #22c55e;
+}
+
+.progressCount {
+  margin-left: 6px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.completed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  color: #16a34a;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  padding: 6px 12px;
+}
+
+.earnedSticker {
+  object-fit: contain;
+}
+
+@media (max-width: 600px) {
+  .label {
+    font-size: 1.15rem;
+  }
+
+  .progressDot {
+    width: 10px;
+    height: 10px;
+  }
+}
