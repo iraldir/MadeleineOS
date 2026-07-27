@@ -27,13 +27,16 @@
     "stickers:generate": "tsx scripts/generate-stickers.ts",
     "char:search": "tsx scripts/cli.ts char search",
     "char:pick": "tsx scripts/cli.ts char pick",
-    "char:install": "tsx scripts/cli.ts char install"
+    "char:install": "tsx scripts/cli.ts char install",
+    "planets:illustrate": "tsx scripts/generate-planet-illustrations.ts",
+    "games:thumbnails": "tsx scripts/generate-game-thumbnails.ts"
   },
   "dependencies": {
     "@google/genai": "^1.20.0",
     "@google/generative-ai": "^0.24.1",
     "@types/canvas-confetti": "^1.9.0",
     "@types/howler": "^2.2.12",
+    "@types/three": "^0.185.1",
     "axios": "^1.12.2",
     "canvas-confetti": "^1.9.3",
     "commander": "^12.1.0",
@@ -43,7 +46,8 @@
     "next": "^15.5.7",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
-    "sharp": "^0.34.4"
+    "sharp": "^0.34.4",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,0 +1,16 @@
+.main {
+  min-height: 100vh;
+  background: #05060d;
+  overflow: hidden;
+}
+
+.credit {
+  position: fixed;
+  bottom: 0.5rem;
+  left: 1rem;
+  margin: 0;
+  z-index: 40;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.28);
+  pointer-events: none;
+}

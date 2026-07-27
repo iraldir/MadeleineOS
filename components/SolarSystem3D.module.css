@@ -1,0 +1,226 @@
+.wrapper {
+  --strip-height: 190px;
+
+  position: fixed;
+  inset: 0;
+  background: #05060d;
+  color: #fff;
+  overflow: hidden;
+}
+
+.nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1rem 2rem;
+  z-index: 40;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease-in-out;
+}
+
+.backButton:hover {
+  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.24);
+}
+
+/* --- headings -------------------------------------------------------- */
+
+.title {
+  position: absolute;
+  top: 1.6rem;
+  left: 6.5rem;
+  margin: 0;
+  z-index: 30;
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 2.6rem;
+  line-height: 1;
+  background: linear-gradient(90deg, #ffd79a, #ff8ac1 60%, #8ab6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  pointer-events: none;
+}
+
+/* The name of the planet being visited — big, in its own colour, and it
+   speaks itself again when tapped. */
+.planetName {
+  position: absolute;
+  top: 4.75rem;
+  left: 2rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--accent, #fff);
+  text-shadow: 0 0 32px var(--accent, #fff), 0 4px 24px rgba(0, 0, 0, 0.8);
+  animation: nameIn 0.5s ease-out;
+}
+
+@keyframes nameIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.speaker {
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.planetName:hover .speaker {
+  opacity: 0.75;
+  transform: scale(1.1);
+}
+
+/* --- 3D stage -------------------------------------------------------- */
+
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--strip-height);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas canvas {
+  display: block;
+  touch-action: none;
+}
+
+/* --- loading --------------------------------------------------------- */
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background: #05060d;
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 1.35rem;
+  color: #ffd79a;
+  z-index: 5;
+}
+
+.loadingOrb {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff3c4, #ffb02e 45%, #ff6a00);
+  box-shadow: 0 0 40px rgba(255, 160, 40, 0.7);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.75; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* --- illustrated planet strip ---------------------------------------- */
+
+.strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--strip-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  background: linear-gradient(to top, #05060d 55%, rgba(5, 6, 13, 0));
+  z-index: 20;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.5rem 0.5rem;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background: none;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.04);
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.cardActive {
+  border-color: var(--accent, #fff);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.cardArt {
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent, #fff) 45%, transparent));
+  transition: filter 0.2s ease;
+}
+
+.card:hover .cardArt,
+.cardActive .cardArt {
+  filter: drop-shadow(0 0 22px var(--accent, #fff));
+}
+
+.cardName {
+  font-family: var(--font-schoolbell), cursive;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+@media (max-width: 1100px) {
+  .wrapper {
+    --strip-height: 150px;
+  }
+
+  .cardArt {
+    width: 78px;
+    height: 78px;
+  }
+
+  .cardName {
+    font-size: 1.05rem;
+  }
+
+  .planetName {
+    font-size: 3.4rem;
+  }
+}

@@ -220,6 +220,68 @@ When adding new games or characters:
 5. Update navigation in `app/layout.tsx`
 6. Follow existing CSS Module patterns for styling
 
+### Solar System Games (3D)
+
+Two games share the planet data in `types/planets.ts`:
+
+- `/games/solar-system` — `components/SolarSystem3D.tsx`, a three.js scene of the Sun and
+  eight planets, with a strip of illustrated planet cards along the bottom. Clicking a
+  planet — in the scene or on its card — flies the camera to it, keeps following it along
+  its orbit, speaks its name, shows the name large in the top left, and hides every other
+  planet (the Sun stays) so there is nothing else to look at. The app's back button
+  returns to the whole system first, and only leaves the game on a second press.
+- `/games/planet-quiz` — "which planet is this?", built on `components/PlanetSphere.tsx`,
+  a small reusable spinning-planet canvas.
+
+`components/planetShaders.ts` holds the hand-written materials. They all assume the Sun
+sits at the world origin, which lets them solve lighting analytically instead of using
+shadow maps:
+- **Earth** — day map, city lights on the night side, ocean glint, normal-mapped relief,
+  and the cloud layer shadowing the ground beneath it.
+- **Sun** — two copies of the photosphere drifting across each other so it churns, with
+  limb darkening; it renders above 1.0 so the bloom pass catches it.
+- **Saturn** — the planet's shadow falls across the rings, and the rings' shadow falls
+  across the planet, both by ray-tracing to the ring plane. Uranus uses the same path
+  with a hand-painted thin ring texture (`makeThinRingTexture`); because it lies on its
+  side, its rings stand up almost vertically.
+
+There is deliberately **no atmosphere/limb glow** — it read as a coloured border drawn
+around each planet rather than as air.
+
+Both the overview framing and the framing when visiting a planet are solved by
+**projecting sample points and bisecting the camera distance**, not by trigonometry:
+perspective magnifies whichever edge is nearest, so an analytic fit crops Saturn's rings
+and leaves the overview half empty. The overview fits Neptune's orbit across the width
+only — the near edge of the outer orbits runs off the bottom on purpose.
+
+The tour renders through an `EffectComposer` (bloom on a half-float target with 4x MSAA).
+The quiz deliberately does **not** — a bloom pass forces the canvas opaque and paints a
+black box over the page, so the halo there is a CSS radial gradient instead.
+
+Assets:
+- Textures live in `public/textures/planets/` — 4K equirectangular maps from
+  [Solar System Scope](https://www.solarsystemscope.com/textures/) (CC BY 4.0), downscaled
+  from their 8K originals and converted to WebP (~14 MB total). Uranus and Neptune are
+  only published at 2K, which is plenty for two featureless balls. The credit line on the
+  game page is required by that licence.
+- Spoken names live in `public/sounds/planets/<id>.mp3`, generated with Google Cloud TTS
+  (`en-GB-Journey-F`), same voice family as the vocabulary audio.
+- The illustrated cards live in `public/images/planets/<id>.webp` — painted storybook
+  drawings, deliberately not photoreal, since the 3D scene already shows the real thing.
+  Regenerate with `npm run planets:illustrate [-- --only <id>] [-- --force]`; the script
+  follows the sticker pipeline (Vertex AI + gcloud token, magenta background chroma-keyed
+  to transparency). Prompts live in `SUBJECTS` in the script. Two things worth knowing:
+  the script rejects a generation whose background is not actually magenta, or whose
+  centre comes out see-through — otherwise the key silently punches holes through a
+  planet whose colours sit near magenta (this is what made Mars look muddy for a long
+  time, and it was the key, not the model). `--best-of <n>` draws several and keeps
+  whichever average colour is closest to that planet's 3D texture.
+- The two home-screen cards are painted too: `npm run games:thumbnails`.
+
+Scene distances and sizes in `types/planets.ts` are deliberately compressed — real ratios
+would make Mercury a single pixel. Rotation directions (retrograde Venus and Uranus) and
+the facts shown in the panel are accurate.
+
 ### Adding New Characters
 
 There's a helper script to quickly scaffold new characters:

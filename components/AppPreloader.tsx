@@ -36,7 +36,9 @@ const AppPreloader: React.FC<PreloaderProps> = ({ onComplete }) => {
         { type: 'image', src: '/images/games/youtube.png', name: 'Videos' },
         { type: 'image', src: '/images/games/vocabulary.webp', name: 'Vocabulary' },
         { type: 'image', src: '/images/games/coupon.webp', name: 'Coupon' },
-        
+        { type: 'image', src: '/images/games/solar-system.webp', name: 'Solar System' },
+        { type: 'image', src: '/images/games/planet-quiz.webp', name: 'Planet Quiz' },
+
         // Background images
         { type: 'image', src: '/images/backgrounds/floral-pattern.webp', name: 'Floral Background' },
         { type: 'image', src: '/images/backgrounds/page-background.webp', name: 'Page Background' },
@@ -68,11 +70,16 @@ const AppPreloader: React.FC<PreloaderProps> = ({ onComplete }) => {
         { type: 'audio', src: '/sounds/reject.mp3', name: 'Reject Sound' },
         { type: 'audio', src: '/sounds/reset.mp3', name: 'Reset Sound' },
 
-        // Solar system audio
-        { type: 'audio', src: '/sounds/solar-system/sun.mp3', name: 'Sun' },
-        { type: 'audio', src: '/sounds/solar-system/earth.mp3', name: 'Earth' },
-        { type: 'audio', src: '/sounds/solar-system/mars.mp3', name: 'Mars' },
-        { type: 'audio', src: '/sounds/solar-system/jupiter.mp3', name: 'Jupiter' },
+        // Planet names (spoken) and their illustrated cards
+        ...['sun', 'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'].flatMap(
+          (planet) => {
+            const name = planet.charAt(0).toUpperCase() + planet.slice(1);
+            return [
+              { type: 'audio' as const, src: `/sounds/planets/${planet}.mp3`, name },
+              { type: 'image' as const, src: `/images/planets/${planet}.webp`, name },
+            ];
+          }
+        ),
       ];
 
       if (!isMounted) return;
