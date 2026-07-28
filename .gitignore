@@ -1,7 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# dependencies — this project uses pnpm. An npm lockfile that drifts out of
+# step with pnpm-lock.yaml breaks the deploy's frozen-lockfile install.
 /node_modules
+package-lock.json
 /.pnp
 .pnp.*
 .yarn/*

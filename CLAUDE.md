@@ -8,15 +8,21 @@ This is "Madeleine's Learning Games" - an educational web application for childr
 
 ## Essential Commands
 
+This project uses **pnpm**, and the deploy installs with `--frozen-lockfile`. Adding a
+dependency with `npm install` leaves `pnpm-lock.yaml` untouched and the deploy then fails
+to install it, so always use pnpm. (`package-lock.json` is gitignored for that reason.)
+
 ```bash
 # Development
-npm run dev      # Start development server with Turbopack (http://localhost:3000)
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+pnpm dev         # Start development server with Turbopack (http://localhost:3000)
+pnpm build       # Build for production
+pnpm start       # Start production server
+pnpm lint        # Run ESLint
 
 # Common development tasks
-npm install      # Install dependencies after cloning or when package.json changes
+pnpm install                 # Install dependencies after cloning or when package.json changes
+pnpm add <package>           # Add a dependency — never `npm install`
+pnpm install --frozen-lockfile   # What the deploy runs; check this passes before pushing
 ```
 
 ## Utility Toolkit
