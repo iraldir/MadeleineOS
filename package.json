@@ -29,7 +29,9 @@
     "char:pick": "tsx scripts/cli.ts char pick",
     "char:install": "tsx scripts/cli.ts char install",
     "planets:illustrate": "tsx scripts/generate-planet-illustrations.ts",
-    "games:thumbnails": "tsx scripts/generate-game-thumbnails.ts"
+    "games:thumbnails": "tsx scripts/generate-game-thumbnails.ts",
+    "planets:voices": "tsx scripts/generate-planet-voices.ts",
+    "planets:clouds": "tsx scripts/derive-cloud-maps.ts"
   },
   "dependencies": {
     "@google/genai": "^1.20.0",

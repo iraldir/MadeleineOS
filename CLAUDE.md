@@ -238,6 +238,10 @@ sits at the world origin, which lets them solve lighting analytically instead of
 shadow maps:
 - **Earth** — day map, city lights on the night side, ocean glint, normal-mapped relief,
   and the cloud layer shadowing the ground beneath it.
+- **Cloud layers** — a second sphere per planet (`clouds` in the planet data) drifting at
+  its own rate. Neptune's drift is negative because its winds really do blow against its
+  rotation; its cloud map has to be derived from its own surface texture
+  (`npm run planets:clouds`) since no public one exists — see the script for how.
 - **Sun** — two copies of the photosphere drifting across each other so it churns, with
   limb darkening; it renders above 1.0 so the bloom pass catches it.
 - **Saturn** — the planet's shadow falls across the rings, and the rings' shadow falls
@@ -247,6 +251,15 @@ shadow maps:
 
 There is deliberately **no atmosphere/limb glow** — it read as a coloured border drawn
 around each planet rather than as air.
+
+Tilt and spin are separate objects in the scene graph. Putting both on one Euler makes
+the spin swing the axis around instead of turning about it, which wobbles the poles and
+sends the ring shadows lurching up and down the planet.
+
+Travelling from one planet straight to another follows a quadratic Bézier out through the
+overview vantage point and back down, taking `ARC_SECONDS`, so the trip shows where the
+two planets sit relative to each other. The other planets are shown for the whole journey
+and only hidden once the camera arrives.
 
 Both the overview framing and the framing when visiting a planet are solved by
 **projecting sample points and bisecting the camera distance**, not by trigonometry:
@@ -264,8 +277,12 @@ Assets:
   from their 8K originals and converted to WebP (~14 MB total). Uranus and Neptune are
   only published at 2K, which is plenty for two featureless balls. The credit line on the
   game page is required by that licence.
-- Spoken names live in `public/sounds/planets/<id>.mp3`, generated with Google Cloud TTS
-  (`en-GB-Journey-F`), same voice family as the vocabulary audio.
+- Voice lines are ElevenLabs (voice "Jessica", young and warm — the Google TTS ones
+  sounded flat): `public/sounds/planets/<id>.mp3` is the name ("The Earth", "Mars"), and
+  `public/sounds/planets/facts/<id>-<n>.mp3` are the five facts held in `facts` in the
+  planet data. Regenerate with `npm run planets:voices` (needs `ELEVENLABS_API_KEY`).
+  The name is only spoken when the name itself is tapped; arriving at a planet plays one
+  of its facts at random.
 - The illustrated cards live in `public/images/planets/<id>.webp` — painted storybook
   drawings, deliberately not photoreal, since the 3D scene already shows the real thing.
   Regenerate with `npm run planets:illustrate [-- --only <id>] [-- --force]`; the script

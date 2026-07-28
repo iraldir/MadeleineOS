@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { Howl } from "howler";
 import { ArrowLeft, Volume2 } from "lucide-react";
-import { PLANETS, SUN, Planet, planetAudioUrl } from "@/types/planets";
+import { PLANETS, SUN, Planet, planetFactUrl, planetNameUrl } from "@/types/planets";
 import styles from "./SolarSystem3D.module.css";
 
 const BODIES: Planet[] = [SUN, ...PLANETS];
@@ -27,11 +27,29 @@ const HOME_DIRECTION = new THREE.Vector3(0, 70, 198).normalize();
 const HOME_TARGET = new THREE.Vector3(0, 0, 0);
 /** Neptune's orbit — the overview is framed so this just spans the screen. */
 const SYSTEM_RADIUS = 107;
-const FLIGHT_SECONDS = 1.6;
+const FLIGHT_SECONDS = 1.8;
+/** Planet to planet, out over the system and back down — worth taking slowly. */
+const ARC_SECONDS = 4.2;
 
 const deg = (d: number) => (d * Math.PI) / 180;
 const easeInOut = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/** Quadratic Bézier — the curve the camera follows from planet to planet. */
+const bezier = (
+  from: THREE.Vector3,
+  control: THREE.Vector3,
+  to: THREE.Vector3,
+  t: number,
+  out: THREE.Vector3
+) => {
+  const inverse = 1 - t;
+  return out
+    .copy(from)
+    .multiplyScalar(inverse * inverse)
+    .addScaledVector(control, 2 * inverse * t)
+    .addScaledVector(to, t * t);
+};
 
 /** One body as it exists in the scene. */
 interface Body {
@@ -40,7 +58,9 @@ interface Body {
   orbit: THREE.Group;
   /** Sits at the orbit radius — the body's own position */
   holder: THREE.Group;
-  /** Spins on its (tilted) axis */
+  /** Holds the axial tilt. Rings hang off this — they do not spin. */
+  tilt: THREE.Object3D;
+  /** Spins on the tilted axis */
   spinner: THREE.Object3D;
   clouds?: THREE.Mesh;
   moonOrbit?: THREE.Group;
@@ -96,24 +116,39 @@ export default function SolarSystem3D() {
   /** Set by the scene each time it is built, so React buttons can drive the camera. */
   const flyToRef = useRef<(id: string | null) => void>(() => {});
   const voicesRef = useRef<Map<string, Howl>>(new Map());
+  const playingRef = useRef<Howl | null>(null);
 
-  const speak = useCallback((id: string) => {
-    let voice = voicesRef.current.get(id);
+  /** One voice at a time — a new line cuts off whatever was still talking. */
+  const play = useCallback((url: string) => {
+    let voice = voicesRef.current.get(url);
     if (!voice) {
-      voice = new Howl({ src: [planetAudioUrl(id)], volume: 1 });
-      voicesRef.current.set(id, voice);
+      voice = new Howl({ src: [url], volume: 1 });
+      voicesRef.current.set(url, voice);
     }
+    playingRef.current?.stop();
+    playingRef.current = voice;
     voice.play();
   }, []);
 
-  const select = useCallback(
-    (planet: Planet | null) => {
-      flyToRef.current(planet?.id ?? null);
-      setFocused(planet);
-      if (planet) speak(planet.id);
-    },
-    [speak]
+  const speakName = useCallback(
+    (id: string) => play(planetNameUrl(id)),
+    [play]
   );
+
+  /** Called once the camera has arrived, so the fact lands with the planet. */
+  const arriveAtRef = useRef<(id: string) => void>(() => {});
+  arriveAtRef.current = (id: string) => {
+    const planet = BODIES.find((body) => body.id === id);
+    if (!planet?.facts.length) return;
+    play(planetFactUrl(id, 1 + Math.floor(Math.random() * planet.facts.length)));
+  };
+
+  const select = useCallback((planet: Planet | null) => {
+    flyToRef.current(planet?.id ?? null);
+    setFocused(planet);
+    // Heading back out to the whole system: nothing left to say.
+    if (!planet) playingRef.current?.stop();
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -242,7 +277,7 @@ export default function SolarSystem3D() {
     const ringed: Array<{
       material: THREE.ShaderMaterial;
       holder: THREE.Object3D;
-      spinner?: THREE.Object3D;
+      tilt?: THREE.Object3D;
     }> = [];
     let earthMaterial: THREE.ShaderMaterial | undefined;
 
@@ -261,16 +296,29 @@ export default function SolarSystem3D() {
       holder.position.x = planet.orbitRadius;
       orbit.add(holder);
 
+      // Tilt and spin have to be separate objects: sharing one Euler makes the
+      // spin swing the axis around instead of turning about it, which wobbles
+      // the poles and sends the ring shadows lurching up and down.
+      const tiltGroup = new THREE.Group();
+      tiltGroup.rotation.z = deg(planet.tilt);
+      holder.add(tiltGroup);
+
       const spinner = new THREE.Group();
-      spinner.rotation.z = deg(planet.tilt);
-      holder.add(spinner);
+      tiltGroup.add(spinner);
 
       const map = load(planet.texture);
       disposables.push(map);
       const isSun = planet.id === SUN.id;
 
+      // Loaded up front: Earth's shader samples the cloud map too, to shade
+      // the ground underneath the clouds.
+      let cloudTexture: THREE.Texture | undefined;
+      if (planet.clouds) {
+        cloudTexture = load(planet.clouds.texture);
+        disposables.push(cloudTexture);
+      }
+
       let material: THREE.Material;
-      let earthClouds: THREE.Texture | undefined;
       let ringTexture: THREE.Texture | undefined;
       if (isSun) {
         const sunMaterial = createSunMaterial(map);
@@ -281,14 +329,13 @@ export default function SolarSystem3D() {
         const night = load("/textures/planets/earth_night.webp");
         const specular = loadData("/textures/planets/earth_specular.webp");
         const normal = loadData("/textures/planets/earth_normal.webp");
-        earthClouds = load("/textures/planets/earth_clouds.webp");
-        disposables.push(night, specular, normal, earthClouds);
+        disposables.push(night, specular, normal);
         earthMaterial = createEarthMaterial({
           day: map,
           night,
           specular,
           normal,
-          clouds: earthClouds,
+          clouds: cloudTexture!,
         });
         material = earthMaterial;
       } else if (planet.ring) {
@@ -302,7 +349,7 @@ export default function SolarSystem3D() {
           planet.radius * planet.ring.inner,
           planet.radius * planet.ring.outer
         );
-        ringed.push({ material: saturnMaterial, holder, spinner });
+        ringed.push({ material: saturnMaterial, holder, tilt: tiltGroup });
         material = saturnMaterial;
       } else {
         material = new THREE.MeshStandardMaterial({
@@ -332,17 +379,19 @@ export default function SolarSystem3D() {
       }
 
       let clouds: THREE.Mesh | undefined;
-      if (earthClouds) {
+      if (planet.clouds && cloudTexture) {
         const cloudMaterial = new THREE.MeshStandardMaterial({
-          alphaMap: earthClouds,
+          alphaMap: cloudTexture,
           transparent: true,
-          opacity: 0.85,
+          opacity: planet.clouds.opacity,
           depthWrite: false,
           roughness: 1,
         });
         disposables.push(cloudMaterial);
         clouds = new THREE.Mesh(sphere, cloudMaterial);
         clouds.scale.setScalar(planet.radius * 1.015);
+        // On its own layer above the spinner, so it can drift at its own rate
+        // — and, for Neptune, in its own direction.
         spinner.add(clouds);
       }
 
@@ -357,7 +406,7 @@ export default function SolarSystem3D() {
         disposables.push(ringGeometry, ringMaterial);
         const ring = new THREE.Mesh(ringGeometry, ringMaterial);
         ring.rotation.x = -Math.PI / 2;
-        spinner.add(ring);
+        tiltGroup.add(ring);
       }
 
       let moonOrbit: THREE.Group | undefined;
@@ -419,6 +468,7 @@ export default function SolarSystem3D() {
         planet,
         orbit,
         holder,
+        tilt: tiltGroup,
         spinner,
         clouds,
         moonOrbit,
@@ -429,9 +479,11 @@ export default function SolarSystem3D() {
     let focusedId: string | null = null;
     let flight: {
       elapsed: number;
+      duration: number;
       fromPosition: THREE.Vector3;
       fromTarget: THREE.Vector3;
       toId: string | null;
+      arcing: boolean;
     } | null = null;
 
     const worldPosition = new THREE.Vector3();
@@ -470,7 +522,7 @@ export default function SolarSystem3D() {
       }
       if (planet.ring) {
         // The ring's outer edge, in the planet's own equatorial plane
-        body.spinner.getWorldQuaternion(fitQuaternion);
+        body.tilt.getWorldQuaternion(fitQuaternion);
         ringNormal.set(0, 1, 0).applyQuaternion(fitQuaternion).normalize();
         ringBasisU.set(1, 0, 0).cross(ringNormal);
         if (ringBasisU.lengthSq() < 1e-6) ringBasisU.set(0, 0, 1).cross(ringNormal);
@@ -547,21 +599,41 @@ export default function SolarSystem3D() {
       out.copy(worldPosition).addScaledVector(offset, far);
     };
 
+    /**
+     * The high point of a planet-to-planet arc: the overview vantage, pulled
+     * back a little further so the whole system is comfortably in shot as we
+     * sail over it.
+     */
+    const apex = new THREE.Vector3();
+    const arcApex = () => apex.copy(homePosition).multiplyScalar(1.12);
+
+    const showEverything = () => bodies.forEach((b) => (b.holder.visible = true));
+
+    /** Leaves only the visited planet and the Sun in the sky. */
+    const hideAllBut = (id: string) =>
+      bodies.forEach((b) => {
+        b.holder.visible = b.planet.id === id || b.planet.id === SUN.id;
+      });
+
     flyToRef.current = (id: string | null) => {
+      // Going straight from one planet to another sails back out over the
+      // system on the way, so the trip shows where the two planets sit.
+      const arcing = focusedId !== null && id !== null && id !== focusedId;
       flight = {
         elapsed: 0,
+        duration: arcing ? ARC_SECONDS : FLIGHT_SECONDS,
         fromPosition: camera.position.clone(),
         fromTarget: controls.target.clone(),
         toId: id,
+        arcing,
       };
+      const returning = id !== null && id === focusedId;
       focusedId = id;
       controls.enabled = false;
-      // Once we are visiting a planet, everything else gets out of the way —
-      // only that planet and the Sun are left in the sky.
-      bodies.forEach((b) => {
-        b.holder.visible =
-          id === null || b.planet.id === id || b.planet.id === SUN.id;
-      });
+      // The other planets come back the moment we start pulling out, and only
+      // disappear again once we have arrived. Tapping the planet we are already
+      // visiting should not make them blink back in.
+      if (!returning) showEverything();
     };
 
     // ---- picking -------------------------------------------------------
@@ -646,7 +718,9 @@ export default function SolarSystem3D() {
           body.orbit.rotation.y += (Math.PI * 2 * dt) / planet.orbitSeconds;
         }
         body.spinner.rotation.y += (Math.PI * 2 * dt) / planet.spinSeconds;
-        if (body.clouds) body.clouds.rotation.y += dt * 0.012;
+        if (body.clouds && planet.clouds) {
+          body.clouds.rotation.y += dt * planet.clouds.drift;
+        }
         if (body.moonOrbit && planet.moon) {
           body.moonOrbit.rotation.y += (Math.PI * 2 * dt) / planet.moon.orbitSeconds;
         }
@@ -663,31 +737,42 @@ export default function SolarSystem3D() {
         // in the right place.
         earthMaterial.uniforms.cloudOffset.value = drift / (Math.PI * 2);
       }
-      ringed.forEach(({ material, holder, spinner }) => {
+      ringed.forEach(({ material, holder, tilt }) => {
         holder.getWorldPosition(material.uniforms.planetCenter.value);
-        if (spinner) {
+        if (tilt) {
           // The ring plane is the planet's equator, which tips as it orbits.
           material.uniforms.ringNormal.value
             .set(0, 1, 0)
-            .applyQuaternion(spinner.getWorldQuaternion(spinTilt))
+            .applyQuaternion(tilt.getWorldQuaternion(spinTilt))
             .normalize();
         }
       });
 
       if (flight) {
         flight.elapsed += dt;
-        const t = Math.min(flight.elapsed / FLIGHT_SECONDS, 1);
+        const t = Math.min(flight.elapsed / flight.duration, 1);
         const e = easeInOut(t);
         if (flight.toId) {
           const body = bodyOf(flight.toId);
+          // Recomputed every frame: the destination is a moving target.
           viewFor(body, desired);
-          camera.position.lerpVectors(flight.fromPosition, desired, e);
-          controls.target.lerpVectors(flight.fromTarget, worldPosition, e);
+          if (flight.arcing) {
+            // Curve out through the overview vantage point and back down.
+            bezier(flight.fromPosition, arcApex(), desired, e, camera.position);
+            bezier(flight.fromTarget, HOME_TARGET, worldPosition, e, controls.target);
+          } else {
+            camera.position.lerpVectors(flight.fromPosition, desired, e);
+            controls.target.lerpVectors(flight.fromTarget, worldPosition, e);
+          }
         } else {
           camera.position.lerpVectors(flight.fromPosition, homePosition, e);
           controls.target.lerpVectors(flight.fromTarget, HOME_TARGET, e);
         }
         if (t >= 1) {
+          if (flight.toId) {
+            hideAllBut(flight.toId);
+            arriveAtRef.current(flight.toId);
+          }
           flight = null;
           controls.enabled = true;
         }
@@ -770,7 +855,7 @@ export default function SolarSystem3D() {
         <button
           key={focused.id}
           className={styles.planetName}
-          onClick={() => speak(focused.id)}
+          onClick={() => speakName(focused.id)}
           style={{ ["--accent" as string]: focused.color }}
         >
           {focused.name}

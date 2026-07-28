@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Howl } from "howler";
 import PlanetSphere from "@/components/PlanetSphere";
-import { ALL_BODIES, Planet, planetAudioUrl } from "@/types/planets";
+import { ALL_BODIES, Planet, planetNameUrl } from "@/types/planets";
 import { audioService, celebrationService, challengeService } from "@/services";
 import styles from "./page.module.css";
 
@@ -30,7 +30,7 @@ export default function PlanetQuiz() {
   const speak = useCallback((id: string) => {
     let voice = voicesRef.current.get(id);
     if (!voice) {
-      voice = new Howl({ src: [planetAudioUrl(id)], volume: 1 });
+      voice = new Howl({ src: [planetNameUrl(id)], volume: 1 });
       voicesRef.current.set(id, voice);
     }
     voice.play();
