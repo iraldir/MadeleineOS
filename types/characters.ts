@@ -654,6 +654,175 @@ export const characters: Character[] = [
       "/images/coloring/bo4.webp",
     ],
   },
+  // Totoro
+  {
+    id: "totoro",
+    name: "TOTORO",
+    imageUrl: "/images/characters/totoro.webp",
+    franchise: "My Neighbor Totoro",
+    coloringPages: [
+      "/images/coloring/totoro1.webp",
+      "/images/coloring/totoro2.webp",
+      "/images/coloring/totoro3.webp",
+      "/images/coloring/totoro4.webp",
+    ],
+  },
+  // Satsuki
+  {
+    id: "satsuki",
+    name: "SATSUKI",
+    imageUrl: "/images/characters/satsuki.webp",
+    franchise: "My Neighbor Totoro",
+    coloringPages: [
+      "/images/coloring/satsuki1.webp",
+      "/images/coloring/satsuki2.webp",
+      "/images/coloring/satsuki3.webp",
+      "/images/coloring/satsuki4.webp",
+    ],
+  },
+  // Mei
+  {
+    id: "mei",
+    name: "MEI",
+    imageUrl: "/images/characters/mei.webp",
+    franchise: "My Neighbor Totoro",
+    coloringPages: [
+      "/images/coloring/mei1.webp",
+      "/images/coloring/mei2.webp",
+      "/images/coloring/mei3.webp",
+      "/images/coloring/mei4.webp",
+    ],
+  },
+  // Catbus
+  {
+    id: "catbus",
+    name: "CATBUS",
+    imageUrl: "/images/characters/catbus.webp",
+    franchise: "My Neighbor Totoro",
+    coloringPages: [
+      "/images/coloring/catbus1.webp",
+      "/images/coloring/catbus2.webp",
+      "/images/coloring/catbus3.webp",
+      "/images/coloring/catbus4.webp",
+    ],
+  },
+  // Kiki
+  {
+    id: "kiki",
+    name: "KIKI",
+    imageUrl: "/images/characters/kiki.webp",
+    franchise: "Kiki's Delivery Service",
+    coloringPages: [
+      "/images/coloring/kiki1.webp",
+      "/images/coloring/kiki2.webp",
+      "/images/coloring/kiki3.webp",
+      "/images/coloring/kiki4.webp",
+    ],
+  },
+  // Jiji
+  {
+    id: "jiji",
+    name: "JIJI",
+    imageUrl: "/images/characters/jiji.webp",
+    franchise: "Kiki's Delivery Service",
+    coloringPages: [
+      "/images/coloring/jiji1.webp",
+      "/images/coloring/jiji2.webp",
+      "/images/coloring/jiji3.webp",
+      "/images/coloring/jiji4.webp",
+    ],
+  },
+  // Tombo
+  {
+    id: "tombo",
+    name: "TOMBO",
+    imageUrl: "/images/characters/tombo.webp",
+    franchise: "Kiki's Delivery Service",
+    coloringPages: [
+      "/images/coloring/tombo1.webp",
+      "/images/coloring/tombo2.webp",
+      "/images/coloring/tombo3.webp",
+      "/images/coloring/tombo4.webp",
+    ],
+  },
+  // Bloom
+  {
+    id: "bloom",
+    name: "BLOOM",
+    imageUrl: "/images/characters/bloom.webp",
+    franchise: "Winx Club",
+    coloringPages: [
+      "/images/coloring/bloom1.webp",
+      "/images/coloring/bloom2.webp",
+      "/images/coloring/bloom3.webp",
+      "/images/coloring/bloom4.webp",
+    ],
+  },
+  // Stella
+  {
+    id: "stella",
+    name: "STELLA",
+    imageUrl: "/images/characters/stella.webp",
+    franchise: "Winx Club",
+    coloringPages: [
+      "/images/coloring/stella1.webp",
+      "/images/coloring/stella2.webp",
+      "/images/coloring/stella3.webp",
+      "/images/coloring/stella4.webp",
+    ],
+  },
+  // Flora
+  {
+    id: "flora",
+    name: "FLORA",
+    imageUrl: "/images/characters/flora.webp",
+    franchise: "Winx Club",
+    coloringPages: [
+      "/images/coloring/flora1.webp",
+      "/images/coloring/flora2.webp",
+      "/images/coloring/flora3.webp",
+      "/images/coloring/flora4.webp",
+    ],
+  },
+  // Musa
+  {
+    id: "musa",
+    name: "MUSA",
+    imageUrl: "/images/characters/musa.webp",
+    franchise: "Winx Club",
+    coloringPages: [
+      "/images/coloring/musa1.webp",
+      "/images/coloring/musa2.webp",
+      "/images/coloring/musa3.webp",
+      "/images/coloring/musa4.webp",
+    ],
+  },
+  // Tecna
+  {
+    id: "tecna",
+    name: "TECNA",
+    imageUrl: "/images/characters/tecna.webp",
+    franchise: "Winx Club",
+    coloringPages: [
+      "/images/coloring/tecna1.webp",
+      "/images/coloring/tecna2.webp",
+      "/images/coloring/tecna3.webp",
+      "/images/coloring/tecna4.webp",
+    ],
+  },
+  // Aisha
+  {
+    id: "aisha",
+    name: "AISHA",
+    imageUrl: "/images/characters/aisha.webp",
+    franchise: "Winx Club",
+    coloringPages: [
+      "/images/coloring/aisha1.webp",
+      "/images/coloring/aisha2.webp",
+      "/images/coloring/aisha3.webp",
+      "/images/coloring/aisha4.webp",
+    ],
+  },
 ];
 
 export const secretCharacters: Character[] = [
