@@ -823,6 +823,188 @@ export const characters: Character[] = [
       "/images/coloring/aisha4.webp",
     ],
   },
+  // Woody
+  {
+    id: "woody",
+    name: "WOODY",
+    imageUrl: "/images/characters/woody.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/woody1.webp",
+      "/images/coloring/woody2.webp",
+      "/images/coloring/woody3.webp",
+      "/images/coloring/woody4.webp",
+    ],
+  },
+  // Buzz Lightyear
+  {
+    id: "buzz-lightyear",
+    name: "BUZZ LIGHTYEAR",
+    imageUrl: "/images/characters/buzz-lightyear.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/buzz-lightyear1.webp",
+      "/images/coloring/buzz-lightyear2.webp",
+      "/images/coloring/buzz-lightyear3.webp",
+      "/images/coloring/buzz-lightyear4.webp",
+    ],
+  },
+  // Jessie
+  {
+    id: "jessie",
+    name: "JESSIE",
+    imageUrl: "/images/characters/jessie.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/jessie1.webp",
+      "/images/coloring/jessie2.webp",
+      "/images/coloring/jessie3.webp",
+      "/images/coloring/jessie4.webp",
+    ],
+  },
+  // Bullseye
+  {
+    id: "bullseye",
+    name: "BULLSEYE",
+    imageUrl: "/images/characters/bullseye.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/bullseye1.webp",
+      "/images/coloring/bullseye2.webp",
+      "/images/coloring/bullseye3.webp",
+      "/images/coloring/bullseye4.webp",
+    ],
+  },
+  // Rex
+  {
+    id: "rex",
+    name: "REX",
+    imageUrl: "/images/characters/rex.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/rex1.webp",
+      "/images/coloring/rex2.webp",
+      "/images/coloring/rex3.webp",
+      "/images/coloring/rex4.webp",
+    ],
+  },
+  // Hamm
+  {
+    id: "hamm",
+    name: "HAMM",
+    imageUrl: "/images/characters/hamm.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/hamm1.webp",
+      "/images/coloring/hamm2.webp",
+      "/images/coloring/hamm3.webp",
+      "/images/coloring/hamm4.webp",
+    ],
+  },
+  // Slinky Dog
+  {
+    id: "slinky-dog",
+    name: "SLINKY DOG",
+    imageUrl: "/images/characters/slinky-dog.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/slinky-dog1.webp",
+      "/images/coloring/slinky-dog2.webp",
+      "/images/coloring/slinky-dog3.webp",
+      "/images/coloring/slinky-dog4.webp",
+    ],
+  },
+  // Forky
+  {
+    id: "forky",
+    name: "FORKY",
+    imageUrl: "/images/characters/forky.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/forky1.webp",
+      "/images/coloring/forky2.webp",
+      "/images/coloring/forky3.webp",
+      "/images/coloring/forky4.webp",
+    ],
+  },
+  // Aliens
+  {
+    id: "aliens",
+    name: "ALIENS",
+    imageUrl: "/images/characters/aliens.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/aliens1.webp",
+      "/images/coloring/aliens2.webp",
+      "/images/coloring/aliens3.webp",
+      "/images/coloring/aliens4.webp",
+    ],
+  },
+  // Bonnie
+  {
+    id: "bonnie",
+    name: "BONNIE",
+    imageUrl: "/images/characters/bonnie.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/bonnie1.webp",
+      "/images/coloring/bonnie2.webp",
+      "/images/coloring/bonnie3.webp",
+      "/images/coloring/bonnie4.webp",
+    ],
+  },
+  // Blaze
+  {
+    id: "blaze",
+    name: "BLAZE",
+    imageUrl: "/images/characters/blaze.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/blaze1.webp",
+      "/images/coloring/blaze2.webp",
+      "/images/coloring/blaze3.webp",
+      "/images/coloring/blaze4.webp",
+    ],
+  },
+  // Lilypad
+  {
+    id: "lilypad",
+    name: "LILYPAD",
+    imageUrl: "/images/characters/lilypad.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/lilypad1.webp",
+      "/images/coloring/lilypad2.webp",
+      "/images/coloring/lilypad3.webp",
+      "/images/coloring/lilypad4.webp",
+    ],
+  },
+  // Bo Peep
+  {
+    id: "bo-peep",
+    name: "BO PEEP",
+    imageUrl: "/images/characters/bo-peep.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/bo-peep1.webp",
+      "/images/coloring/bo-peep2.webp",
+      "/images/coloring/bo-peep3.webp",
+      "/images/coloring/bo-peep4.webp",
+    ],
+  },
+  // Atlas
+  {
+    id: "atlas",
+    name: "ATLAS",
+    imageUrl: "/images/characters/atlas.webp",
+    franchise: "Toy Story",
+    coloringPages: [
+      "/images/coloring/atlas1.webp",
+      "/images/coloring/atlas2.webp",
+      "/images/coloring/atlas3.webp",
+      "/images/coloring/atlas4.webp",
+    ],
+  },
 ];
 
 export const secretCharacters: Character[] = [
