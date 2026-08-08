@@ -100,6 +100,17 @@ export const games: Game[] = [
     },
   },
   {
+    id: "reading-sentences",
+    title: "Read a Sentence",
+    thumbnailUrl: "/images/games/reading-sentences.webp",
+    path: "/games/reading-sentences",
+    challenge: {
+      label: "Read {n} sentences out loud",
+      minGoal: 3,
+      maxGoal: 6,
+    },
+  },
+  {
     id: "stickers",
     title: "Sticker Book",
     thumbnailUrl: "/images/games/stickers.webp",

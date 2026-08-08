@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates the home-screen cards for the two solar system games
+ * Generates home-screen cards for games that want a painted one
  * (public/images/games/<id>.webp).
  *
  * Unlike the planet illustrations these are full-bleed square paintings — they
@@ -27,7 +27,13 @@ const STYLE =
   "warm glow, wondrous and inviting. No text, no letters, no numbers, no " +
   "labels, no people, no spacecraft. Square composition, filling the whole frame.";
 
-const CARDS: Array<{ id: string; prompt: string }> = [
+/** Not every card is set in space — a card may bring its own style. */
+const READING_STYLE =
+  "Hand-painted children's picture-book illustration, soft gouache and " +
+  "watercolour texture, warm sunny colours, cosy and inviting. No text, no " +
+  "letters, no numbers, no labels. Square composition, filling the whole frame.";
+
+const CARDS: Array<{ id: string; prompt: string; style?: string }> = [
   {
     id: "solar-system",
     prompt:
@@ -44,6 +50,15 @@ const CARDS: Array<{ id: string; prompt: string }> = [
       "a blue and green one, a striped amber giant and a ringed golden world — " +
       "each glowing softly, as if waiting to be named, with a scattering of " +
       "little sparkles between them.",
+  },
+  {
+    id: "reading-sentences",
+    style: READING_STYLE,
+    prompt:
+      "A young girl sitting cross-legged with a big open picture book on her " +
+      "lap, reading out loud with a delighted face — and rising out of the " +
+      "pages, a little green dragon, a rocket and a butterfly floating up as " +
+      "if the sentences were coming true around her.",
   },
 ];
 
@@ -64,7 +79,11 @@ async function getAuth(): Promise<{ token: string; project: string }> {
   return cachedAuth;
 }
 
-async function generateCard(prompt: string, outputPath: string): Promise<void> {
+async function generateCard(
+  prompt: string,
+  outputPath: string,
+  style: string = STYLE
+): Promise<void> {
   const { token, project } = await getAuth();
   const model = CONFIG.models.imageGeneration;
   const url =
@@ -78,7 +97,7 @@ async function generateCard(prompt: string, outputPath: string): Promise<void> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: `${prompt} ${STYLE}` }] }],
+      contents: [{ role: "user", parts: [{ text: `${prompt} ${style}` }] }],
       generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
     }),
   });
@@ -123,7 +142,7 @@ async function main() {
     let success = false;
     for (let attempt = 1; attempt <= 8 && !success; attempt++) {
       try {
-        await generateCard(card.prompt, outputPath);
+        await generateCard(card.prompt, outputPath, card.style);
         console.log(formatSuccess(label));
         success = true;
       } catch (error) {

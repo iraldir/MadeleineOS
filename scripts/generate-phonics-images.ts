@@ -1,15 +1,24 @@
+#!/usr/bin/env node
+/**
+ * Generates the reward pictures for the phonics reading game
+ * (public/images/phonics/<word>.webp).
+ *
+ * Resumable: a word whose file already exists is skipped, so it is safe to
+ * re-run after adding words, or after the Vertex quota cuts a run short.
+ *
+ * Usage: pnpm phonics:images [-- --only <word>] [-- --limit <n>] [-- --force]
+ */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import dotenv from "dotenv";
-import { mediaGenerator } from "./utils/media-generator";
-import { CONFIG } from "./config";
+import { formatSuccess, formatError, formatInfo, formatWarning } from "./config";
+import { generateImageWithRetry, getVertexAuth } from "./utils/vertex-image";
 import { ALL_WORDS, type PhonicsWord } from "../app/games/phonics/words";
-
-dotenv.config();
 
 const OUTPUT_DIR = path.join(__dirname, "../public/images/phonics");
 const THUMB_PATH = path.join(__dirname, "../public/images/games/phonics.webp");
-const { delayMs, batchSize, batchDelayMs } = CONFIG.rateLimit.imageGeneration;
+
+/** Milliseconds between requests; tuned against the model's per-minute quota. */
+const SPACING_MS = 2500;
 
 async function exists(p: string): Promise<boolean> {
   try {
@@ -20,78 +29,84 @@ async function exists(p: string): Promise<boolean> {
   }
 }
 
-async function generateOne(
-  word: PhonicsWord
-): Promise<"generated" | "skipped" | "failed"> {
-  const filename = `${word.word.toLowerCase()}.webp`;
-  const outputPath = path.join(OUTPUT_DIR, filename);
-
-  if (await exists(outputPath)) {
-    console.log(`✓ Skip ${filename} (already exists)`);
-    return "skipped";
-  }
+async function main() {
+  const args = process.argv.slice(2);
+  const arg = (name: string): string | null => {
+    const i = args.indexOf(name);
+    return i >= 0 ? args[i + 1] : null;
+  };
+  const only = arg("--only");
+  const limitArg = arg("--limit");
+  const limit = limitArg ? parseInt(limitArg, 10) : Infinity;
+  const force = args.includes("--force");
 
   try {
-    console.log(`🎨 Generating ${filename} — "${word.imagePrompt}"`);
-    await mediaGenerator.generateImage({
-      prompt: word.imagePrompt,
-      outputPath,
-      width: 512,
-      height: 512,
-      quality: 88,
-    });
-    console.log(`   ✅ Saved ${filename}`);
-    return "generated";
-  } catch (err) {
-    console.error(`   ❌ Failed ${filename}:`, err instanceof Error ? err.message : err);
-    return "failed";
+    await getVertexAuth();
+  } catch {
+    console.error(formatError("gcloud auth unavailable — run: gcloud auth login"));
+    process.exit(1);
   }
-}
 
-async function main() {
   await fs.mkdir(OUTPUT_DIR, { recursive: true });
 
+  const pool = only
+    ? ALL_WORDS.filter((w) => w.word.toLowerCase() === only.toLowerCase())
+    : ALL_WORDS;
+
+  const todo: PhonicsWord[] = [];
+  for (const word of pool) {
+    const outputPath = path.join(OUTPUT_DIR, `${word.word.toLowerCase()}.webp`);
+    if (!force && (await exists(outputPath))) continue;
+    todo.push(word);
+    if (todo.length >= limit) break;
+  }
+
+  console.log(
+    formatInfo(`${pool.length} words, ${todo.length} still need a picture`)
+  );
+
   let generated = 0;
-  let skipped = 0;
-  let failed = 0;
+  const failures: string[] = [];
 
-  for (let i = 0; i < ALL_WORDS.length; i++) {
-    const word = ALL_WORDS[i];
-    const result = await generateOne(word);
-    if (result === "generated") generated++;
-    else if (result === "skipped") skipped++;
-    else failed++;
+  for (let i = 0; i < todo.length; i++) {
+    const word = todo[i];
+    const filename = `${word.word.toLowerCase()}.webp`;
+    const outputPath = path.join(OUTPUT_DIR, filename);
+    const label = `[${i + 1}/${todo.length}] ${word.word}`;
 
-    const isLastInBatch =
-      (i + 1) % batchSize === 0 && i + 1 < ALL_WORDS.length;
-    const isLast = i + 1 === ALL_WORDS.length;
+    const ok = await generateImageWithRetry(
+      { prompt: word.imagePrompt, outputPath, width: 512, height: 512, quality: 88 },
+      5,
+      (attempt, message) =>
+        console.error(formatError(`${label} attempt ${attempt}: ${message.slice(0, 140)}`))
+    );
 
-    if (result === "generated" && !isLast) {
-      if (isLastInBatch) {
-        console.log(`⏸  Batch break — waiting ${batchDelayMs}ms`);
-        await new Promise((r) => setTimeout(r, batchDelayMs));
-      } else {
-        await new Promise((r) => setTimeout(r, delayMs));
-      }
+    if (ok) {
+      generated++;
+      console.log(formatSuccess(label));
+    } else {
+      failures.push(word.word);
+      console.error(formatError(`${label} gave up`));
     }
+
+    if (i < todo.length - 1) await new Promise((r) => setTimeout(r, SPACING_MS));
   }
 
   if (!(await exists(THUMB_PATH))) {
     const catPath = path.join(OUTPUT_DIR, "cat.webp");
     if (await exists(catPath)) {
       await fs.copyFile(catPath, THUMB_PATH);
-      console.log(`🏠 Copied cat.webp → phonics.webp (home thumbnail)`);
+      console.log(formatInfo("Copied cat.webp → phonics.webp (home thumbnail)"));
     } else {
-      console.warn(`⚠️  Could not create thumbnail — cat.webp missing`);
+      console.warn(formatWarning("Could not create thumbnail — cat.webp missing"));
     }
-  } else {
-    console.log(`✓ Thumbnail already exists at ${THUMB_PATH}`);
   }
 
   console.log(
-    `\nDone. Generated: ${generated}, Skipped: ${skipped}, Failed: ${failed}`
+    formatInfo(`Done. Generated ${generated}, failed ${failures.length}` +
+      (failures.length ? `: ${failures.join(", ")}` : ""))
   );
-  if (failed > 0) process.exit(1);
+  if (failures.length > 0) process.exit(1);
 }
 
 main().catch((err) => {

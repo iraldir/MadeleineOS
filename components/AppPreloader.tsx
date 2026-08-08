@@ -166,8 +166,12 @@ const AppPreloader: React.FC<PreloaderProps> = ({ onComplete }) => {
                 className={styles.particle}
                 style={{
                   '--delay': `${i * 0.2}s`,
-                  '--x': `${Math.sin(i * 0.5) * 100}px`,
-                  '--y': `${Math.cos(i * 0.3) * 100}px`,
+                  // Rounded because sin/cos are not guaranteed to agree to the
+                  // last bit between Node and the browser, and the difference —
+                  // 59.847214410395644 against 59.84721441039566 — was enough
+                  // for React to report a hydration mismatch on every page.
+                  '--x': `${(Math.sin(i * 0.5) * 100).toFixed(2)}px`,
+                  '--y': `${(Math.cos(i * 0.3) * 100).toFixed(2)}px`,
                 } as React.CSSProperties}
               />
             ))}

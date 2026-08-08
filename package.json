@@ -32,7 +32,13 @@
     "planets:illustrate": "tsx scripts/generate-planet-illustrations.ts",
     "games:thumbnails": "tsx scripts/generate-game-thumbnails.ts",
     "planets:voices": "tsx scripts/generate-planet-voices.ts",
-    "planets:clouds": "tsx scripts/derive-cloud-maps.ts"
+    "planets:clouds": "tsx scripts/derive-cloud-maps.ts",
+    "phonics:images": "tsx scripts/generate-phonics-images.ts",
+    "sentences:images": "tsx scripts/generate-sentence-images.ts",
+    "sentences:check-speech": "tsx scripts/check-scribe-matching.ts",
+    "sentences:check-matching": "tsx scripts/check-alignment.ts",
+    "media:ready": "tsx scripts/generate-ready-media.ts",
+    "media:check-ready": "tsx scripts/check-ready-media.ts"
   },
   "dependencies": {
     "@google/genai": "^1.20.0",

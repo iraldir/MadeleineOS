@@ -15,6 +15,8 @@ import { audioService, celebrationService, currencyService, challengeService } f
 
 const HIGH_SCORE_KEY = "phonicsGame_highScore";
 const LISTEN_MS = 6000;
+/** How many words to hold out of the bag before they can come round again. */
+const RECENT_MEMORY = 15;
 
 type Phase = "ready" | "listening" | "success" | "retry" | "gameover";
 
@@ -34,7 +36,7 @@ export default function PhonicsGame() {
   const advance = useCallback(
     (current: PhonicsWord | null, nextStreak: number) => {
       const nextRecent = current
-        ? [current.word, ...recent].slice(0, 3)
+        ? [current.word, ...recent].slice(0, RECENT_MEMORY)
         : recent;
       setRecent(nextRecent);
       const next = pickNextWord(nextStreak, nextRecent);
