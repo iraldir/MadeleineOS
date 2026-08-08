@@ -179,10 +179,13 @@
   font-weight: bold;
 }
 
+/* Top-right, not top-left: the coin price sits top-left with a z-index and
+   was covering this completely. */
 .newBadge {
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
+  z-index: 2;
   background: linear-gradient(135deg, #ff4d6d, #ff8c42);
   color: white;
   padding: 4px 10px;

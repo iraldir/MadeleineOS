@@ -1,11 +1,136 @@
+export type VideoCategory = 'yoga' | 'drawing' | 'songs';
+
 export interface Video {
   id: string;
   youtubeId: string;
   title: string;
   thumbnail: string;
   duration?: string;
-  category: 'yoga' | 'drawing' | 'songs';
+  category: VideoCategory;
+  /** Uploading channel. Used to keep the drawing rotation from stacking up. */
+  channel?: string;
+  /** Franchise / theme tag, e.g. "Pokemon". Same purpose as `channel`. */
+  franchise?: string;
+  /**
+   * Who or what gets drawn, for videos where more than one channel teaches the
+   * same character (two Charizards, three Rosalinas). Only set where it needs
+   * to group; unset means "nothing else in the list draws this".
+   */
+  subject?: string;
   addedDate?: string;
+}
+
+/**
+ * Categories that show a rotating subset instead of the whole list.
+ *
+ * Only `drawing` rotates: it is the one category big enough (90+ tutorials)
+ * that showing everything is overwhelming. Yoga and songs are small, curated
+ * lists where Madeleine expects to find the same video where she left it, so
+ * they are deliberately left alone.
+ */
+const ROTATING_CATEGORIES: Record<string, { size: number; maxPerChannel: number; maxPerFranchise: number }> = {
+  drawing: { size: 12, maxPerChannel: 3, maxPerFranchise: 3 },
+};
+
+/**
+ * Seed for the current half-day: "2026-08-08-am" / "2026-08-08-pm".
+ *
+ * Deriving it from a `Date` the caller passes in (rather than reading the clock
+ * in here) keeps this pure and testable — and lets the UI take the reading in a
+ * click handler, so no server render ever depends on the wall clock and there
+ * is nothing for hydration to disagree about.
+ */
+export function halfDaySeed(now: Date): string {
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}-${now.getHours() < 12 ? 'am' : 'pm'}`;
+}
+
+/** FNV-1a: turns the seed string into the 32-bit number the PRNG wants. */
+function hashSeed(seed: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/** mulberry32 — small, fast, well-distributed seeded PRNG. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle<T>(items: readonly T[], rand: () => number): T[] {
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * Pick `size` videos for one half-day.
+ *
+ * A full Fisher-Yates shuffle first (so the result looks nothing like a slice
+ * of the list), then a greedy walk that skips anything which would push a
+ * channel or a franchise over its cap — otherwise a shuffle of a list that is
+ * half Art for Kids Hub happily returns twelve Art for Kids Hub videos. The
+ * same subject never appears twice, so you don't get two Charizard lessons
+ * side by side just because two different channels teach it.
+ *
+ * The caps are relaxed in later passes so we always return a full set even if
+ * the pool ever gets too lopsided to satisfy them.
+ */
+export function pickRotation(
+  videos: readonly Video[],
+  size: number,
+  seed: string,
+  maxPerChannel: number,
+  maxPerFranchise: number
+): Video[] {
+  if (videos.length <= size) return videos.slice();
+
+  const shuffled = seededShuffle(videos, mulberry32(hashSeed(seed)));
+  const picked: Video[] = [];
+  const taken = new Set<string>();
+  const channelCount = new Map<string, number>();
+  const franchiseCount = new Map<string, number>();
+  const subjectCount = new Map<string, number>();
+
+  const bump = (counts: Map<string, number>, key: string) => counts.set(key, (counts.get(key) ?? 0) + 1);
+
+  for (const relax of [0, 1, Infinity]) {
+    const chanCap = maxPerChannel + relax;
+    const franCap = maxPerFranchise + relax;
+    const subjCap = 1 + relax;
+    for (const video of shuffled) {
+      if (picked.length >= size) break;
+      if (taken.has(video.id)) continue;
+      const channel = video.channel ?? video.id;
+      const franchise = video.franchise ?? video.id;
+      const subject = video.subject ?? video.id;
+      if ((channelCount.get(channel) ?? 0) >= chanCap) continue;
+      if ((franchiseCount.get(franchise) ?? 0) >= franCap) continue;
+      if ((subjectCount.get(subject) ?? 0) >= subjCap) continue;
+      picked.push(video);
+      taken.add(video.id);
+      bump(channelCount, channel);
+      bump(franchiseCount, franchise);
+      bump(subjectCount, subject);
+    }
+    if (picked.length >= size) break;
+  }
+
+  return picked;
 }
 
 export interface Category {
@@ -49,246 +174,1054 @@ class YouTubeService {
 
   private readonly videos: Video[] = [
     {
-      id: 'drawing-265',
-      youtubeId: 'zY1269CaCFk',
-      title: 'How To Draw A Tulip In A Pot - Plant A Flower Day',
-      thumbnail: 'https://i.ytimg.com/vi/zY1269CaCFk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-266',
-      youtubeId: 'NLWNOafqfh0',
-      title: 'How To Draw A Monarch Butterfly',
-      thumbnail: 'https://i.ytimg.com/vi/NLWNOafqfh0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-267',
-      youtubeId: 'jkkJNhsrhKo',
-      title: 'How To Draw Cute Mushroom Friends',
-      thumbnail: 'https://i.ytimg.com/vi/jkkJNhsrhKo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-268',
-      youtubeId: 'i_pQWFkZJrc',
-      title: 'How To Draw A Sunflower',
-      thumbnail: 'https://i.ytimg.com/vi/i_pQWFkZJrc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-269',
-      youtubeId: 'Dt4SD4e2Z6E',
-      title: 'How to Draw a Rainbow and Clouds Easy with Coloring',
-      thumbnail: 'https://i.ytimg.com/vi/Dt4SD4e2Z6E/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-270',
-      youtubeId: 'hTOnVBgpPNE',
-      title: 'How To Draw A Robin Bird - Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/hTOnVBgpPNE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-271',
+      id: 'drawing-1',
       youtubeId: 'jBfMs-YskHo',
       title: 'How To Draw Ariel The Little Mermaid',
       thumbnail: 'https://i.ytimg.com/vi/jBfMs-YskHo/hqdefault.jpg',
+      duration: '9:09',
       category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-272',
-      youtubeId: 'R4TgExfr12I',
-      title: 'How to Draw Rapunzel from Tangled Cute and Easy',
-      thumbnail: 'https://i.ytimg.com/vi/R4TgExfr12I/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-273',
+      id: 'drawing-2',
       youtubeId: 'twAox47nBes',
       title: 'How To Draw A Cartoon Moana',
       thumbnail: 'https://i.ytimg.com/vi/twAox47nBes/hqdefault.jpg',
+      duration: '10:59',
       category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
+      subject: 'Moana',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-274',
+      id: 'drawing-3',
       youtubeId: 'kvpkTj-6EZw',
       title: 'How To Draw Princess Jasmine From Aladdin',
       thumbnail: 'https://i.ytimg.com/vi/kvpkTj-6EZw/hqdefault.jpg',
+      duration: '7:13',
       category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-275',
-      youtubeId: 's9c_ZISjh-8',
-      title: 'How To Draw Cute Cinderella Kawaii',
-      thumbnail: 'https://i.ytimg.com/vi/s9c_ZISjh-8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-276',
+      id: 'drawing-4',
       youtubeId: 'YBwoGTvsA2Q',
       title: 'How To Draw Princess Tiana From Princess And The Frog',
       thumbnail: 'https://i.ytimg.com/vi/YBwoGTvsA2Q/hqdefault.jpg',
+      duration: '10:43',
       category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-277',
-      youtubeId: 'ySdXMv7PY6I',
-      title: 'How To Draw Pikachu for Beginners',
-      thumbnail: 'https://i.ytimg.com/vi/ySdXMv7PY6I/hqdefault.jpg',
+      id: 'drawing-5',
+      youtubeId: 'hky2ggpPM88',
+      title: 'How To Draw A Cartoon Belle From Beauty And The Beast',
+      thumbnail: 'https://i.ytimg.com/vi/hky2ggpPM88/hqdefault.jpg',
+      duration: '11:29',
       category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-6',
+      youtubeId: 'Tg64kM4Q8ek',
+      title: 'How To Draw Elsa **NEW**',
+      thumbnail: 'https://i.ytimg.com/vi/Tg64kM4Q8ek/hqdefault.jpg',
+      duration: '13:04',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
+      subject: 'Elsa',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-7',
+      youtubeId: 'GcpXN_FFFVg',
+      title: 'How To Draw Anna **NEW**',
+      thumbnail: 'https://i.ytimg.com/vi/GcpXN_FFFVg/hqdefault.jpg',
+      duration: '12:34',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-8',
+      youtubeId: 'AbH7lCWaDX0',
+      title: 'How To Draw Mulan',
+      thumbnail: 'https://i.ytimg.com/vi/AbH7lCWaDX0/hqdefault.jpg',
+      duration: '6:44',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Disney',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-9',
+      youtubeId: 'R4TgExfr12I',
+      title: 'How to Draw Rapunzel from Tangled Cute and Easy',
+      thumbnail: 'https://i.ytimg.com/vi/R4TgExfr12I/hqdefault.jpg',
+      duration: '9:31',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-278',
-      youtubeId: 'aN-HP2z2MF4',
-      title: 'How To Draw Eevee | Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/aN-HP2z2MF4/hqdefault.jpg',
+      id: 'drawing-10',
+      youtubeId: 'aeJQsbPAEhc',
+      title: 'How to Draw Cinderella ✨  Disney Princess (New)',
+      thumbnail: 'https://i.ytimg.com/vi/aeJQsbPAEhc/hqdefault.jpg',
+      duration: '14:41',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
+      addedDate: '2026-05-16'
     },
     {
-      id: 'drawing-279',
-      youtubeId: 'x7cVh0ddaCs',
-      title: 'How To Draw Super Mario for Beginners',
-      thumbnail: 'https://i.ytimg.com/vi/x7cVh0ddaCs/hqdefault.jpg',
+      id: 'drawing-11',
+      youtubeId: '80mkqBe4TsQ',
+      title: 'How to Draw Elsa in White Dress Hair Down | Disney Frozen',
+      thumbnail: 'https://i.ytimg.com/vi/80mkqBe4TsQ/hqdefault.jpg',
+      duration: '19:29',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
+      subject: 'Elsa',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-280',
+      id: 'drawing-12',
+      youtubeId: 'zrLIop2WukM',
+      title: 'How to Draw Snow White 🍎 Disney Princess',
+      thumbnail: 'https://i.ytimg.com/vi/zrLIop2WukM/hqdefault.jpg',
+      duration: '15:34',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-13',
+      youtubeId: 'VlazaMYoIjs',
+      title: 'How to Draw Moana | Disney Moana 2',
+      thumbnail: 'https://i.ytimg.com/vi/VlazaMYoIjs/hqdefault.jpg',
+      duration: '15:19',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
+      subject: 'Moana',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-14',
+      youtubeId: '7H1fm0SEVcY',
+      title: 'How to Draw Disney Princess Merida from Brave step by step Cute',
+      thumbnail: 'https://i.ytimg.com/vi/7H1fm0SEVcY/hqdefault.jpg',
+      duration: '15:01',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-15',
+      youtubeId: 'CNb2cV24wr0',
+      title: 'How to Draw Mirabel Madrigal 🦋Disney Encanto',
+      thumbnail: 'https://i.ytimg.com/vi/CNb2cV24wr0/hqdefault.jpg',
+      duration: '13:55',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Disney',
+      subject: 'Mirabel',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-16',
+      youtubeId: 'ZHZ5qrogCOE',
+      title: 'How To Draw Mirabel | Beginner Sketch Tutorial (Step-by-Step)',
+      thumbnail: 'https://i.ytimg.com/vi/ZHZ5qrogCOE/hqdefault.jpg',
+      duration: '29:46',
+      category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Disney',
+      subject: 'Mirabel',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-17',
+      youtubeId: 'FObW5ynBbVg',
+      title: 'How To Draw Princess Peach',
+      thumbnail: 'https://i.ytimg.com/vi/FObW5ynBbVg/hqdefault.jpg',
+      duration: '17:07',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      subject: 'Peach',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-18',
+      youtubeId: 'OukDd4qFjM8',
+      title: 'How To Draw Princess Rosalina from Super Mario Galaxy',
+      thumbnail: 'https://i.ytimg.com/vi/OukDd4qFjM8/hqdefault.jpg',
+      duration: '13:26',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      subject: 'Rosalina',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-19',
+      youtubeId: 'QGMz2e3MFxY',
+      title: 'How To Draw Bowser',
+      thumbnail: 'https://i.ytimg.com/vi/QGMz2e3MFxY/hqdefault.jpg',
+      duration: '16:06',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-20',
+      youtubeId: 'tWYhAy8K0Eg',
+      title: 'How To Draw Mario',
+      thumbnail: 'https://i.ytimg.com/vi/tWYhAy8K0Eg/hqdefault.jpg',
+      duration: '10:50',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-21',
+      youtubeId: 'Kchg3IK7mFM',
+      title: 'How To Draw Luigi',
+      thumbnail: 'https://i.ytimg.com/vi/Kchg3IK7mFM/hqdefault.jpg',
+      duration: '11:01',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-22',
+      youtubeId: 'iPJeemfinZ8',
+      title: 'How To Draw Yoshi From Mario',
+      thumbnail: 'https://i.ytimg.com/vi/iPJeemfinZ8/hqdefault.jpg',
+      duration: '8:16',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-23',
+      youtubeId: '2yxnq_Q_bsI',
+      title: 'How To Draw Bowser Jr From Mario',
+      thumbnail: 'https://i.ytimg.com/vi/2yxnq_Q_bsI/hqdefault.jpg',
+      duration: '12:53',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-24',
+      youtubeId: 'JwSVs1aRs9A',
+      title: 'How To Draw King Boo From Mario',
+      thumbnail: 'https://i.ytimg.com/vi/JwSVs1aRs9A/hqdefault.jpg',
+      duration: '8:47',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-25',
+      youtubeId: 'q15P6OE0EGk',
+      title: 'How To Draw Kamek Magic Koopa From Mario',
+      thumbnail: 'https://i.ytimg.com/vi/q15P6OE0EGk/hqdefault.jpg',
+      duration: '10:52',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-26',
+      youtubeId: 'IrQ_BcEAR3A',
+      title: 'How To Draw Kirby',
+      thumbnail: 'https://i.ytimg.com/vi/IrQ_BcEAR3A/hqdefault.jpg',
+      duration: '18:27',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-27',
+      youtubeId: '4eIMePaqk5A',
+      title: 'How To Draw Toon Link',
+      thumbnail: 'https://i.ytimg.com/vi/4eIMePaqk5A/hqdefault.jpg',
+      duration: '32:04',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      subject: 'Link',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-28',
+      youtubeId: 'AQIx4UfYrJI',
+      title: 'How To Draw Link From Zelda',
+      thumbnail: 'https://i.ytimg.com/vi/AQIx4UfYrJI/hqdefault.jpg',
+      duration: '10:47',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Nintendo',
+      subject: 'Link',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-29',
       youtubeId: '_aHGaUZnRJc',
       title: 'How to Draw Princess Peach from Super Mario',
       thumbnail: 'https://i.ytimg.com/vi/_aHGaUZnRJc/hqdefault.jpg',
+      duration: '11:19',
       category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Nintendo',
+      subject: 'Peach',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-281',
-      youtubeId: '2iUpNsSaWds',
-      title: 'How To Draw Toad | Super Mario',
-      thumbnail: 'https://i.ytimg.com/vi/2iUpNsSaWds/hqdefault.jpg',
+      id: 'drawing-30',
+      youtubeId: 'K0VSVYmPcbI',
+      title: 'How to Draw Rosalina ⭐️Super Mario',
+      thumbnail: 'https://i.ytimg.com/vi/K0VSVYmPcbI/hqdefault.jpg',
+      duration: '13:51',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Nintendo',
+      subject: 'Rosalina',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-282',
-      youtubeId: 'mDqV3sFDpcU',
-      title: 'How to Draw Yoshi from Super Mario Bros',
-      thumbnail: 'https://i.ytimg.com/vi/mDqV3sFDpcU/hqdefault.jpg',
+      id: 'drawing-31',
+      youtubeId: 'rA06Tpnx44E',
+      title: 'How to Draw Princess Daisy | Super Mario',
+      thumbnail: 'https://i.ytimg.com/vi/rA06Tpnx44E/hqdefault.jpg',
+      duration: '12:29',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Nintendo',
+      subject: 'Daisy',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-283',
-      youtubeId: 'YwV9I9RbvAw',
-      title: 'How To Draw Link Kirby',
-      thumbnail: 'https://i.ytimg.com/vi/YwV9I9RbvAw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-17'
-    },
-    {
-      id: 'drawing-284',
+      id: 'drawing-32',
       youtubeId: '7x5v_tt1az0',
       title: 'How to Draw Link | The Legend of Zelda | Breath of the Wild',
       thumbnail: 'https://i.ytimg.com/vi/7x5v_tt1az0/hqdefault.jpg',
+      duration: '15:01',
       category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Nintendo',
+      subject: 'Link',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-285',
-      youtubeId: 'UW6H5dAPuhY',
-      title: 'How To Draw A Cute Ice Cream Cone',
-      thumbnail: 'https://i.ytimg.com/vi/UW6H5dAPuhY/hqdefault.jpg',
+      id: 'drawing-33',
+      youtubeId: 'TDxVwg3BwAo',
+      title: 'How To Draw Rosalina | Super Mario',
+      thumbnail: 'https://i.ytimg.com/vi/TDxVwg3BwAo/hqdefault.jpg',
+      duration: '11:01',
       category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Nintendo',
+      subject: 'Rosalina',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-34',
+      youtubeId: 'T-TqSyNKYfk',
+      title: 'How to Draw Princess Daisy | Super Mario Bros',
+      thumbnail: 'https://i.ytimg.com/vi/T-TqSyNKYfk/hqdefault.jpg',
+      duration: '10:13',
+      category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Nintendo',
+      subject: 'Daisy',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-35',
+      youtubeId: '-RRw77w183w',
+      title: 'How To Draw Charizard',
+      thumbnail: 'https://i.ytimg.com/vi/-RRw77w183w/hqdefault.jpg',
+      duration: '25:08',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      subject: 'Charizard',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-36',
+      youtubeId: '1zX0hLFrlbQ',
+      title: 'How To Draw Ash Ketchum From Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/1zX0hLFrlbQ/hqdefault.jpg',
+      duration: '22:17',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-37',
+      youtubeId: 'HXW6W1eVo3c',
+      title: 'How To Draw Eevee Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/HXW6W1eVo3c/hqdefault.jpg',
+      duration: '13:16',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      subject: 'Eevee',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-38',
+      youtubeId: '6IeaiSVU7Cc',
+      title: 'How To Draw Squirtle',
+      thumbnail: 'https://i.ytimg.com/vi/6IeaiSVU7Cc/hqdefault.jpg',
+      duration: '17:26',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-39',
+      youtubeId: 'hbo1WnqlMrc',
+      title: 'How To Draw Charmander + Pokemon Giveaway',
+      thumbnail: 'https://i.ytimg.com/vi/hbo1WnqlMrc/hqdefault.jpg',
+      duration: '15:57',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-40',
+      youtubeId: '8Hi-04JwsuM',
+      title: 'How To Draw Blastoise From Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/8Hi-04JwsuM/hqdefault.jpg',
+      duration: '32:20',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-41',
+      youtubeId: 'K48siVDktpI',
+      title: 'How To Draw Bulbasaur Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/K48siVDktpI/hqdefault.jpg',
+      duration: '11:37',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-42',
+      youtubeId: 'U4uf_F6JY1M',
+      title: 'How To Draw Mewtwo',
+      thumbnail: 'https://i.ytimg.com/vi/U4uf_F6JY1M/hqdefault.jpg',
+      duration: '28:48',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-43',
+      youtubeId: 'j3RafPJ3iWY',
+      title: 'How To Draw Vaporeon Pokémon',
+      thumbnail: 'https://i.ytimg.com/vi/j3RafPJ3iWY/hqdefault.jpg',
+      duration: '14:44',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-44',
+      youtubeId: 'zsrFZMVxBs8',
+      title: 'How To Draw Sprigatito Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/zsrFZMVxBs8/hqdefault.jpg',
+      duration: '15:30',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-45',
+      youtubeId: 'WoV4f1ncE7U',
+      title: 'How To Draw Pikachu (with color)',
+      thumbnail: 'https://i.ytimg.com/vi/WoV4f1ncE7U/hqdefault.jpg',
+      duration: '7:58',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-46',
+      youtubeId: 'yLmPwjDtMnQ',
+      title: 'How To Draw Pokemon | Charizard',
+      thumbnail: 'https://i.ytimg.com/vi/yLmPwjDtMnQ/hqdefault.jpg',
+      duration: '13:32',
+      category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Pokemon',
+      subject: 'Charizard',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-47',
+      youtubeId: 'aN-HP2z2MF4',
+      title: 'How To Draw Eevee | Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/aN-HP2z2MF4/hqdefault.jpg',
+      duration: '9:12',
+      category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Pokemon',
+      subject: 'Eevee',
       addedDate: '2026-05-17'
     },
     {
-      id: 'drawing-286',
-      youtubeId: 'WonItzkHl9g',
-      title: 'How To Draw a Castle - VERY EASY For Kids',
-      thumbnail: 'https://i.ytimg.com/vi/WonItzkHl9g/hqdefault.jpg',
+      id: 'drawing-48',
+      youtubeId: 'jCCPBGOCo6Q',
+      title: 'How to Draw Vulpix | Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/jCCPBGOCo6Q/hqdefault.jpg',
+      duration: '13:34',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Pokemon',
+      addedDate: '2026-05-16'
     },
     {
-      id: 'drawing-287',
-      youtubeId: 'WLoPNgIp6go',
-      title: 'How To Draw A Cute Unicorn Doughnut',
-      thumbnail: 'https://i.ytimg.com/vi/WLoPNgIp6go/hqdefault.jpg',
+      id: 'drawing-49',
+      youtubeId: 'fqGlGkI6LAk',
+      title: 'How to Draw Pokemon Easy | Sylveon',
+      thumbnail: 'https://i.ytimg.com/vi/fqGlGkI6LAk/hqdefault.jpg',
+      duration: '10:51',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Pokemon',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-288',
-      youtubeId: 'iBcLL9y3FSw',
-      title: 'How To Draw A Cute Birthday Cake',
-      thumbnail: 'https://i.ytimg.com/vi/iBcLL9y3FSw/hqdefault.jpg',
+      id: 'drawing-50',
+      youtubeId: 'XtPfR_D8BC0',
+      title: 'How to Draw Espeon Easy | Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/XtPfR_D8BC0/hqdefault.jpg',
+      duration: '9:06',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Pokemon',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-289',
-      youtubeId: 'OF2Oe7_QFdU',
-      title: 'How to Draw a Cute Cat Very Very Easy',
-      thumbnail: 'https://i.ytimg.com/vi/OF2Oe7_QFdU/hqdefault.jpg',
+      id: 'drawing-51',
+      youtubeId: '9wzr0PRok2w',
+      title: 'How to Draw Umbreon | Pokemon',
+      thumbnail: 'https://i.ytimg.com/vi/9wzr0PRok2w/hqdefault.jpg',
+      duration: '10:00',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Pokemon',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-290',
-      youtubeId: '7fTwIhTI2q8',
-      title: 'How To Draw A Capybara Holding A Heart',
-      thumbnail: 'https://i.ytimg.com/vi/7fTwIhTI2q8/hqdefault.jpg',
+      id: 'drawing-52',
+      youtubeId: 'NW20U356pmA',
+      title: 'How to Draw Totoro 🌱 My Neighbor Totoro',
+      thumbnail: 'https://i.ytimg.com/vi/NW20U356pmA/hqdefault.jpg',
+      duration: '11:35',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Ghibli',
+      subject: 'Totoro',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-291',
-      youtubeId: 'bmYHe083qt4',
-      title: 'How To Draw A Hello Kitty Valentine',
-      thumbnail: 'https://i.ytimg.com/vi/bmYHe083qt4/hqdefault.jpg',
+      id: 'drawing-53',
+      youtubeId: 'bpXEx0Ypeiw',
+      title: 'How to Draw Kiki | Kiki\'s Delivery Service',
+      thumbnail: 'https://i.ytimg.com/vi/bpXEx0Ypeiw/hqdefault.jpg',
+      duration: '12:17',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Ghibli',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-292',
-      youtubeId: 'QlPxeBM1ioE',
-      title: 'How To Draw A Baby Deer Fawn For Spring',
-      thumbnail: 'https://i.ytimg.com/vi/QlPxeBM1ioE/hqdefault.jpg',
+      id: 'drawing-54',
+      youtubeId: 'Vg7wVaiSXJs',
+      title: 'How to Draw Chihiro | Spirited Away',
+      thumbnail: 'https://i.ytimg.com/vi/Vg7wVaiSXJs/hqdefault.jpg',
+      duration: '11:56',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Ghibli',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-293',
-      youtubeId: 'F6fzGD2aOmg',
-      title: 'How To Draw A Baby Chick Hatching Out Of An Egg',
-      thumbnail: 'https://i.ytimg.com/vi/F6fzGD2aOmg/hqdefault.jpg',
+      id: 'drawing-55',
+      youtubeId: 'hutTbIT8pPc',
+      title: 'How to Draw Jiji Black Cat | Kiki\'s Delivery Service',
+      thumbnail: 'https://i.ytimg.com/vi/hutTbIT8pPc/hqdefault.jpg',
+      duration: '9:24',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Draw So Cute',
+      franchise: 'Ghibli',
+      addedDate: '2026-08-08'
     },
     {
-      id: 'drawing-294',
-      youtubeId: 'wdNcCvRvsUQ',
-      title: 'How to Draw My Melody | Sanrio',
-      thumbnail: 'https://i.ytimg.com/vi/wdNcCvRvsUQ/hqdefault.jpg',
+      id: 'drawing-56',
+      youtubeId: 'Q3lsif7GkI0',
+      title: 'How To Draw Totoro | Sketch Saturday',
+      thumbnail: 'https://i.ytimg.com/vi/Q3lsif7GkI0/hqdefault.jpg',
+      duration: '28:18',
       category: 'drawing',
-      addedDate: '2026-05-17'
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Ghibli',
+      subject: 'Totoro',
+      addedDate: '2026-08-08'
     },
-    // Yoga Videos - Kid-friendly yoga sessions
+    {
+      id: 'drawing-57',
+      youtubeId: '_24oxPpE9kY',
+      title: 'How to Draw No Face (Kaonashi) | Spirited Away',
+      thumbnail: 'https://i.ytimg.com/vi/_24oxPpE9kY/hqdefault.jpg',
+      duration: '6:16',
+      category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Ghibli',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-58',
+      youtubeId: 'FM0n1aq1ROw',
+      title: 'How To Draw Ponyo - Easy Step By Step Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/FM0n1aq1ROw/hqdefault.jpg',
+      duration: '13:08',
+      category: 'drawing',
+      channel: 'Quick Doodle',
+      franchise: 'Ghibli',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-59',
+      youtubeId: '2zZadXzXgKo',
+      title: 'How To Draw Cartoon Woody From Toy Story',
+      thumbnail: 'https://i.ytimg.com/vi/2zZadXzXgKo/hqdefault.jpg',
+      duration: '7:52',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Toy Story',
+      subject: 'Woody',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-60',
+      youtubeId: '0srd_PwKUaU',
+      title: 'How To Draw Cartoon Buzz Lightyear',
+      thumbnail: 'https://i.ytimg.com/vi/0srd_PwKUaU/hqdefault.jpg',
+      duration: '12:56',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Toy Story',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-61',
+      youtubeId: 'bayiwrmYilg',
+      title: 'How To Draw Cartoon Jessie From Toy Story',
+      thumbnail: 'https://i.ytimg.com/vi/bayiwrmYilg/hqdefault.jpg',
+      duration: '10:40',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Toy Story',
+      subject: 'Jessie',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-62',
+      youtubeId: '9ilXZhSwRn4',
+      title: 'How to Draw Sheriff Woody | Toy Story',
+      thumbnail: 'https://i.ytimg.com/vi/9ilXZhSwRn4/hqdefault.jpg',
+      duration: '15:38',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Toy Story',
+      subject: 'Woody',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-63',
+      youtubeId: 'QafsWEkdNlM',
+      title: 'How to Draw Jessie | Toy Story',
+      thumbnail: 'https://i.ytimg.com/vi/QafsWEkdNlM/hqdefault.jpg',
+      duration: '18:14',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Toy Story',
+      subject: 'Jessie',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-64',
+      youtubeId: '5F7XT-MFy_s',
+      title: 'How to Draw Bo Peep from Toy Story',
+      thumbnail: 'https://i.ytimg.com/vi/5F7XT-MFy_s/hqdefault.jpg',
+      duration: '15:36',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Toy Story',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-65',
+      youtubeId: 'YCSieMazLi8',
+      title: 'How To Draw Woody | Toy Story Sketch Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/YCSieMazLi8/hqdefault.jpg',
+      duration: '16:41',
+      category: 'drawing',
+      channel: 'Cartooning Club How to Draw',
+      franchise: 'Toy Story',
+      subject: 'Woody',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-66',
+      youtubeId: '5rEzWsuYXCc',
+      title: 'How To Draw Aang From Avatar: The Last Airbender',
+      thumbnail: 'https://i.ytimg.com/vi/5rEzWsuYXCc/hqdefault.jpg',
+      duration: '22:08',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Avatar',
+      subject: 'Aang',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-67',
+      youtubeId: 'WsgEs8tIra0',
+      title: 'How To Draw Katara From Avatar: The Last Airbender',
+      thumbnail: 'https://i.ytimg.com/vi/WsgEs8tIra0/hqdefault.jpg',
+      duration: '10:49',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Avatar',
+      subject: 'Katara',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-68',
+      youtubeId: 'XAtY402mTlY',
+      title: 'How To Draw Appa From Avatar: The Last Airbender',
+      thumbnail: 'https://i.ytimg.com/vi/XAtY402mTlY/hqdefault.jpg',
+      duration: '22:27',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Avatar',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-69',
+      youtubeId: 'qhE3w81K4LU',
+      title: 'How to Draw Aang | Avatar The Last Airbender',
+      thumbnail: 'https://i.ytimg.com/vi/qhE3w81K4LU/hqdefault.jpg',
+      duration: '13:45',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Avatar',
+      subject: 'Aang',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-70',
+      youtubeId: '8dZJK8i-KFM',
+      title: 'How to Draw Katara from Avatar: The Last Airbender 💧',
+      thumbnail: 'https://i.ytimg.com/vi/8dZJK8i-KFM/hqdefault.jpg',
+      duration: '13:20',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Avatar',
+      subject: 'Katara',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-71',
+      youtubeId: 'WiW0t9ic7_s',
+      title: 'How To Draw Zuko | Step By Step| Avatar The Last Air Bender',
+      thumbnail: 'https://i.ytimg.com/vi/WiW0t9ic7_s/hqdefault.jpg',
+      duration: '14:18',
+      category: 'drawing',
+      channel: 'Art.Simple.',
+      franchise: 'Avatar',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-72',
+      youtubeId: 'KO2yNtHs5lg',
+      title: 'How to Draw Fairy Bloom | Winx Club',
+      thumbnail: 'https://i.ytimg.com/vi/KO2yNtHs5lg/hqdefault.jpg',
+      duration: '22:43',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Winx Club',
+      subject: 'Bloom',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-73',
+      youtubeId: '7ryzgt0XN6s',
+      title: 'How to Draw Fairy Princess Bloom | Winx Club',
+      thumbnail: 'https://i.ytimg.com/vi/7ryzgt0XN6s/hqdefault.jpg',
+      duration: '18:03',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Winx Club',
+      subject: 'Bloom',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-74',
+      youtubeId: 'UJ2EfvqWn9I',
+      title: 'How to draw winx club ✤ Stella ✤ believix   Fairy Form Slow mode',
+      thumbnail: 'https://i.ytimg.com/vi/UJ2EfvqWn9I/hqdefault.jpg',
+      duration: '11:13',
+      category: 'drawing',
+      channel: 'Discover to Draw',
+      franchise: 'Winx Club',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-75',
+      youtubeId: 'q3DGqCBnuco',
+      title: 'How to draw Winx Club Musa Believix - Slow mode',
+      thumbnail: 'https://i.ytimg.com/vi/q3DGqCBnuco/hqdefault.jpg',
+      duration: '27:07',
+      category: 'drawing',
+      channel: 'Discover to Draw',
+      franchise: 'Winx Club',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-76',
+      youtubeId: 'qz5I8OXMW-o',
+      title: 'Winx Club Art Journey | Draw and Color All the Fairies for a Brain Break',
+      thumbnail: 'https://i.ytimg.com/vi/qz5I8OXMW-o/hqdefault.jpg',
+      duration: '30:39',
+      category: 'drawing',
+      channel: 'Winx Club Official',
+      franchise: 'Winx Club',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-77',
+      youtubeId: 'qc5uz9uXNj4',
+      title: 'Winx Club - Draw and colour Aisha',
+      thumbnail: 'https://i.ytimg.com/vi/qc5uz9uXNj4/hqdefault.jpg',
+      duration: '7:19',
+      category: 'drawing',
+      channel: 'Winx Club Official',
+      franchise: 'Winx Club',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-78',
+      youtubeId: 'lSSYciuiKSA',
+      title: 'How To Draw Bluey',
+      thumbnail: 'https://i.ytimg.com/vi/lSSYciuiKSA/hqdefault.jpg',
+      duration: '8:44',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Bluey',
+      subject: 'Bluey',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-79',
+      youtubeId: '5mA03XDIRUg',
+      title: 'How To Draw Bluey From The Dragon Episode',
+      thumbnail: 'https://i.ytimg.com/vi/5mA03XDIRUg/hqdefault.jpg',
+      duration: '8:34',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Bluey',
+      subject: 'Bluey',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-80',
+      youtubeId: 'l_4ZAq5zyJM',
+      title: 'How to Draw Bluey the Puppy | Disney',
+      thumbnail: 'https://i.ytimg.com/vi/l_4ZAq5zyJM/hqdefault.jpg',
+      duration: '10:31',
+      category: 'drawing',
+      channel: 'Draw So Cute',
+      franchise: 'Bluey',
+      subject: 'Bluey',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-81',
+      youtubeId: 'yGIUAkEbwpY',
+      title: 'How To Draw Bluey and Bingo | Bluey',
+      thumbnail: 'https://i.ytimg.com/vi/yGIUAkEbwpY/hqdefault.jpg',
+      duration: '11:06',
+      category: 'drawing',
+      channel: 'Bluey - Official Channel',
+      franchise: 'Bluey',
+      subject: 'Bluey',
+      addedDate: '2026-08-08'
+    },
+    {
+      id: 'drawing-82',
+      youtubeId: 'eFHwTD9eHyw',
+      title: 'How To Draw A Mythical Kitten Dragon',
+      thumbnail: 'https://i.ytimg.com/vi/eFHwTD9eHyw/hqdefault.jpg',
+      duration: '16:01',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-83',
+      youtubeId: 'TzifMl12ahk',
+      title: 'How To Draw An Ice Dragon - Advanced',
+      thumbnail: 'https://i.ytimg.com/vi/TzifMl12ahk/hqdefault.jpg',
+      duration: '17:12',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-84',
+      youtubeId: 'ANcwbdO-QYM',
+      title: 'How To Draw Chinese Dragon',
+      thumbnail: 'https://i.ytimg.com/vi/ANcwbdO-QYM/hqdefault.jpg',
+      duration: '22:40',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-85',
+      youtubeId: 'TBH3-tjHNHY',
+      title: 'How To Draw A Griffin',
+      thumbnail: 'https://i.ytimg.com/vi/TBH3-tjHNHY/hqdefault.jpg',
+      duration: '13:32',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-86',
+      youtubeId: '14L8XVjus3U',
+      title: 'How To Draw A Cute Phoenix',
+      thumbnail: 'https://i.ytimg.com/vi/14L8XVjus3U/hqdefault.jpg',
+      duration: '15:13',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-87',
+      youtubeId: 'KUXOQfh0ZKY',
+      title: 'How To Draw An Alicorn (Unicorn & Pegasus)',
+      thumbnail: 'https://i.ytimg.com/vi/KUXOQfh0ZKY/hqdefault.jpg',
+      duration: '10:45',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-88',
+      youtubeId: '9U1zQ_oX5LU',
+      title: 'How To Draw A Cute Fall Fairy',
+      thumbnail: 'https://i.ytimg.com/vi/9U1zQ_oX5LU/hqdefault.jpg',
+      duration: '8:31',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-89',
+      youtubeId: 'KRAarF177Y4',
+      title: 'How To Draw A Dragon',
+      thumbnail: 'https://i.ytimg.com/vi/KRAarF177Y4/hqdefault.jpg',
+      duration: '20:28',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Mythical',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-90',
+      youtubeId: 'LNJqyHm95w0',
+      title: 'How To Draw A Cartoon Harry Potter And Hedwig',
+      thumbnail: 'https://i.ytimg.com/vi/LNJqyHm95w0/hqdefault.jpg',
+      duration: '13:51',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Harry Potter',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-91',
+      youtubeId: 'T37o30V69YQ',
+      title: 'How To Draw Sonic The Hedgehog',
+      thumbnail: 'https://i.ytimg.com/vi/T37o30V69YQ/hqdefault.jpg',
+      duration: '19:57',
+      category: 'drawing',
+      channel: 'Art for Kids Hub',
+      franchise: 'Sonic',
+      addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-92',
+      youtubeId: 'fgr9KZ64TXc',
+      title: 'How to Draw a Tyrannosaurus Rex | Step By Step',
+      thumbnail: 'https://i.ytimg.com/vi/fgr9KZ64TXc/hqdefault.jpg',
+      duration: '22:46',
+      category: 'drawing',
+      channel: 'Art.Simple.',
+      franchise: 'Dinosaurs',
+      addedDate: '2026-05-16'
+    },
     {
       id: 'yoga-1',
       youtubeId: '2cxcGwDZNWQ',
@@ -337,240 +1270,6 @@ class YouTubeService {
       category: 'yoga',
       addedDate: '2026-05-16'
     },
-
-    // Drawing Videos - Simple drawing tutorials for kids
-    {
-      id: 'drawing-1',
-      youtubeId: 'NLD3QQSVUZE',
-      title: 'How To Draw A Giant Rainbow Lollipop',
-      thumbnail: 'https://img.youtube.com/vi/NLD3QQSVUZE/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-2',
-      youtubeId: 'ST5GG-zS1BE',
-      title: 'How To Draw A Cute Raccoon',
-      thumbnail: 'https://img.youtube.com/vi/ST5GG-zS1BE/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-3',
-      youtubeId: '6lfV3XDfA64',
-      title: 'How To Draw POKEMON | VULPIX Step By Step Tutorial',
-      thumbnail: 'https://img.youtube.com/vi/6lfV3XDfA64/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-4',
-      youtubeId: 'Iy-qngRwYxU',
-      title: 'HOW TO DRAW VULPIX - Easy Pokémon Drawing',
-      thumbnail: 'https://img.youtube.com/vi/Iy-qngRwYxU/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-5',
-      youtubeId: 'jCCPBGOCo6Q',
-      title: 'How to Draw Vulpix | Pokemon',
-      thumbnail: 'https://img.youtube.com/vi/jCCPBGOCo6Q/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-6',
-      youtubeId: '-RRw77w183w',
-      title: 'How To Draw Charizard',
-      thumbnail: 'https://img.youtube.com/vi/-RRw77w183w/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-7',
-      youtubeId: 'yLmPwjDtMnQ',
-      title: 'How To Draw Pokemon | Charizard || Step by Step',
-      thumbnail: 'https://img.youtube.com/vi/yLmPwjDtMnQ/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-8',
-      youtubeId: 'bJZQYRywEAc',
-      title: 'Handwriting name #calligraphy #art',
-      thumbnail: 'https://img.youtube.com/vi/bJZQYRywEAc/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-9',
-      youtubeId: 'qN6bXtsBBsI',
-      title: 'How to Draw a CHICK',
-      thumbnail: 'https://img.youtube.com/vi/qN6bXtsBBsI/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-10',
-      youtubeId: 'VzX-xntLpL0',
-      title: 'How to Draw a BUTTERFLY',
-      thumbnail: 'https://img.youtube.com/vi/VzX-xntLpL0/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-11',
-      youtubeId: '8qrq6ZIX0W0',
-      title: 'How to Draw a MOUSE (Easy for Kids)',
-      thumbnail: 'https://img.youtube.com/vi/8qrq6ZIX0W0/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-12',
-      youtubeId: 'hky2ggpPM88',
-      title: 'How To Draw A Cartoon Belle (Beauty and the Beast)',
-      thumbnail: 'https://img.youtube.com/vi/hky2ggpPM88/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-13',
-      youtubeId: 'aeJQsbPAEhc',
-      title: 'How to Draw Cinderella',
-      thumbnail: 'https://img.youtube.com/vi/aeJQsbPAEhc/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-14',
-      youtubeId: 'RWtrnnvNBGc',
-      title: 'How To Draw A Cartoon Mouse',
-      thumbnail: 'https://img.youtube.com/vi/RWtrnnvNBGc/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-15',
-      youtubeId: 'UDzGI6KFBrY',
-      title: 'How to Draw a Penguin (Beginner)',
-      thumbnail: 'https://img.youtube.com/vi/UDzGI6KFBrY/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-16',
-      youtubeId: 'eEenczJV_l8',
-      title: 'How to Draw a Penguin | Easy Step-by-Step',
-      thumbnail: 'https://img.youtube.com/vi/eEenczJV_l8/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-17',
-      youtubeId: 'MilR2D3cJRY',
-      title: 'How To Draw A Cartoon Penguin',
-      thumbnail: 'https://img.youtube.com/vi/MilR2D3cJRY/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-18',
-      youtubeId: 'tQNbRUuzLXw',
-      title: 'How to Draw a Horse',
-      thumbnail: 'https://img.youtube.com/vi/tQNbRUuzLXw/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-19',
-      youtubeId: 'l_4ZAq5zyJM',
-      title: 'How to Draw Bluey the Puppy (Disney)',
-      thumbnail: 'https://img.youtube.com/vi/l_4ZAq5zyJM/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-20',
-      youtubeId: 'laVebaRmKdA',
-      title: 'How To Draw A Cartoon Horse',
-      thumbnail: 'https://img.youtube.com/vi/laVebaRmKdA/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-21',
-      youtubeId: 'mSAlNhm0F-8',
-      title: 'Horse Drawing from 243 Number',
-      thumbnail: 'https://img.youtube.com/vi/mSAlNhm0F-8/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-22',
-      youtubeId: 'cDlA1QmDVUs',
-      title: 'How to Draw a Horse Rider',
-      thumbnail: 'https://img.youtube.com/vi/cDlA1QmDVUs/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-23',
-      youtubeId: 'YPB2R8YqWXc',
-      title: 'How to draw a cat! (Kids)',
-      thumbnail: 'https://img.youtube.com/vi/YPB2R8YqWXc/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-24',
-      youtubeId: 'nuyrn3WWDKA',
-      title: 'How to Draw a Cow - Easy',
-      thumbnail: 'https://img.youtube.com/vi/nuyrn3WWDKA/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-25',
-      youtubeId: 'cZrQRg-yWS0',
-      title: 'How To Draw A Frog Prince',
-      thumbnail: 'https://img.youtube.com/vi/cZrQRg-yWS0/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-26',
-      youtubeId: 'CGXCyzcXsYk',
-      title: 'How To Draw A Cute Cupcake Monster Folding Surprise',
-      thumbnail: 'https://img.youtube.com/vi/CGXCyzcXsYk/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-27',
-      youtubeId: '21jWNVrcrw4',
-      title: 'How To Draw A Mario Mushroom',
-      thumbnail: 'https://img.youtube.com/vi/21jWNVrcrw4/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-28',
-      youtubeId: 'r6cJl89axqY',
-      title: 'How To Draw A Cute Unicorn',
-      thumbnail: 'https://i.ytimg.com/vi/r6cJl89axqY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-29',
-      youtubeId: '9Eg-rk2P1Ks',
-      title: 'How To Draw A Unicorn - Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/9Eg-rk2P1Ks/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
     {
       id: 'yoga-7',
       youtubeId: 'oLC13hFePTc',
@@ -578,33 +1277,7 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/oLC13hFePTc/hqdefault.jpg',
       category: 'yoga',
       addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-30',
-      youtubeId: 'KRAarF177Y4',
-      title: 'How To Draw A Dragon',
-      thumbnail: 'https://i.ytimg.com/vi/KRAarF177Y4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
     },
-    {
-      id: 'drawing-31',
-      youtubeId: '4lc82nvj7bo',
-      title: 'How To Draw A Funny Summer Dragon',
-      thumbnail: 'https://i.ytimg.com/vi/4lc82nvj7bo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-32',
-      youtubeId: 'O0_2y4G6eAs',
-      title: 'How To Draw A Funny Turkey',
-      thumbnail: 'https://img.youtube.com/vi/O0_2y4G6eAs/maxresdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
     {
       id: 'yoga-8',
       youtubeId: 'a6wrKLFLLeI',
@@ -1036,1876 +1709,7 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/cR9mGcb4joA/hqdefault.jpg',
       category: 'yoga',
       addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-33',
-      youtubeId: 'ezegUT9U6fM',
-      title: 'How To Draw A Cartoon Cow',
-      thumbnail: 'https://i.ytimg.com/vi/ezegUT9U6fM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
     },
-    {
-      id: 'drawing-34',
-      youtubeId: 'Pu7v_3qUfs8',
-      title: 'How To Draw A Pig For Young Artists',
-      thumbnail: 'https://i.ytimg.com/vi/Pu7v_3qUfs8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-35',
-      youtubeId: 'rLk0uovLscQ',
-      title: 'How To Draw A Chicken (for super young artists)',
-      thumbnail: 'https://i.ytimg.com/vi/rLk0uovLscQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-36',
-      youtubeId: 'tpwyCVfKe_A',
-      title: 'How To Draw A Cartoon Turkey',
-      thumbnail: 'https://i.ytimg.com/vi/tpwyCVfKe_A/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-37',
-      youtubeId: 'tpwyCVfKe_A',
-      title: 'How To Draw A Cartoon Turkey',
-      thumbnail: 'https://i.ytimg.com/vi/tpwyCVfKe_A/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-38',
-      youtubeId: '-03ZYb-Qpec',
-      title: 'How To Draw A Turkey',
-      thumbnail: 'https://i.ytimg.com/vi/-03ZYb-Qpec/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-39',
-      youtubeId: 'nxatuBKGAVs',
-      title: 'How To Draw Momma And Baby Ducks',
-      thumbnail: 'https://i.ytimg.com/vi/nxatuBKGAVs/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-40',
-      youtubeId: 'CfunFth2P1Y',
-      title: 'How To Draw A Duck',
-      thumbnail: 'https://i.ytimg.com/vi/CfunFth2P1Y/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-41',
-      youtubeId: 'rAgBdvTMjvg',
-      title: 'How To Draw A Cartoon Sheep',
-      thumbnail: 'https://i.ytimg.com/vi/rAgBdvTMjvg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-42',
-      youtubeId: 'il-2SmoQS7Y',
-      title: 'How To Draw A Funny Scarecrow',
-      thumbnail: 'https://i.ytimg.com/vi/il-2SmoQS7Y/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-43',
-      youtubeId: 'kTt0Iid6YFE',
-      title: 'How To Draw A Cute Cartoon Goat',
-      thumbnail: 'https://i.ytimg.com/vi/kTt0Iid6YFE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-44',
-      youtubeId: '5GOFwmqQ7oU',
-      title: 'How To Draw A Cartoon Baby Chick',
-      thumbnail: 'https://i.ytimg.com/vi/5GOFwmqQ7oU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-45',
-      youtubeId: 'TMCYgdFPt-k',
-      title: 'How To Draw A Donkey - Nativity',
-      thumbnail: 'https://i.ytimg.com/vi/TMCYgdFPt-k/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-46',
-      youtubeId: 'hTNzh5gyOIc',
-      title: 'Drawing A Pig Using Shapes - Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/hTNzh5gyOIc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-47',
-      youtubeId: 'lrKMn__pnKo',
-      title: 'How To Draw A Barn (farm) 👩‍🌾',
-      thumbnail: 'https://i.ytimg.com/vi/lrKMn__pnKo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-48',
-      youtubeId: 'jNawjZ40pOY',
-      title: 'How To Draw An Ox',
-      thumbnail: 'https://i.ytimg.com/vi/jNawjZ40pOY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-49',
-      youtubeId: 'UhwIN1e4rEY',
-      title: 'How To Draw A Duck - Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/UhwIN1e4rEY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-50',
-      youtubeId: 'H0yCGmZf-GU',
-      title: 'How To Draw A Farm Truck With Pumpkins',
-      thumbnail: 'https://i.ytimg.com/vi/H0yCGmZf-GU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-51',
-      youtubeId: 'aW9OA4ot00o',
-      title: 'How To Draw A Funny Cartoon Turkey In Disguise',
-      thumbnail: 'https://i.ytimg.com/vi/aW9OA4ot00o/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-52',
-      youtubeId: 'YysRjvVW_8M',
-      title: 'How To Draw A Chicken - Mom And Baby - Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/YysRjvVW_8M/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-53',
-      youtubeId: 'Gr4hqOSg598',
-      title: 'How To Draw A Horse - Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/Gr4hqOSg598/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-54',
-      youtubeId: 'ZX9NxiPmDI4',
-      title: 'How To Draw A Highland Cow Blowing Bubble Gum Bubble',
-      thumbnail: 'https://i.ytimg.com/vi/ZX9NxiPmDI4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-55',
-      youtubeId: 'NfyDG7obGoE',
-      title: 'How To Draw A Fall Goose',
-      thumbnail: 'https://i.ytimg.com/vi/NfyDG7obGoE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-56',
-      youtubeId: 'WoV4f1ncE7U',
-      title: 'How To Draw Pikachu (with color)',
-      thumbnail: 'https://i.ytimg.com/vi/WoV4f1ncE7U/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-57',
-      youtubeId: '4BFzt5i1jXA',
-      title: 'How To Draw A Poké Ball Folding Surprise',
-      thumbnail: 'https://i.ytimg.com/vi/4BFzt5i1jXA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-58',
-      youtubeId: 'xV2n-KUeltc',
-      title: 'How To Draw A Poké Ball From Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/xV2n-KUeltc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-59',
-      youtubeId: '1zX0hLFrlbQ',
-      title: 'How To Draw Ash Ketchum From Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/1zX0hLFrlbQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-60',
-      youtubeId: 'S8DfLCsWxc0',
-      title: 'How To Draw Mew From Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/S8DfLCsWxc0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-61',
-      youtubeId: 'HXW6W1eVo3c',
-      title: 'How To Draw Eevee Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/HXW6W1eVo3c/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-62',
-      youtubeId: '6IeaiSVU7Cc',
-      title: 'How To Draw Squirtle',
-      thumbnail: 'https://i.ytimg.com/vi/6IeaiSVU7Cc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-63',
-      youtubeId: 'hbo1WnqlMrc',
-      title: 'How To Draw Charmander + Pokemon Giveaway',
-      thumbnail: 'https://i.ytimg.com/vi/hbo1WnqlMrc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-64',
-      youtubeId: '8Hi-04JwsuM',
-      title: 'How To Draw Blastoise From Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/8Hi-04JwsuM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-65',
-      youtubeId: 'nye7BaaRW8g',
-      title: 'How To Draw Mega Gyarados Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/nye7BaaRW8g/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-66',
-      youtubeId: 'V2wfQyCN6B8',
-      title: 'How To Draw Frogadier Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/V2wfQyCN6B8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-67',
-      youtubeId: 'K48siVDktpI',
-      title: 'How To Draw Bulbasaur Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/K48siVDktpI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-68',
-      youtubeId: 'J5Q35SLMezY',
-      title: 'How To Draw Snorlax Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/J5Q35SLMezY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-69',
-      youtubeId: 'ASjXtCp51M4',
-      title: 'How To Draw Jigglypuff',
-      thumbnail: 'https://i.ytimg.com/vi/ASjXtCp51M4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-70',
-      youtubeId: 'U4uf_F6JY1M',
-      title: 'How To Draw Mewtwo',
-      thumbnail: 'https://i.ytimg.com/vi/U4uf_F6JY1M/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-71',
-      youtubeId: 'fx1cYZfDh8U',
-      title: 'How To Draw Gengar Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/fx1cYZfDh8U/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-72',
-      youtubeId: '9k1pbD03_d0',
-      title: 'How To Draw Pokemon Detective Pikachu',
-      thumbnail: 'https://i.ytimg.com/vi/9k1pbD03_d0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-73',
-      youtubeId: 'vsjzWTfP7iE',
-      title: 'How To Draw Scorbunny Pokemon From Sword And Shield',
-      thumbnail: 'https://i.ytimg.com/vi/vsjzWTfP7iE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-74',
-      youtubeId: 'EcF9856AUQM',
-      title: 'How To Draw Pichu Pokemon - NEW BLUE TABLE',
-      thumbnail: 'https://i.ytimg.com/vi/EcF9856AUQM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-75',
-      youtubeId: 'gPpuLnCIwOM',
-      title: 'How To Draw Litten Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/gPpuLnCIwOM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-76',
-      youtubeId: 'j3RafPJ3iWY',
-      title: 'How To Draw Vaporeon Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/j3RafPJ3iWY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-77',
-      youtubeId: 'hXTpdKLh-64',
-      title: 'How To Draw Meowth Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/hXTpdKLh-64/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-78',
-      youtubeId: 'pa-tg0C-6fo',
-      title: 'How To Draw Quaxly Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/pa-tg0C-6fo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-79',
-      youtubeId: 'CBjTZBRCas8',
-      title: 'How To Draw Diglett From Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/CBjTZBRCas8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-80',
-      youtubeId: 'GwfNncN9Muw',
-      title: 'How To Draw Fennekin Pokemon (Toy Giveaway)',
-      thumbnail: 'https://i.ytimg.com/vi/GwfNncN9Muw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-81',
-      youtubeId: 'zsrFZMVxBs8',
-      title: 'How To Draw Sprigatito Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/zsrFZMVxBs8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-82',
-      youtubeId: 'yn_hiXj5jVw',
-      title: 'How To Draw Lapras',
-      thumbnail: 'https://i.ytimg.com/vi/yn_hiXj5jVw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-83',
-      youtubeId: 'KpUquUAUR9I',
-      title: 'How To Draw Grookey Pokemon From Sword And Shield',
-      thumbnail: 'https://i.ytimg.com/vi/KpUquUAUR9I/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-84',
-      youtubeId: 'DIX6WIcd1mc',
-      title: 'How To Draw A Cubone Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/DIX6WIcd1mc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-85',
-      youtubeId: 'vDnuJEtaxnE',
-      title: 'How To Draw Torchic Pokemon + Toy Giveaway',
-      thumbnail: 'https://i.ytimg.com/vi/vDnuJEtaxnE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-86',
-      youtubeId: 'QbcXQqZX1ew',
-      title: 'How To Draw Oddish Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/QbcXQqZX1ew/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-87',
-      youtubeId: 't-ZEi0gXmkw',
-      title: 'How To Draw Fall Pikachu',
-      thumbnail: 'https://i.ytimg.com/vi/t-ZEi0gXmkw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-88',
-      youtubeId: 'DBnSpOXlepo',
-      title: 'How To Draw Popplio Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/DBnSpOXlepo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-89',
-      youtubeId: 'LEIFiHRbl60',
-      title: 'How To Draw Sobble Pokémon From Sword And Shield',
-      thumbnail: 'https://i.ytimg.com/vi/LEIFiHRbl60/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-90',
-      youtubeId: 'bPRSmPbA3Wg',
-      title: 'How To Draw Fuecoco Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/bPRSmPbA3Wg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-91',
-      youtubeId: 'BxFiQvoqjSw',
-      title: 'How To Draw Zubat From Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/BxFiQvoqjSw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-92',
-      youtubeId: 'fuSTL99GTR4',
-      title: 'How To Draw Alola Vulpix',
-      thumbnail: 'https://i.ytimg.com/vi/fuSTL99GTR4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-93',
-      youtubeId: '6MiS12zGOkI',
-      title: 'How To Draw A Froakie Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/6MiS12zGOkI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-94',
-      youtubeId: 'nhj6qfhOIp4',
-      title: 'How To Draw Minccino Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/nhj6qfhOIp4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-95',
-      youtubeId: 'MMCT8xqebZY',
-      title: 'How To Draw Beedrill Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/MMCT8xqebZY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-96',
-      youtubeId: 'gERFI27EcCw',
-      title: 'How To Fold Pikachu',
-      thumbnail: 'https://i.ytimg.com/vi/gERFI27EcCw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-97',
-      youtubeId: 'YpekLNkWRNw',
-      title: 'How To Draw Marill Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/YpekLNkWRNw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-98',
-      youtubeId: 'z6mq2FWrK-g',
-      title: 'How To Draw Chespin From Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/z6mq2FWrK-g/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-99',
-      youtubeId: '3Dj7rmHWV14',
-      title: 'How To Draw Weedle Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/3Dj7rmHWV14/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-100',
-      youtubeId: 'eI_d7fkwqIw',
-      title: 'How To Draw Kakuna Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/eI_d7fkwqIw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-101',
-      youtubeId: '9CtryYZpYZ4',
-      title: 'How To Draw A Golbat Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/9CtryYZpYZ4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-102',
-      youtubeId: 'eB1IZSPF2IQ',
-      title: 'How To Draw Furret Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/eB1IZSPF2IQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-103',
-      youtubeId: 'rDOWeio-lSc',
-      title: 'How To Draw Oshawott',
-      thumbnail: 'https://i.ytimg.com/vi/rDOWeio-lSc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-104',
-      youtubeId: '6sA8-es7Yx0',
-      title: 'How To Draw Togepi Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/6sA8-es7Yx0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-105',
-      youtubeId: 'Y_x9DOgmnVY',
-      title: 'How To Draw Pikipek Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/Y_x9DOgmnVY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-106',
-      youtubeId: 'O59Fr2rJ_O4',
-      title: 'How To Draw Parasect Pokémon',
-      thumbnail: 'https://i.ytimg.com/vi/O59Fr2rJ_O4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-107',
-      youtubeId: 'IZVA3jTh5MQ',
-      title: 'How To Draw Emolga Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/IZVA3jTh5MQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-108',
-      youtubeId: 'BWLLwOsoBis',
-      title: 'How To Draw Caterpie Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/BWLLwOsoBis/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-109',
-      youtubeId: 'LIKBKiF5cTc',
-      title: 'How To Draw Seaking Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/LIKBKiF5cTc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-110',
-      youtubeId: 'exnB0L_AVU4',
-      title: 'How To Draw A Mario Piranha Plant',
-      thumbnail: 'https://i.ytimg.com/vi/exnB0L_AVU4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-111',
-      youtubeId: 'u6qZDv8v2fQ',
-      title: 'How To Draw Toad From Mario (With Body)',
-      thumbnail: 'https://i.ytimg.com/vi/u6qZDv8v2fQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-112',
-      youtubeId: 'JwSVs1aRs9A',
-      title: 'How To Draw King Boo From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/JwSVs1aRs9A/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-113',
-      youtubeId: 'El1G0ZAZqkg',
-      title: 'How To Draw Clash Royale Minion',
-      thumbnail: 'https://i.ytimg.com/vi/El1G0ZAZqkg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-114',
-      youtubeId: 'HdyD2kT692E',
-      title: 'How To Draw Shy Guy From Mario!',
-      thumbnail: 'https://i.ytimg.com/vi/HdyD2kT692E/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-115',
-      youtubeId: 'KNprO-8tx5g',
-      title: 'How To Draw Stampy',
-      thumbnail: 'https://i.ytimg.com/vi/KNprO-8tx5g/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-116',
-      youtubeId: 'cBu6gjZkFXg',
-      title: 'How To Draw Red From Angry Birds',
-      thumbnail: 'https://i.ytimg.com/vi/cBu6gjZkFXg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-117',
-      youtubeId: '4eIMePaqk5A',
-      title: 'How To Draw Toon Link',
-      thumbnail: 'https://i.ytimg.com/vi/4eIMePaqk5A/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-118',
-      youtubeId: 'FObW5ynBbVg',
-      title: 'How To Draw Princess Peach',
-      thumbnail: 'https://i.ytimg.com/vi/FObW5ynBbVg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-119',
-      youtubeId: 'ydFoc-taX9c',
-      title: 'How To Draw Mega Man',
-      thumbnail: 'https://i.ytimg.com/vi/ydFoc-taX9c/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-120',
-      youtubeId: 'klso11V6NTk',
-      title: 'How To Draw Pac-Man',
-      thumbnail: 'https://i.ytimg.com/vi/klso11V6NTk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-121',
-      youtubeId: 'hQR_HkQEUkI',
-      title: 'How To Draw A Creeper (New)',
-      thumbnail: 'https://i.ytimg.com/vi/hQR_HkQEUkI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-122',
-      youtubeId: '3yBzZ0kTYcU',
-      title: 'How To Draw A Minecraft Wolf (dog)',
-      thumbnail: 'https://i.ytimg.com/vi/3yBzZ0kTYcU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-123',
-      youtubeId: 'ZpDszIAvtdw',
-      title: 'How To Draw A Sunflower (Plants vs. Zombies)',
-      thumbnail: 'https://i.ytimg.com/vi/ZpDszIAvtdw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-124',
-      youtubeId: 'EssAMxLuNgU',
-      title: 'How To Draw Om Nom',
-      thumbnail: 'https://i.ytimg.com/vi/EssAMxLuNgU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-125',
-      youtubeId: 'T37o30V69YQ',
-      title: 'How To Draw Sonic The Hedgehog',
-      thumbnail: 'https://i.ytimg.com/vi/T37o30V69YQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-126',
-      youtubeId: '46eOue7WMsQ',
-      title: 'How To Draw Bowser',
-      thumbnail: 'https://i.ytimg.com/vi/46eOue7WMsQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-127',
-      youtubeId: '2qONTgGRGIc',
-      title: 'How To Draw A Peashooter (Plants vs Zombies)',
-      thumbnail: 'https://i.ytimg.com/vi/2qONTgGRGIc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-128',
-      youtubeId: 'ovVJuT4FFyk',
-      title: 'How To Draw A Zombie (Plants vs Zombies)',
-      thumbnail: 'https://i.ytimg.com/vi/ovVJuT4FFyk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-129',
-      youtubeId: 'IrQ_BcEAR3A',
-      title: 'How To Draw Kirby',
-      thumbnail: 'https://i.ytimg.com/vi/IrQ_BcEAR3A/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-130',
-      youtubeId: 'b4N8fMSDNIk',
-      title: 'How To Draw Toad From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/b4N8fMSDNIk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-131',
-      youtubeId: 'ir9foPjmB2s',
-      title: 'How To Draw A Ghast',
-      thumbnail: 'https://i.ytimg.com/vi/ir9foPjmB2s/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-132',
-      youtubeId: 'Guc9Qkl2rps',
-      title: 'How To Draw Enderman',
-      thumbnail: 'https://i.ytimg.com/vi/Guc9Qkl2rps/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-133',
-      youtubeId: 'UQxAFUcgXEE',
-      title: 'How To Draw Yoshi',
-      thumbnail: 'https://i.ytimg.com/vi/UQxAFUcgXEE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-134',
-      youtubeId: 'Kchg3IK7mFM',
-      title: 'How To Draw Luigi',
-      thumbnail: 'https://i.ytimg.com/vi/Kchg3IK7mFM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-135',
-      youtubeId: 'M8FFRmCwj5I',
-      title: 'How To Draw A Pig From Minecraft',
-      thumbnail: 'https://i.ytimg.com/vi/M8FFRmCwj5I/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-136',
-      youtubeId: 'tWYhAy8K0Eg',
-      title: 'How To Draw Mario',
-      thumbnail: 'https://i.ytimg.com/vi/tWYhAy8K0Eg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-137',
-      youtubeId: 'GjK8Jntgph4',
-      title: 'How To Draw A Chicken From Minecraft',
-      thumbnail: 'https://i.ytimg.com/vi/GjK8Jntgph4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-138',
-      youtubeId: 'UNPJrxxJqdo',
-      title: 'How To Draw Splatoon Inkling Squid 🦑',
-      thumbnail: 'https://i.ytimg.com/vi/UNPJrxxJqdo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-139',
-      youtubeId: 'P9AcwxT6FBE',
-      title: 'How To Draw A Chug Jug From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/P9AcwxT6FBE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-140',
-      youtubeId: 'GmzJ5-X2r68',
-      title: 'How To Draw Brite Bomber From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/GmzJ5-X2r68/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-141',
-      youtubeId: 'kiCd6jJm3c0',
-      title: 'How To Draw The Fortnite Durr Burger',
-      thumbnail: 'https://i.ytimg.com/vi/kiCd6jJm3c0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-142',
-      youtubeId: 'GBKZHPvSYlA',
-      title: 'How To Draw Pip Squeak Pickaxe From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/GBKZHPvSYlA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-143',
-      youtubeId: '4xSwjtY0zq8',
-      title: 'How To Draw A Sneaky Snowman Fortnite + Spotlight',
-      thumbnail: 'https://i.ytimg.com/vi/4xSwjtY0zq8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-144',
-      youtubeId: 'pBGmutQAim8',
-      title: 'How To Draw Fortnite Ragnarok Mask',
-      thumbnail: 'https://i.ytimg.com/vi/pBGmutQAim8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-145',
-      youtubeId: '_udxrl1n2Sk',
-      title: 'How To Draw Raven From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/_udxrl1n2Sk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-146',
-      youtubeId: '6U-uMIyfptw',
-      title: 'How To Draw Fortnite Bitemark Pickaxe - REPLAY DRAW ALONG!',
-      thumbnail: 'https://i.ytimg.com/vi/6U-uMIyfptw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-147',
-      youtubeId: 'EhiJpi-JCFw',
-      title: 'How To Draw Fortnite Marshmello Skin',
-      thumbnail: 'https://i.ytimg.com/vi/EhiJpi-JCFw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-148',
-      youtubeId: 'dqompIaStZo',
-      title: 'How To Draw Tomato Head Fortnite Skin (cartoon)',
-      thumbnail: 'https://i.ytimg.com/vi/dqompIaStZo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-149',
-      youtubeId: 'gWDMXeHke1E',
-      title: 'How To Draw Cuddle Team Leader Fortnite Skin + Challenge Time',
-      thumbnail: 'https://i.ytimg.com/vi/gWDMXeHke1E/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-150',
-      youtubeId: 'h_485fqykeg',
-      title: 'How To Draw Fortnite Slurp Juice Pickaxe',
-      thumbnail: 'https://i.ytimg.com/vi/h_485fqykeg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-151',
-      youtubeId: 'VfZpuQRQZn0',
-      title: 'How To Draw Fortnite Rainbow Smash Pickaxe',
-      thumbnail: 'https://i.ytimg.com/vi/VfZpuQRQZn0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-152',
-      youtubeId: '8PhFwNjy4V0',
-      title: 'How To Draw Fortnite Ice King',
-      thumbnail: 'https://i.ytimg.com/vi/8PhFwNjy4V0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-153',
-      youtubeId: '6HE3oUYc7EI',
-      title: 'How To Draw DJ Yonder From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/6HE3oUYc7EI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-154',
-      youtubeId: 'gtE325n5DRA',
-      title: 'How To Draw The Skull Trooper From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/gtE325n5DRA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-155',
-      youtubeId: 'hRaIW4HNjYw',
-      title: 'How To Draw Omega Skin Fortnite Skin (cartoon)',
-      thumbnail: 'https://i.ytimg.com/vi/hRaIW4HNjYw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-156',
-      youtubeId: '2BCW7_2uYDg',
-      title: 'How To Draw The Fortnite Battle Bus',
-      thumbnail: 'https://i.ytimg.com/vi/2BCW7_2uYDg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-157',
-      youtubeId: 'HKM08PhcpVk',
-      title: 'How To Draw Drift From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/HKM08PhcpVk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-158',
-      youtubeId: 'KOkpBux31Bs',
-      title: 'How To Draw Spike From Brawl Stars',
-      thumbnail: 'https://i.ytimg.com/vi/KOkpBux31Bs/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-159',
-      youtubeId: 'bTBgTeCQ1B4',
-      title: 'How To Draw The Loot Llama From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/bTBgTeCQ1B4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-160',
-      youtubeId: 'VsSpgHtF0gA',
-      title: 'How To Draw Fishstick From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/VsSpgHtF0gA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-161',
-      youtubeId: 'rMTITetwbj4',
-      title: 'How To Draw Rox Skin From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/rMTITetwbj4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-162',
-      youtubeId: 'aTbXuZ_VcwE',
-      title: 'How To Draw Vendetta Skin From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/aTbXuZ_VcwE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-163',
-      youtubeId: 'gHNNHEHcK-A',
-      title: 'How To Draw Eternal Voyager From Fortnite (Cartoon)',
-      thumbnail: 'https://i.ytimg.com/vi/gHNNHEHcK-A/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-164',
-      youtubeId: 'PmtQ5Hq0FBU',
-      title: 'How To Draw Catalyst From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/PmtQ5Hq0FBU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-165',
-      youtubeId: '8hGCTHlhre4',
-      title: 'How To Draw X-Lord From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/8hGCTHlhre4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-166',
-      youtubeId: 'ij2xlhZ0Plo',
-      title: 'How To Draw Rippley From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/ij2xlhZ0Plo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-167',
-      youtubeId: 'NaEhsisXYb0',
-      title: 'How To Draw Monks From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/NaEhsisXYb0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-168',
-      youtubeId: 'aW-IGuxnO24',
-      title: 'How To Draw Bull Shark From Fortnite',
-      thumbnail: 'https://i.ytimg.com/vi/aW-IGuxnO24/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-169',
-      youtubeId: 'E3XYrY2QwW8',
-      title: 'How To Draw A Game Boy',
-      thumbnail: 'https://i.ytimg.com/vi/E3XYrY2QwW8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-170',
-      youtubeId: 'WRkzm0hzo1M',
-      title: 'How To Draw A Joystick',
-      thumbnail: 'https://i.ytimg.com/vi/WRkzm0hzo1M/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-171',
-      youtubeId: 'AQIx4UfYrJI',
-      title: 'How To Draw Link From Zelda',
-      thumbnail: 'https://i.ytimg.com/vi/AQIx4UfYrJI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-172',
-      youtubeId: 'So1FLuARZUc',
-      title: 'How To Draw Cappy The Hat From Mario Odyssey',
-      thumbnail: 'https://i.ytimg.com/vi/So1FLuARZUc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-173',
-      youtubeId: 'UA974Vlf8VA',
-      title: 'How To Draw Gorilla Tag',
-      thumbnail: 'https://i.ytimg.com/vi/UA974Vlf8VA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-174',
-      youtubeId: 'jgVsw3Wv35c',
-      title: 'How To Draw The Brawl Stars Logo',
-      thumbnail: 'https://i.ytimg.com/vi/jgVsw3Wv35c/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-175',
-      youtubeId: '-ViXpUYo3OU',
-      title: 'How To Draw A Minecraft Sword',
-      thumbnail: 'https://i.ytimg.com/vi/-ViXpUYo3OU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-176',
-      youtubeId: 't9t9tv4xulg',
-      title: 'How To Draw A Minecraft Creeper Face',
-      thumbnail: 'https://i.ytimg.com/vi/t9t9tv4xulg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-177',
-      youtubeId: 'Ho0e4Wo81h8',
-      title: 'How To Draw A Minecraft Pickaxe',
-      thumbnail: 'https://i.ytimg.com/vi/Ho0e4Wo81h8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-178',
-      youtubeId: 'mZkXGLqvL-c',
-      title: 'How To Draw Minecraft TNT',
-      thumbnail: 'https://i.ytimg.com/vi/mZkXGLqvL-c/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-179',
-      youtubeId: 'khIMbv66LvI',
-      title: 'How To Draw Mario Pixel Art',
-      thumbnail: 'https://i.ytimg.com/vi/khIMbv66LvI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-180',
-      youtubeId: 'i2583UNNLNY',
-      title: 'How To Draw A Game Controller For Kids',
-      thumbnail: 'https://i.ytimg.com/vi/i2583UNNLNY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-181',
-      youtubeId: 'TeQIEHQHOeY',
-      title: 'How To Draw A PS5 Controller',
-      thumbnail: 'https://i.ytimg.com/vi/TeQIEHQHOeY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-182',
-      youtubeId: '7UBxAtGSsvw',
-      title: 'How To Draw The Nintendo Switch 2',
-      thumbnail: 'https://i.ytimg.com/vi/7UBxAtGSsvw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-183',
-      youtubeId: 'DP7kf_4WZKU',
-      title: 'How To Draw Sneaky Sasquatch',
-      thumbnail: 'https://i.ytimg.com/vi/DP7kf_4WZKU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-184',
-      youtubeId: '7AB95qBsqew',
-      title: 'How To Draw A Koopa Troopa From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/7AB95qBsqew/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-185',
-      youtubeId: 'HZzu04vcL9c',
-      title: 'How To Draw Baby Mario | Happy Mario Day!',
-      thumbnail: 'https://i.ytimg.com/vi/HZzu04vcL9c/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-186',
-      youtubeId: '2yxnq_Q_bsI',
-      title: 'How To Draw Bowser Jr From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/2yxnq_Q_bsI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-187',
-      youtubeId: 'YBMDNsUPDEw',
-      title: 'How To Draw The Wonder Flower From Mario Bros Wonder',
-      thumbnail: 'https://i.ytimg.com/vi/YBMDNsUPDEw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-188',
-      youtubeId: 'CfwqtvJzLi0',
-      title: 'How To Draw An Elephant Fruit From Super Mario Wonder',
-      thumbnail: 'https://i.ytimg.com/vi/CfwqtvJzLi0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-189',
-      youtubeId: 'GjiD_AbRqVo',
-      title: 'How To Draw A Cheep Cheep From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/GjiD_AbRqVo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-190',
-      youtubeId: 'vSFcn1U4wNI',
-      title: 'How To Draw Paper Mario',
-      thumbnail: 'https://i.ytimg.com/vi/vSFcn1U4wNI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-191',
-      youtubeId: 'q15P6OE0EGk',
-      title: 'How To Draw Kamek Magic Koopa From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/q15P6OE0EGk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-192',
-      youtubeId: 'cyUk0GJHpDc',
-      title: 'How To Draw Princess Peach',
-      thumbnail: 'https://i.ytimg.com/vi/cyUk0GJHpDc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-193',
-      youtubeId: 'iPJeemfinZ8',
-      title: 'How To Draw Yoshi From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/iPJeemfinZ8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-194',
-      youtubeId: 'OoB6DQAauDo',
-      title: 'How To Draw A Blooper Squid From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/OoB6DQAauDo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-195',
-      youtubeId: 'qyM9gTutsFM',
-      title: 'How To Draw Bob omb From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/qyM9gTutsFM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-196',
-      youtubeId: 'aatw7r0VcaE',
-      title: 'How To Draw A Koopa Shell From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/aatw7r0VcaE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-197',
-      youtubeId: 'DrqvYTefUJM',
-      title: 'How To Draw Bullet Bill From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/DrqvYTefUJM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-198',
-      youtubeId: 'QGMz2e3MFxY',
-      title: 'How To Draw Bowser',
-      thumbnail: 'https://i.ytimg.com/vi/QGMz2e3MFxY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-199',
-      youtubeId: 'YASJd66bXFE',
-      title: 'How To Draw Paper Luigi From Mario Bros',
-      thumbnail: 'https://i.ytimg.com/vi/YASJd66bXFE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-200',
-      youtubeId: 'q21S4J4DZmY',
-      title: 'How To Draw A Fire Flower From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/q21S4J4DZmY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-201',
-      youtubeId: 'X0AZ_ZChv48',
-      title: 'How To Draw A Dino Piranha Plant From Mario',
-      thumbnail: 'https://i.ytimg.com/vi/X0AZ_ZChv48/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-202',
-      youtubeId: 'KcuANouCnk8',
-      title: 'How To Draw A Goomba From Mario Bros',
-      thumbnail: 'https://i.ytimg.com/vi/KcuANouCnk8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-203',
-      youtubeId: 'tIvHQ_ivkPY',
-      title: 'How To Draw A Violin',
-      thumbnail: 'https://i.ytimg.com/vi/tIvHQ_ivkPY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-204',
-      youtubeId: 'Qp3tnvm4a7k',
-      title: 'How To Draw A Grand Piano',
-      thumbnail: 'https://i.ytimg.com/vi/Qp3tnvm4a7k/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-205',
-      youtubeId: '-VerKMhktLg',
-      title: 'How To Draw A Drum Set',
-      thumbnail: 'https://i.ytimg.com/vi/-VerKMhktLg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-206',
-      youtubeId: 'Q9FvUXXVwAU',
-      title: 'How To Draw An Electric Guitar',
-      thumbnail: 'https://i.ytimg.com/vi/Q9FvUXXVwAU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-207',
-      youtubeId: 'lvP1nDeheUc',
-      title: 'How To Draw A Cyber Butterfly',
-      thumbnail: 'https://i.ytimg.com/vi/lvP1nDeheUc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-208',
-      youtubeId: '0G8_rk53wko',
-      title: 'How To Draw A Cyber Lion',
-      thumbnail: 'https://i.ytimg.com/vi/0G8_rk53wko/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-209',
-      youtubeId: 'zZnOiNVvTfc',
-      title: 'How To Draw A Gnome Sitting On A Mushroom',
-      thumbnail: 'https://i.ytimg.com/vi/zZnOiNVvTfc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-210',
-      youtubeId: 'WMDfEeksr14',
-      title: 'How To Draw A Unicorn Popsicle',
-      thumbnail: 'https://i.ytimg.com/vi/WMDfEeksr14/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-211',
-      youtubeId: 'jVkGOeN-HKI',
-      title: 'How To Draw A Cute Axolotl Mermaid',
-      thumbnail: 'https://i.ytimg.com/vi/jVkGOeN-HKI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-212',
-      youtubeId: 'QzyOIAzQQ90',
-      title: 'How To Draw A Watermelon Shark',
-      thumbnail: 'https://i.ytimg.com/vi/QzyOIAzQQ90/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-213',
-      youtubeId: '9U1zQ_oX5LU',
-      title: 'How To Draw A Cute Fall Fairy',
-      thumbnail: 'https://i.ytimg.com/vi/9U1zQ_oX5LU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-214',
-      youtubeId: 'mlZiIBNXmgw',
-      title: 'How To Draw A Mermaid Folding Surprise',
-      thumbnail: 'https://i.ytimg.com/vi/mlZiIBNXmgw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-215',
-      youtubeId: 'BiBAtvYwjGs',
-      title: 'How To Draw A Lepricorn For St. Patrick\'s Day',
-      thumbnail: 'https://i.ytimg.com/vi/BiBAtvYwjGs/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-216',
-      youtubeId: 'lyYtFNlQR90',
-      title: 'How To Draw A Princess Fairy Panda',
-      thumbnail: 'https://i.ytimg.com/vi/lyYtFNlQR90/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-217',
-      youtubeId: 'CoVpO6Wb4rs',
-      title: 'How To Draw A Mom And Baby Unicorn',
-      thumbnail: 'https://i.ytimg.com/vi/CoVpO6Wb4rs/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-218',
-      youtubeId: 'eFHwTD9eHyw',
-      title: 'How To Draw A Mythical Kitten Dragon',
-      thumbnail: 'https://i.ytimg.com/vi/eFHwTD9eHyw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-219',
-      youtubeId: 'TzifMl12ahk',
-      title: 'How To Draw An Ice Dragon - Advanced',
-      thumbnail: 'https://i.ytimg.com/vi/TzifMl12ahk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-220',
-      youtubeId: '1LyEd-nQj7k',
-      title: 'How To Draw A Mermaid Corgi',
-      thumbnail: 'https://i.ytimg.com/vi/1LyEd-nQj7k/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-221',
-      youtubeId: 'TBH3-tjHNHY',
-      title: 'How To Draw A Griffin',
-      thumbnail: 'https://i.ytimg.com/vi/TBH3-tjHNHY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-222',
-      youtubeId: 'GvAaVrEdsWQ',
-      title: 'How To Draw A Pandacorn (Panda Unicorn)',
-      thumbnail: 'https://i.ytimg.com/vi/GvAaVrEdsWQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-223',
-      youtubeId: '14L8XVjus3U',
-      title: 'How To Draw A Cute Phoenix',
-      thumbnail: 'https://i.ytimg.com/vi/14L8XVjus3U/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-224',
-      youtubeId: '_dxCu3yJEfc',
-      title: 'How To Draw A Lioncorn (Lion Unicorn)',
-      thumbnail: 'https://i.ytimg.com/vi/_dxCu3yJEfc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-225',
-      youtubeId: 'BP7zhrgp710',
-      title: 'How To Draw A Dragon Silhouette',
-      thumbnail: 'https://i.ytimg.com/vi/BP7zhrgp710/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-226',
-      youtubeId: 'KUXOQfh0ZKY',
-      title: 'How To Draw An Alicorn (Unicorn & Pegasus)',
-      thumbnail: 'https://i.ytimg.com/vi/KUXOQfh0ZKY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-227',
-      youtubeId: 'EhySLRE7o5E',
-      title: 'How To Draw King Merburger (Merman + Cheeseburger)',
-      thumbnail: 'https://i.ytimg.com/vi/EhySLRE7o5E/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-228',
-      youtubeId: '3J_jteLhBXA',
-      title: 'How To Draw A Mermaid Kitty- Preschool',
-      thumbnail: 'https://i.ytimg.com/vi/3J_jteLhBXA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-229',
-      youtubeId: 'sjU9tEobw78',
-      title: 'How To Draw A Unicorn Ice Cream Cone (Ice Cream-icorn)',
-      thumbnail: 'https://i.ytimg.com/vi/sjU9tEobw78/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-230',
-      youtubeId: '53s9aZ3KF5s',
-      title: 'How To Draw A Dragon (For Super Young Artists)',
-      thumbnail: 'https://i.ytimg.com/vi/53s9aZ3KF5s/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-231',
-      youtubeId: 'ANcwbdO-QYM',
-      title: 'How To Draw Chinese Dragon',
-      thumbnail: 'https://i.ytimg.com/vi/ANcwbdO-QYM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-232',
-      youtubeId: '5uZao8cqqRo',
-      title: 'How To Draw Agent P',
-      thumbnail: 'https://i.ytimg.com/vi/5uZao8cqqRo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-233',
-      youtubeId: 'B3-PKR2QJSw',
-      title: 'How To Draw Perry The Platypus',
-      thumbnail: 'https://i.ytimg.com/vi/B3-PKR2QJSw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-234',
-      youtubeId: 'vLvalljnJUc',
-      title: 'How To Draw The Easter Bunny Cartoon',
-      thumbnail: 'https://i.ytimg.com/vi/vLvalljnJUc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-235',
-      youtubeId: 'vLvDSfTySoA',
-      title: 'How To Draw A Unicorn (a cute and cuddly one)',
-      thumbnail: 'https://i.ytimg.com/vi/vLvDSfTySoA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-236',
-      youtubeId: 'ZkBODLrJkMw',
-      title: 'How To Draw A Troll',
-      thumbnail: 'https://i.ytimg.com/vi/ZkBODLrJkMw/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-237',
-      youtubeId: '5yzsPsqF8zA',
-      title: 'How To Draw An Alien by Chuckers',
-      thumbnail: 'https://i.ytimg.com/vi/5yzsPsqF8zA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-238',
-      youtubeId: 'C37fkE5GtMU',
-      title: 'How To Draw Elf On A Shelf',
-      thumbnail: 'https://i.ytimg.com/vi/C37fkE5GtMU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-239',
-      youtubeId: 'iLnO1LEnU6Q',
-      title: 'How To Draw The Grinch',
-      thumbnail: 'https://i.ytimg.com/vi/iLnO1LEnU6Q/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-240',
-      youtubeId: 'TW-dq6m9rfI',
-      title: 'How To Draw Hello Kitty',
-      thumbnail: 'https://i.ytimg.com/vi/TW-dq6m9rfI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-241',
-      youtubeId: '8PWZa9t-sqk',
-      title: 'How To Draw A Witch',
-      thumbnail: 'https://i.ytimg.com/vi/8PWZa9t-sqk/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-242',
-      youtubeId: 'GHvBEm7ku_s',
-      title: 'How To Draw The Grim Reaper for Halloween!',
-      thumbnail: 'https://i.ytimg.com/vi/GHvBEm7ku_s/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-243',
-      youtubeId: 'Y_x7UGFTcO8',
-      title: 'How To Draw A Robot Crab',
-      thumbnail: 'https://i.ytimg.com/vi/Y_x7UGFTcO8/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-244',
-      youtubeId: 'sO4-bPQH0XI',
-      title: 'How To Draw An Easter Bunny',
-      thumbnail: 'https://i.ytimg.com/vi/sO4-bPQH0XI/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-245',
-      youtubeId: 'WftGT_F3U-4',
-      title: 'How To Draw A Cupid',
-      thumbnail: 'https://i.ytimg.com/vi/WftGT_F3U-4/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-246',
-      youtubeId: 'wZHGxCjDXKU',
-      title: 'How To Draw Santa',
-      thumbnail: 'https://i.ytimg.com/vi/wZHGxCjDXKU/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-247',
-      youtubeId: 'kc_iugiP314',
-      title: 'How To Draw A Fairy',
-      thumbnail: 'https://i.ytimg.com/vi/kc_iugiP314/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-248',
-      youtubeId: 'kT3YJbP0pZA',
-      title: 'How To Draw A Mummy',
-      thumbnail: 'https://i.ytimg.com/vi/kT3YJbP0pZA/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-249',
-      youtubeId: 'jmfvmGbiICQ',
-      title: 'How To Draw Frankenstein',
-      thumbnail: 'https://i.ytimg.com/vi/jmfvmGbiICQ/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-250',
-      youtubeId: '1ksIegCk0Vg',
-      title: 'How To Draw A Dragon',
-      thumbnail: 'https://i.ytimg.com/vi/1ksIegCk0Vg/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-251',
-      youtubeId: 'GgENm6Uk55o',
-      title: 'How To Draw A Monster',
-      thumbnail: 'https://i.ytimg.com/vi/GgENm6Uk55o/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-252',
-      youtubeId: 'zVd5R8ooAkM',
-      title: 'How To Draw A Korok From Zelda',
-      thumbnail: 'https://i.ytimg.com/vi/zVd5R8ooAkM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-253',
-      youtubeId: 'Dn41j2pAN9o',
-      title: 'How To Draw A Rupee From Zelda',
-      thumbnail: 'https://i.ytimg.com/vi/Dn41j2pAN9o/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-254',
-      youtubeId: 'LNJqyHm95w0',
-      title: 'How To Draw A Cartoon Harry Potter And Hedwig',
-      thumbnail: 'https://i.ytimg.com/vi/LNJqyHm95w0/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-255',
-      youtubeId: 'fqYdXMtm8cE',
-      title: 'How to Draw Harry Potter Easy Chibi',
-      thumbnail: 'https://i.ytimg.com/vi/fqYdXMtm8cE/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-256',
-      youtubeId: 'Gnj02dDKYFc',
-      title: 'How To Draw Harry Potter',
-      thumbnail: 'https://i.ytimg.com/vi/Gnj02dDKYFc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-257',
-      youtubeId: 'T90B5oZ2DVM',
-      title: 'How to Draw Pokemon | Butterfree | Step-by-Step Tutorial',
-      thumbnail: 'https://i.ytimg.com/vi/T90B5oZ2DVM/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-258',
-      youtubeId: 'NK1Jt87PZ7w',
-      title: 'How to Draw Butterfree | Pokemon',
-      thumbnail: 'https://i.ytimg.com/vi/NK1Jt87PZ7w/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-259',
-      youtubeId: 'rEdna7P-uPo',
-      title: 'How To Draw  Butterfree From Pokemon | Coloring and Drawing For Kids',
-      thumbnail: 'https://i.ytimg.com/vi/rEdna7P-uPo/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-260',
-      youtubeId: 'TDINek931wY',
-      title: 'Pokemon Butterfree | How to Draw | Pokemon Coloring Book | ARTSY KIDS',
-      thumbnail: 'https://i.ytimg.com/vi/TDINek931wY/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-261',
-      youtubeId: 'zHynB8Ykq5k',
-      title: 'How To Draw Butterfree | Pokemon #012 | Easy Step By Step Drawing Tutorial',
-      thumbnail: 'https://i.ytimg.com/vi/zHynB8Ykq5k/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    }
-  ,
-    {
-      id: 'drawing-262',
-      youtubeId: 'SAmoCUCQr84',
-      title: '🦋 How to Draw Butterfree EASY!  Step by Step Pokémon Tutorial ✏️',
-      thumbnail: 'https://i.ytimg.com/vi/SAmoCUCQr84/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-263',
-      youtubeId: 'JqY7qbKwons',
-      title: 'How to Draw #012 BUTTERFREE | Narrated Easy Step-by-Step Tutorial | Pokemon Drawing Project',
-      thumbnail: 'https://i.ytimg.com/vi/JqY7qbKwons/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-    {
-      id: 'drawing-264',
-      youtubeId: 'fgr9KZ64TXc',
-      title: 'How to draw a T-REX',
-      thumbnail: 'https://i.ytimg.com/vi/fgr9KZ64TXc/hqdefault.jpg',
-      category: 'drawing',
-      addedDate: '2026-05-16'
-    },
-
-    // ===== SONGS CATEGORY =====
-    // --- Frozen ---
     {
       id: 'songs-1',
       youtubeId: 'L0MK7qz13bU',
@@ -2946,8 +1750,6 @@ class YouTubeService {
       category: 'songs',
       addedDate: '2026-05-16'
     },
-
-    // --- Moana ---
     {
       id: 'songs-6',
       youtubeId: 'rDhlGc6OcR8',
@@ -2980,8 +1782,6 @@ class YouTubeService {
       category: 'songs',
       addedDate: '2026-05-16'
     },
-
-    // --- Rapunzel / Tangled ---
     {
       id: 'songs-10',
       youtubeId: 'h9SAUq5-V7o',
@@ -3014,8 +1814,6 @@ class YouTubeService {
       category: 'songs',
       addedDate: '2026-05-16'
     },
-
-    // --- K-Pop Demon Hunters ---
     {
       id: 'songs-14',
       youtubeId: 'cWppAbqm9I8',
@@ -3075,10 +1873,25 @@ class YouTubeService {
     return this.categories.find(cat => cat.id === id);
   }
 
-  public getVideosByCategory(category: 'yoga' | 'drawing' | 'songs'): Video[] {
+  public getVideosByCategory(category: VideoCategory): Video[] {
     return this.videos
       .filter(video => video.category === category)
       .sort(this.compareByAddedDateDesc);
+  }
+
+  /**
+   * What the category screen should actually show.
+   *
+   * For rotating categories (drawing) this is a seeded, variety-constrained
+   * pick of 12 that changes twice a day; for everything else it is the whole
+   * list. Pass the seed from {@link halfDaySeed}; pass `null` and you get the
+   * full list, which is what a render with no clock reading yet should show.
+   */
+  public getVideosForDisplay(category: VideoCategory, seed: string | null): Video[] {
+    const all = this.getVideosByCategory(category);
+    const rotation = ROTATING_CATEGORIES[category];
+    if (!rotation || !seed) return all;
+    return pickRotation(all, rotation.size, seed, rotation.maxPerChannel, rotation.maxPerFranchise);
   }
 
   public getVideo(id: string): Video | undefined {
@@ -3093,7 +1906,7 @@ class YouTubeService {
    * The most recent addedDate across all videos in a category — videos
    * matching this date are considered the current "new batch".
    */
-  public getLatestAddedDate(category?: 'yoga' | 'drawing' | 'songs'): string | undefined {
+  public getLatestAddedDate(category?: VideoCategory): string | undefined {
     const pool = category
       ? this.videos.filter(v => v.category === category)
       : this.videos;

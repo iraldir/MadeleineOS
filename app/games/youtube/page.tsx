@@ -4,7 +4,7 @@ import { useState } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { youtubeService } from "@/services/youtubeService";
+import { youtubeService, halfDaySeed, VideoCategory } from "@/services/youtubeService";
 import { currencyService } from "@/services";
 import CategoryView from "./CategoryView";
 import VideoPlayer from "./VideoPlayer";
@@ -16,8 +16,14 @@ export default function YouTubeApp() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [_showInsufficientCoins, setShowInsufficientCoins] = useState(false);
+  // Which half-day's line-up to show. Read off the clock here, in a click
+  // handler, rather than during render: the page is a client component that
+  // Next still prerenders, so a render that looked at the clock would bake the
+  // build-time line-up into the HTML and mismatch on hydration.
+  const [rotationSeed, setRotationSeed] = useState<string | null>(null);
 
   const handleSelectCategory = (categoryId: string) => {
+    setRotationSeed(halfDaySeed(new Date()));
     setSelectedCategory(categoryId);
     setViewMode("videos");
   };
@@ -49,7 +55,7 @@ export default function YouTubeApp() {
 
   const categories = youtubeService.getCategories();
   const videos = selectedCategory
-    ? youtubeService.getVideosByCategory(selectedCategory as "yoga" | "drawing")
+    ? youtubeService.getVideosForDisplay(selectedCategory as VideoCategory, rotationSeed)
     : [];
   const currentVideo = selectedVideoId
     ? youtubeService.getVideo(selectedVideoId)

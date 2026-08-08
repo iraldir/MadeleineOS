@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import styles from './page.module.css';
-import { Category, Video } from '@/services/youtubeService';
+import { Category, Video, VideoCategory, youtubeService } from '@/services/youtubeService';
 import { currencyService } from '@/services';
 
 interface CategoryViewProps {
@@ -13,13 +13,13 @@ interface CategoryViewProps {
 export default function CategoryView({ category, videos, onSelectVideo }: CategoryViewProps) {
   const [currentCoins, setCurrentCoins] = useState(0);
 
-  const latestAddedDate = useMemo(() => {
-    let latest: string | undefined;
-    for (const v of videos) {
-      if (v.addedDate && (!latest || v.addedDate > latest)) latest = v.addedDate;
-    }
-    return latest;
-  }, [videos]);
+  // Taken across the whole category, not just the videos on screen: drawing
+  // shows a rotating subset, and a rotation that happens to miss the newest
+  // batch shouldn't promote an older video to "NEW".
+  const latestAddedDate = useMemo(
+    () => youtubeService.getLatestAddedDate(category.id as VideoCategory),
+    [category.id]
+  );
 
   useEffect(() => {
     setCurrentCoins(currencyService.getCoins());
