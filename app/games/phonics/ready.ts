@@ -3,6 +3,7 @@
 // held back from the game until its picture has been generated.
 export const READY_WORD_IMAGES = new Set<string>([
   "anna",
+  "ariel",
   "baby",
   "ball",
   "balloon",
@@ -30,6 +31,7 @@ export const READY_WORD_IMAGES = new Set<string>([
   "bug",
   "bus",
   "butterfly",
+  "buzz",
   "cake",
   "castle",
   "cat",
@@ -37,6 +39,7 @@ export const READY_WORD_IMAGES = new Set<string>([
   "cheese",
   "chick",
   "chocolate",
+  "cinderella",
   "clock",
   "cloud",
   "coat",
@@ -96,6 +99,7 @@ export const READY_WORD_IMAGES = new Set<string>([
   "mario",
   "mermaid",
   "milk",
+  "moana",
   "monster",
   "moon",
   "mountain",
@@ -124,6 +128,7 @@ export const READY_WORD_IMAGES = new Set<string>([
   "rabbit",
   "rain",
   "rainbow",
+  "rapunzel",
   "rat",
   "red",
   "ring",
@@ -178,5 +183,6 @@ export const READY_WORD_IMAGES = new Set<string>([
   "window",
   "wing",
   "wizard",
+  "woody",
   "yoshi",
 ]);

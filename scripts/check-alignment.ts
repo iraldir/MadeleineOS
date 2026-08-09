@@ -44,3 +44,22 @@ for (const [sentence, heard, expected] of joins) {
   console.log(`${good ? "ok  " : "BAD "} ${r.matchedCount}/${r.total} passed=${r.passed} (want ${expected})  "${heard}"`);
 }
 console.log(`${ok2}/${joins.length} split-join cases as expected`);
+
+// Homophones: the recogniser cannot hear the difference, so neither should we.
+const homophones: [string, string, boolean][] = [
+  ["The rat ate all my jam.", "the rat eight all my jam", true],   // the real failure
+  ["The rat ate all my jam.", "the rat ate all my jam", true],
+  ["I can see the sea.", "i can sea the see", true],
+  ["We went to the park.", "we went two the park", true],
+  ["He has four red hats.", "he has for red hats", true],
+  ["The knight rode at night.", "the night road at knight", true],
+  ["The rat ate all my jam.", "the rat all my jam", false],        // genuinely skipped
+];
+let ok3 = 0;
+for (const [sentence, heard, expected] of homophones) {
+  const r = alignTranscript(sentence, heard);
+  const good = r.passed === expected;
+  if (good) ok3++;
+  console.log(`${good ? "ok  " : "BAD "} ${r.matchedCount}/${r.total} passed=${r.passed} (want ${expected})  "${heard}"`);
+}
+console.log(`${ok3}/${homophones.length} homophone cases as expected`);

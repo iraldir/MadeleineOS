@@ -153,7 +153,7 @@ export const SENTENCES: ReadingSentence[] = [
     id: "elsa-snowman",
     text: "Elsa made a big snowman.",
     alternates: { elsa: ["elsie", "else"] },
-    imagePrompt: scene("Queen Elsa from Frozen in her blue dress beside a big round smiling snowman in the snow."),
+    imagePrompt: scene("a snow queen in a sparkling pale blue gown with a long blonde braid, beside a big round smiling snowman in the snow."),
     level: "easy",
   },
   {
@@ -317,7 +317,7 @@ export const SENTENCES: ReadingSentence[] = [
     id: "woody-buzz",
     text: "Woody and Buzz play in the box.",
     alternates: { woody: ["woodie", "would he"], buzz: ["bus", "buzzed"] },
-    imagePrompt: scene("Woody the cowboy toy and Buzz Lightyear from Toy Story playing inside a big cardboard box."),
+    imagePrompt: scene("a cowboy rag doll toy in a plaid shirt and a toy astronaut in a silver spacesuit, playing together inside a big cardboard box."),
     level: "medium",
   },
   {
@@ -436,14 +436,14 @@ export const SENTENCES: ReadingSentence[] = [
     id: "rapunzel-hair",
     text: "Rapunzel let down her very long hair.",
     alternates: { rapunzel: ["repunzel", "rapunsel", "rapunzo"] },
-    imagePrompt: scene("Rapunzel from Disney Tangled leaning out of a tower window with her golden hair tumbling far down."),
+    imagePrompt: scene("a princess leaning out of a tall stone tower window with her extremely long golden hair tumbling far down."),
     level: "hard",
   },
   {
     id: "moana-ocean",
     text: "Moana sailed her boat across the ocean.",
     alternates: { moana: ["moanna", "mowana", "banana"] },
-    imagePrompt: scene("Moana the Disney islander heroine steering her small sailing canoe over bright ocean waves."),
+    imagePrompt: scene("a brave Polynesian island girl steering her small wooden sailing canoe over bright ocean waves."),
     level: "hard",
   },
   {

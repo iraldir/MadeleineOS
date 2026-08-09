@@ -33,12 +33,112 @@ const DIGIT_WORDS: Record<string, string> = {
 /** Words the recogniser drops or invents constantly; they cost nothing. */
 const FILLER = new Set(["um", "uh", "er", "erm", "ah", "mm", "hmm"]);
 
+/**
+ * Homophones, folded onto one spelling.
+ *
+ * "The rat ate all my jam" kept being heard as "eight all my jam" and marked
+ * wrong — but she read it perfectly. No recogniser can tell "ate" from "eight";
+ * they are the same sound, and which spelling comes back is the recogniser's
+ * guess about meaning, not a fact about what she said. So every group below
+ * collapses to a single form before anything is compared, and she is never
+ * marked down for a distinction that is not audible.
+ *
+ * Each line is one group; the first entry is arbitrary — only sameness matters.
+ */
+const HOMOPHONE_GROUPS = [
+  ["ate", "eight"],
+  ["to", "too", "two"],
+  ["for", "four", "fore"],
+  ["there", "their", "theyre"],
+  ["here", "hear"],
+  ["see", "sea"],
+  ["be", "bee"],
+  ["blue", "blew"],
+  ["know", "no"],
+  ["new", "knew"],
+  ["one", "won"],
+  ["right", "write", "rite"],
+  ["sun", "son"],
+  ["so", "sew"],
+  ["tail", "tale"],
+  ["wait", "weight"],
+  ["way", "weigh"],
+  ["week", "weak"],
+  ["wood", "would"],
+  ["our", "hour"],
+  ["by", "buy", "bye"],
+  ["flower", "flour"],
+  ["hair", "hare"],
+  ["made", "maid"],
+  ["mail", "male"],
+  ["meat", "meet"],
+  ["pair", "pear", "pare"],
+  ["plain", "plane"],
+  ["rain", "reign", "rein"],
+  ["road", "rode", "rowed"],
+  ["sail", "sale"],
+  ["some", "sum"],
+  ["whole", "hole"],
+  ["red", "read"],
+  ["bear", "bare"],
+  ["deer", "dear"],
+  ["tea", "tee"],
+  ["night", "knight"],
+  ["not", "knot"],
+  ["nose", "knows"],
+  ["eye", "i"],
+  ["ant", "aunt"],
+  ["ball", "bawl"],
+  ["break", "brake"],
+  ["die", "dye"],
+  ["fair", "fare"],
+  ["flea", "flee"],
+  ["great", "grate"],
+  ["grown", "groan"],
+  ["heel", "heal"],
+  ["hi", "high"],
+  ["in", "inn"],
+  ["main", "mane"],
+  ["peace", "piece"],
+  ["poor", "pour", "pore", "paw"],
+  ["real", "reel"],
+  ["ring", "wring"],
+  ["root", "route"],
+  ["rose", "rows"],
+  ["seem", "seam"],
+  ["steal", "steel"],
+  ["sweet", "suite"],
+  ["threw", "through"],
+  ["thrown", "throne"],
+  ["toe", "tow"],
+  ["waist", "waste"],
+  ["which", "witch"],
+  ["your", "youre"],
+  ["its", "it's"],
+  ["bored", "board"],
+  ["cheap", "cheep"],
+  ["chews", "choose"],
+  ["hi", "high"],
+  ["mist", "missed"],
+  ["stair", "stare"],
+  ["tide", "tied"],
+];
+
+const HOMOPHONES = new Map<string, string>();
+for (const group of HOMOPHONE_GROUPS) {
+  const canonical = group[0].replace(/[^a-z0-9]/g, "");
+  for (const word of group) {
+    HOMOPHONES.set(word.replace(/[^a-z0-9]/g, ""), canonical);
+  }
+}
+
 export function normalizeWord(raw: string): string {
   const cleaned = raw
     .toLowerCase()
     .replace(/[’']/g, "")
     .replace(/[^a-z0-9]/g, "");
-  return DIGIT_WORDS[cleaned] ?? cleaned;
+  const spelled = DIGIT_WORDS[cleaned] ?? cleaned;
+  return HOMOPHONES.get(spelled) ?? spelled;
 }
 
 export function tokenize(text: string): string[] {

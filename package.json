@@ -38,7 +38,8 @@
     "sentences:check-speech": "tsx scripts/check-scribe-matching.ts",
     "sentences:check-matching": "tsx scripts/check-alignment.ts",
     "media:ready": "tsx scripts/generate-ready-media.ts",
-    "media:check-ready": "tsx scripts/check-ready-media.ts"
+    "media:check-ready": "tsx scripts/check-ready-media.ts",
+    "media:missing": "tsx scripts/generate-missing-images.ts"
   },
   "dependencies": {
     "@google/genai": "^1.20.0",

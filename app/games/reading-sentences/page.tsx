@@ -79,11 +79,10 @@ export default function ReadingSentencesGame() {
 
     const newStreak = streakRef.current + 1;
     setStreak(newStreak);
+    // A coin only for a new best, so it stays worth something.
     if (newStreak > highScoreRef.current) {
       setHighScore(newStreak);
       localStorage.setItem(HIGH_SCORE_KEY, newStreak.toString());
-    }
-    if (newStreak % 2 === 0) {
       currencyService.addCoins(1);
       celebrationService.quickBurst();
     } else {
