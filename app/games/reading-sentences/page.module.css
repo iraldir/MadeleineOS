@@ -450,3 +450,15 @@
     font-size: 3.5rem;
   }
 }
+
+/* The reward image, fetched during reading and kept out of sight. It has to be
+   really rendered for next/image to request it, but must take up no room and
+   never be announced. */
+.rewardPreload {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}

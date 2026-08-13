@@ -90,7 +90,7 @@ export default function ReadingSentencesGame() {
 
     setMatchedWords(displayWords(current.text).map(() => true));
     setPhase("success");
-    setTimeout(() => advance(current, newStreak), 3500);
+    setTimeout(() => advance(current, newStreak), 6000);
   }, [advance]);
 
   const handleFailure = useCallback(() => {
@@ -257,6 +257,26 @@ export default function ReadingSentencesGame() {
         </div>
       ) : (
         <div className={styles.gameArea}>
+          {/*
+            Fetch the reward while she is still reading, so it is already there
+            the moment she finishes rather than blanking for a beat first.
+            It is rendered rather than preloaded by URL on purpose: next/image
+            serves an optimised URL, so a plain preload of the .webp would fetch
+            something the <Image> below never asks for. Same `sizes`, same
+            candidate, one download.
+          */}
+          {!imageBroken && (
+            <div className={styles.rewardPreload} aria-hidden="true">
+              <Image
+                src={sentenceImage(sentence)}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 92vw, 70vw"
+                onError={() => setImageBroken(true)}
+              />
+            </div>
+          )}
+
           <p className={styles.sentenceCard}>
             {words.map((word, index) => (
               <span

@@ -216,6 +216,19 @@ export default function PhonicsGame() {
         </div>
       ) : (
         <div className={styles.gameArea}>
+          {/* Fetched while she works the word out, so the picture is already
+              there when she gets it. Rendered rather than preloaded by URL:
+              next/image serves an optimised URL, so preloading the .webp would
+              fetch something the <Image> above never asks for. */}
+          <div className={styles.rewardPreload} aria-hidden="true">
+            <Image
+              src={imgSrc}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 80vw, 60vh"
+            />
+          </div>
+
           <div className={styles.wordCard}>{currentWord.word}</div>
 
           <div className={styles.interim}>
