@@ -41,6 +41,11 @@ export default function CoinAnimation({ transaction, onComplete }: CoinAnimation
   return (
     <div className={`${styles.overlay} ${isEarning ? styles.earn : styles.spend}`}>
       <div className={styles.animationContainer}>
+        {/* The coin, the amount and the message travel together as one small
+            card in the corner. Centred, they landed on top of whatever the game
+            was showing — on the reading games, squarely across the picture she
+            had just earned and the sentence she had just read. */}
+        <div className={styles.toast}>
         {/* Main coin animation */}
         <div className={styles.mainCoinWrapper}>
           {coins.map((index) => (
@@ -76,7 +81,8 @@ export default function CoinAnimation({ transaction, onComplete }: CoinAnimation
             </>
           )}
         </div>
-        
+        </div>
+
         {/* Decorative elements for earning */}
         {isEarning && (
           <>
@@ -86,7 +92,10 @@ export default function CoinAnimation({ transaction, onComplete }: CoinAnimation
                   key={i}
                   className={styles.sparkle}
                   style={{
-                    left: `${10 + Math.random() * 80}%`,
+                    // Kept to the margins: the middle of the screen is where the
+                    // game puts the thing she just earned, and a sparkle sitting
+                    // on a word is the same problem in miniature.
+                    left: `${i % 2 === 0 ? 2 + Math.random() * 16 : 82 + Math.random() * 16}%`,
                     top: `${10 + Math.random() * 80}%`,
                     animationDelay: `${Math.random() * 1}s`,
                     fontSize: `${20 + Math.random() * 30}px`
@@ -102,7 +111,7 @@ export default function CoinAnimation({ transaction, onComplete }: CoinAnimation
                   key={i}
                   className={styles.star}
                   style={{
-                    left: `${Math.random() * 100}%`,
+                    left: `${i % 2 === 0 ? 1 + Math.random() * 18 : 81 + Math.random() * 18}%`,
                     animationDelay: `${Math.random() * 2}s`,
                     fontSize: `${30 + Math.random() * 40}px`
                   }}

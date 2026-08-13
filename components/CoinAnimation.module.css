@@ -21,12 +21,50 @@
   }
 }
 
-.overlay.earn {
-  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.3), rgba(255, 223, 0, 0.1));
+/* No full-screen tint: it washed the reward illustration yellow for the whole
+   celebration. The toast below provides its own contrast instead. */
+.overlay.earn,
+.overlay.spend {
+  background: none;
 }
 
-.overlay.spend {
-  background: radial-gradient(circle at center, rgba(147, 112, 219, 0.3), rgba(138, 43, 226, 0.1));
+/* Docked under the coin balance in the top right, which is where the coins are
+   going — and, more to the point, nowhere near the middle of the screen. */
+.toast {
+  position: absolute;
+  top: 6.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 1.75rem 1.25rem;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  /* Above the falling stars, which are later siblings and would otherwise
+     drift across the card. */
+  z-index: 20;
+  animation: toastIn 0.4s cubic-bezier(0.22, 1.4, 0.36, 1) both,
+    toastOut 0.45s ease-in 2.35s both;
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.94);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .animationContainer {
@@ -42,7 +80,8 @@
 /* Main coin animations */
 .mainCoinWrapper {
   position: relative;
-  margin-bottom: 60px;
+  width: 64px;
+  height: 64px;
 }
 
 .coin {
@@ -55,7 +94,7 @@
 /* Sized down from 150px: a coin is now only given for a new best, so it wants
    to read as a small bright reward rather than fill the screen. */
 .coinEmoji {
-  font-size: 80px;
+  font-size: 52px;
   display: block;
   filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.7));
 }
@@ -67,7 +106,7 @@
 
 @keyframes coinEarnAnimation {
   0% {
-    transform: translate(-50%, 500px) scale(0.5) rotate(0deg);
+    transform: translate(-50%, 90px) scale(0.5) rotate(0deg);
     opacity: 0;
   }
   20% {
@@ -90,7 +129,7 @@
   }
   100% {
     transform: translate(-50%, -50%) scale(1) rotate(360deg);
-    opacity: 0;
+    opacity: 1;
   }
 }
 
@@ -109,23 +148,18 @@
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -400px) scale(0) rotate(720deg);
+    transform: translate(-50%, -140px) scale(0) rotate(720deg);
     opacity: 0;
   }
 }
 
 /* Amount display */
 .amountDisplay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   gap: 10px;
   font-family: var(--font-schoolbell);
   font-weight: bold;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
   z-index: 10;
   pointer-events: none;
 }
@@ -141,62 +175,58 @@
 }
 
 .sign {
-  font-size: 52px;
+  font-size: 26px;
 }
 
 .number {
-  font-size: 64px;
+  font-size: 32px;
 }
 
 @keyframes amountPop {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: scale(0);
     opacity: 0;
   }
   20% {
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: scale(1.5);
     opacity: 1;
   }
   40% {
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: scale(0.9);
   }
   60% {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: scale(1.1);
   }
   80% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
   }
   100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0;
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
 @keyframes amountShrink {
   0% {
-    transform: translate(-50%, -50%) scale(0);
+    transform: scale(0);
     opacity: 0;
   }
   30% {
-    transform: translate(-50%, -50%) scale(1.2);
+    transform: scale(1.2);
     opacity: 1;
   }
   80% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: scale(0.8);
     opacity: 0;
   }
 }
 
 /* Messages */
 .message {
-  position: absolute;
-  bottom: 20%;
-  left: 50%;
-  transform: translateX(-50%);
   text-align: center;
   z-index: 11;
   animation: messageSlideIn 0.5s ease-out forwards;
@@ -204,28 +234,26 @@
 
 @keyframes messageSlideIn {
   from {
-    transform: translateX(-50%) translateY(100px);
+    transform: translateY(12px);
     opacity: 0;
   }
   to {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }
 
 .earnTitle {
-  font-size: 72px;
-  color: #FFD700;
+  font-size: 30px;
+  color: #b8860b;
   margin: 0;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
   animation: titlePulse 1.5s ease-in-out infinite;
 }
 
 .spendTitle {
-  font-size: 72px;
-  color: #9C27B0;
+  font-size: 30px;
+  color: #7b1fa2;
   margin: 0;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
   animation: titleWave 1.5s ease-in-out infinite;
 }
 
@@ -248,10 +276,9 @@
 }
 
 .earnSubtitle, .spendSubtitle {
-  font-size: 36px;
-  margin: 10px 0;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: 17px;
+  margin: 2px 0 0;
+  color: #7a5c00;
 }
 
 /* Sparkles for earning */
@@ -347,7 +374,13 @@
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .coinEmoji {
-    font-size: 100px;
+    font-size: 44px;
+  }
+
+  .toast {
+    top: 5.5rem;
+    right: 1rem;
+    padding: 0.75rem 1.25rem 1rem;
   }
   
   .sign {
@@ -359,10 +392,10 @@
   }
   
   .earnTitle, .spendTitle {
-    font-size: 48px;
-  }
-  
-  .earnSubtitle, .spendSubtitle {
     font-size: 24px;
+  }
+
+  .earnSubtitle, .spendSubtitle {
+    font-size: 15px;
   }
 }
