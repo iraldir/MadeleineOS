@@ -1,151 +1,75 @@
 /**
- * Whole-sentence speech matching.
+ * Deciding whether she read it.
  *
  * A six-year-old reading aloud in English with a French accent, through a
  * recogniser that guesses, will never produce the target string exactly. So we
  * never compare strings. Instead we align what was heard against the words of
- * the sentence, in order, allowing for:
+ * the target, in order, allowing for:
  *
  *   - misspellings and mishearings   ("draggon" for "dragon")   — edit distance
- *   - words it split or joined       ("cup cake" / "cupcake")   — join/split
+ *   - homophones                     ("eight" for "ate")        — folded to one
+ *   - words split or joined          ("cup cake" / "cupcake")   — join/split
  *   - digits written as numerals     ("6" for "six")            — normalisation
  *
  * She has to read every word — skipping "the" is still not reading the
  * sentence. The forgiveness sits at the level of the individual word instead:
  * one she says but the recogniser garbles still counts, so she is never
  * punished for the microphone's mistakes, only for her own.
- */
-
-const DIGIT_WORDS: Record<string, string> = {
-  "0": "zero",
-  "1": "one",
-  "2": "two",
-  "3": "three",
-  "4": "four",
-  "5": "five",
-  "6": "six",
-  "7": "seven",
-  "8": "eight",
-  "9": "nine",
-  "10": "ten",
-};
-
-/** Words the recogniser drops or invents constantly; they cost nothing. */
-const FILLER = new Set(["um", "uh", "er", "erm", "ah", "mm", "hmm"]);
-
-/**
- * Homophones, folded onto one spelling.
  *
- * "The rat ate all my jam" kept being heard as "eight all my jam" and marked
- * wrong — but she read it perfectly. No recogniser can tell "ate" from "eight";
- * they are the same sound, and which spelling comes back is the recogniser's
- * guess about meaning, not a fact about what she said. So every group below
- * collapses to a single form before anything is compared, and she is never
- * marked down for a distinction that is not audible.
- *
- * Each line is one group; the first entry is arbitrary — only sameness matters.
+ * This works the same for one word as for a whole sentence, which is why both
+ * reading games share it.
  */
-const HOMOPHONE_GROUPS = [
-  ["ate", "eight"],
-  ["to", "too", "two"],
-  ["for", "four", "fore"],
-  ["there", "their", "theyre"],
-  ["here", "hear"],
-  ["see", "sea"],
-  ["be", "bee"],
-  ["blue", "blew"],
-  ["know", "no"],
-  ["new", "knew"],
-  ["one", "won"],
-  ["right", "write", "rite"],
-  ["sun", "son"],
-  ["so", "sew"],
-  ["tail", "tale"],
-  ["wait", "weight"],
-  ["way", "weigh"],
-  ["week", "weak"],
-  ["wood", "would"],
-  ["our", "hour"],
-  ["by", "buy", "bye"],
-  ["flower", "flour"],
-  ["hair", "hare"],
-  ["made", "maid"],
-  ["mail", "male"],
-  ["meat", "meet"],
-  ["pair", "pear", "pare"],
-  ["plain", "plane"],
-  ["rain", "reign", "rein"],
-  ["road", "rode", "rowed"],
-  ["sail", "sale"],
-  ["some", "sum"],
-  ["whole", "hole"],
-  ["red", "read"],
-  ["bear", "bare"],
-  ["deer", "dear"],
-  ["tea", "tee"],
-  ["night", "knight"],
-  ["not", "knot"],
-  ["nose", "knows"],
-  ["eye", "i"],
-  ["ant", "aunt"],
-  ["ball", "bawl"],
-  ["break", "brake"],
-  ["die", "dye"],
-  ["fair", "fare"],
-  ["flea", "flee"],
-  ["great", "grate"],
-  ["grown", "groan"],
-  ["heel", "heal"],
-  ["hi", "high"],
-  ["in", "inn"],
-  ["main", "mane"],
-  ["peace", "piece"],
-  ["poor", "pour", "pore", "paw"],
-  ["real", "reel"],
-  ["ring", "wring"],
-  ["root", "route"],
-  ["rose", "rows"],
-  ["seem", "seam"],
-  ["steal", "steel"],
-  ["sweet", "suite"],
-  ["threw", "through"],
-  ["thrown", "throne"],
-  ["toe", "tow"],
-  ["waist", "waste"],
-  ["which", "witch"],
-  ["your", "youre"],
-  ["its", "it's"],
-  ["bored", "board"],
-  ["cheap", "cheep"],
-  ["chews", "choose"],
-  ["hi", "high"],
-  ["mist", "missed"],
-  ["stair", "stare"],
-  ["tide", "tied"],
-];
+import { DEFAULT_LANGUAGE, LANGUAGES, type SpeechLanguage } from "./languages";
 
-const HOMOPHONES = new Map<string, string>();
-for (const group of HOMOPHONE_GROUPS) {
-  const canonical = group[0].replace(/[^a-z0-9]/g, "");
-  for (const word of group) {
-    HOMOPHONES.set(word.replace(/[^a-z0-9]/g, ""), canonical);
+interface Tables {
+  digits: Record<string, string>;
+  filler: Set<string>;
+  homophones: Map<string, string>;
+}
+
+const strip = (word: string) => word.replace(/[^a-z0-9à-ÿ]/g, "");
+
+const TABLES = new Map<SpeechLanguage, Tables>();
+
+function tablesFor(language: SpeechLanguage): Tables {
+  const cached = TABLES.get(language);
+  if (cached) return cached;
+
+  const config = LANGUAGES[language] ?? LANGUAGES[DEFAULT_LANGUAGE];
+  const homophones = new Map<string, string>();
+  for (const group of config.homophones) {
+    const canonical = strip(group[0].toLowerCase());
+    for (const word of group) homophones.set(strip(word.toLowerCase()), canonical);
   }
+  const tables: Tables = {
+    digits: config.digits,
+    filler: new Set(config.filler.map((f) => strip(f))),
+    homophones,
+  };
+  TABLES.set(language, tables);
+  return tables;
 }
 
-export function normalizeWord(raw: string): string {
-  const cleaned = raw
-    .toLowerCase()
-    .replace(/[’']/g, "")
-    .replace(/[^a-z0-9]/g, "");
-  const spelled = DIGIT_WORDS[cleaned] ?? cleaned;
-  return HOMOPHONES.get(spelled) ?? spelled;
+export function normalizeWord(
+  raw: string,
+  language: SpeechLanguage = DEFAULT_LANGUAGE
+): string {
+  const tables = tablesFor(language);
+  // Apostrophes go before stripping so "c'est" and "cest" land together.
+  const cleaned = strip(raw.toLowerCase().replace(/[’']/g, ""));
+  const spelled = tables.digits[cleaned] ?? cleaned;
+  return tables.homophones.get(spelled) ?? spelled;
 }
 
-export function tokenize(text: string): string[] {
+export function tokenize(
+  text: string,
+  language: SpeechLanguage = DEFAULT_LANGUAGE
+): string[] {
+  const { filler } = tablesFor(language);
   return text
     .split(/\s+/)
-    .map(normalizeWord)
-    .filter((w) => w.length > 0 && !FILLER.has(w));
+    .map((word) => normalizeWord(word, language))
+    .filter((w) => w.length > 0 && !filler.has(w));
 }
 
 /** The words of the sentence exactly as they should be shown, with punctuation. */
@@ -234,7 +158,8 @@ function alignFrom(
   target: string[],
   spoken: string[],
   start: number,
-  alternates?: Record<string, string[]>
+  alternates?: Record<string, string[]>,
+  language: SpeechLanguage = DEFAULT_LANGUAGE
 ): boolean[] {
   const matched = new Array<boolean>(target.length).fill(false);
 
@@ -243,7 +168,7 @@ function alignFrom(
 
   for (let i = 0; i < target.length; i++) {
     const word = target[i];
-    const alts = alternates?.[word]?.map(normalizeWord);
+    const alts = alternates?.[word]?.map((a) => normalizeWord(a, language));
     const limit = Math.min(spoken.length, cursor + LOOKAHEAD + 1);
 
     for (let j = cursor; j < limit; j++) {
@@ -285,15 +210,16 @@ function alignFrom(
 export function alignTranscript(
   sentenceText: string,
   transcript: string,
-  alternates?: Record<string, string[]>
+  alternates?: Record<string, string[]>,
+  language: SpeechLanguage = DEFAULT_LANGUAGE
 ): AlignmentResult {
-  const target = tokenize(sentenceText);
-  const spoken = tokenize(transcript);
+  const target = tokenize(sentenceText, language);
+  const spoken = tokenize(transcript, language);
 
   let matched = new Array<boolean>(target.length).fill(false);
   let best = -1;
   for (let start = 0; start < Math.max(1, spoken.length); start++) {
-    const attempt = alignFrom(target, spoken, start, alternates);
+    const attempt = alignFrom(target, spoken, start, alternates, language);
     const count = attempt.filter(Boolean).length;
     if (count > best) {
       best = count;
@@ -312,4 +238,17 @@ export function alignTranscript(
   const passed = total > 0 && matchedCount === total;
 
   return { matched, matchedCount, total, score, passed };
+}
+
+/**
+ * Fold a fresh alignment into the one already on screen.
+ *
+ * Interim transcripts are revised as more audio arrives, so a word can be heard
+ * and then un-heard — "The dragon's" becoming "The dragon sat on a big rock."
+ * is a real example. Letting a word go dark again would be worse than never
+ * lighting it: she waits for the chime before reading on, so a word that
+ * un-chimes stops her dead. Once a word has landed, it stays landed.
+ */
+export function mergeSticky(previous: boolean[], fresh: boolean[]): boolean[] {
+  return fresh.map((isMatched, i) => isMatched || previous[i] === true);
 }

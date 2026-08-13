@@ -9,8 +9,7 @@ import {
   pickNextSentence,
   sentenceImage,
 } from "./sentences";
-import { displayWords } from "./matching";
-import { useSentenceSpeech } from "./useSentenceSpeech";
+import { displayWords, useSpeechRecognition } from "@/lib/speech";
 import { playWordChime, playSentenceComplete } from "./wordChime";
 import {
   audioService,
@@ -99,8 +98,8 @@ export default function ReadingSentencesGame() {
     setPhase((p) => (p === "retry" ? "gameover" : "retry"));
   }, []);
 
-  const speech = useSentenceSpeech({
-    lang: "en-US",
+  const speech = useSpeechRecognition({
+    language: "en",
     timeoutMs: LISTEN_MS,
     onProgress: (matched) => setMatchedWords(matched),
     onResult: (result, transcript) => {
@@ -120,7 +119,7 @@ export default function ReadingSentencesGame() {
     setMatchedWords([]);
     setLastHeard("");
     setPhase("listening");
-    speech.start(current.text, current.alternates);
+    speech.start({ text: current.text, alternates: current.alternates });
   }, [speech]);
 
   const handleMicTap = useCallback(() => {
@@ -193,7 +192,10 @@ export default function ReadingSentencesGame() {
     );
   }
 
-  if (!speech.isSupported) {
+  // Only shown once listening has actually been tried and failed — there is no
+  // second recogniser behind this one, so say plainly that it is not working
+  // rather than let her read to something that is not listening.
+  if (speech.status === "unavailable") {
     return (
       <main className={styles.main}>
         <nav className={styles.nav}>
@@ -202,8 +204,8 @@ export default function ReadingSentencesGame() {
           </Link>
         </nav>
         <div className={styles.unsupported}>
-          <h1>Speech recognition isn&apos;t supported</h1>
-          <p>Open this game in Chrome, Edge, or Safari to play.</p>
+          <h1>I can&apos;t hear you right now</h1>
+          <p>{speech.error}</p>
         </div>
       </main>
     );

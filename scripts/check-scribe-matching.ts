@@ -10,7 +10,7 @@
  * Run: pnpm exec tsx scripts/check-scribe-matching.ts
  */
 import * as dotenv from "dotenv";
-import { alignTranscript } from "../app/games/reading-sentences/matching";
+import { alignTranscript } from "../lib/speech/matching";
 import { SENTENCES } from "../app/games/reading-sentences/sentences";
 
 dotenv.config();

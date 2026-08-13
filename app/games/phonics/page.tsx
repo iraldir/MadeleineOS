@@ -10,7 +10,7 @@ import {
   pickNextWord,
   imageFilename,
 } from "./words";
-import { useSpeechRecognition } from "./useSpeechRecognition";
+import { useSpeechRecognition } from "@/lib/speech";
 import { audioService, celebrationService, currencyService, challengeService } from "@/services";
 
 const HIGH_SCORE_KEY = "phonicsGame_highScore";
@@ -92,37 +92,45 @@ export default function PhonicsGame() {
   }, []);
 
   const speech = useSpeechRecognition({
-    lang: "en-US",
+    language: "en",
     timeoutMs: LISTEN_MS,
-    onInterim: setInterim,
-    onMatch: () => {
-      handleSuccess();
-    },
-    onFinish: (matched, transcript) => {
-      if (!matched) {
+    // The phonics game keeps its own verdict: at three letters "cat" and "cap"
+    // are the distinction it exists to teach, so a short word must be exact.
+    judge: shouldMatch,
+    onProgress: (_matched, transcript) => setInterim(transcript),
+    onResult: (result, transcript) => {
+      if (result.passed) {
+        handleSuccess();
+      } else {
         setLastHeard(transcript);
         handleFailedAttempt();
       }
     },
-    shouldMatch,
   });
+
+  const listen = useCallback(() => {
+    const word = currentWordRef.current;
+    if (!word) return;
+    setLastHeard("");
+    setInterim("");
+    setPhase("listening");
+    // The word's own accepted spellings are passed through so the highlighting
+    // agrees with the verdict; `judge` still has the final say.
+    speech.start({
+      text: word.word,
+      alternates: { [word.word.toLowerCase()]: word.match },
+    });
+  }, [speech]);
 
   const handleMicTap = useCallback(() => {
     if (phase === "listening") {
       speech.stop();
       return;
     }
-    setPhase("listening");
-    setInterim("");
-    speech.start();
-  }, [phase, speech]);
+    listen();
+  }, [phase, speech, listen]);
 
-  const handleRetry = useCallback(() => {
-    setLastHeard("");
-    setInterim("");
-    setPhase("listening");
-    speech.start();
-  }, [speech]);
+  const handleRetry = listen;
 
   const handlePlayAgain = useCallback(() => {
     setStreak(0);
@@ -151,7 +159,7 @@ export default function PhonicsGame() {
     );
   }
 
-  if (!speech.isSupported) {
+  if (speech.status === "unavailable") {
     return (
       <main className={styles.main}>
         <nav className={styles.nav}>
@@ -160,8 +168,8 @@ export default function PhonicsGame() {
           </Link>
         </nav>
         <div className={styles.unsupported}>
-          <h1>Speech recognition isn&apos;t supported</h1>
-          <p>Open this game in Chrome, Edge, or Safari to play.</p>
+          <h1>I can&apos;t hear you right now</h1>
+          <p>{speech.error}</p>
         </div>
       </main>
     );

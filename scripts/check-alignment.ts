@@ -1,4 +1,4 @@
-import { alignTranscript } from "../app/games/reading-sentences/matching";
+import { alignTranscript, mergeSticky } from "../lib/speech/matching";
 
 const cases: [string, string, boolean][] = [
   // The exact failure from the log: leading "The" dropped, then read again.
@@ -63,3 +63,22 @@ for (const [sentence, heard, expected] of homophones) {
   console.log(`${good ? "ok  " : "BAD "} ${r.matchedCount}/${r.total} passed=${r.passed} (want ${expected})  "${heard}"`);
 }
 console.log(`${ok3}/${homophones.length} homophone cases as expected`);
+
+// Sticky highlighting: a word that has chimed must never go dark again, because
+// she waits for the chime before reading on.
+const target = "The dragon sat on a big rock.";
+const revisions = ["The dragon's", "The dragon sat", "The drag", "The dragon sat on a big rock."];
+let sticky: boolean[] = [];
+let regressed = false;
+for (const heardSoFar of revisions) {
+  const fresh = alignTranscript(target, heardSoFar);
+  const next = mergeSticky(sticky, fresh.matched);
+  if (sticky.some((was, i) => was && !next[i])) regressed = true;
+  sticky = next;
+  console.log(`  "${heardSoFar}" -> ${next.map((m) => (m ? "*" : ".")).join("")}`);
+}
+console.log(
+  regressed
+    ? "BAD  a word went dark again"
+    : `ok   nothing un-chimed, ended ${sticky.filter(Boolean).length}/${sticky.length}`
+);

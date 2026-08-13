@@ -39,9 +39,11 @@
     "sentences:check-matching": "tsx scripts/check-alignment.ts",
     "media:ready": "tsx scripts/generate-ready-media.ts",
     "media:check-ready": "tsx scripts/check-ready-media.ts",
-    "media:missing": "tsx scripts/generate-missing-images.ts"
+    "media:missing": "tsx scripts/generate-missing-images.ts",
+    "speech:check-realtime": "tsx scripts/check-realtime-speech.ts"
   },
   "dependencies": {
+    "@elevenlabs/client": "^1.17.0",
     "@google/genai": "^1.20.0",
     "@google/generative-ai": "^0.24.1",
     "@types/canvas-confetti": "^1.9.0",
