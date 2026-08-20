@@ -4,7 +4,7 @@ import { useState } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { youtubeService, halfDaySeed, VideoCategory } from "@/services/youtubeService";
+import { youtubeService, effectiveRotationSeed, VideoCategory } from "@/services/youtubeService";
 import { currencyService } from "@/services";
 import CategoryView from "./CategoryView";
 import VideoPlayer from "./VideoPlayer";
@@ -23,7 +23,9 @@ export default function YouTubeApp() {
   const [rotationSeed, setRotationSeed] = useState<string | null>(null);
 
   const handleSelectCategory = (categoryId: string) => {
-    setRotationSeed(halfDaySeed(new Date()));
+    // effectiveRotationSeed folds in any terminal override (shuffle / prev /
+    // next / all) for the current half-day; null means "show the whole list".
+    setRotationSeed(effectiveRotationSeed(new Date()));
     setSelectedCategory(categoryId);
     setViewMode("videos");
   };

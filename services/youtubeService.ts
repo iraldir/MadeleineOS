@@ -47,6 +47,80 @@ export function halfDaySeed(now: Date): string {
   return `${y}-${m}-${d}-${now.getHours() < 12 ? 'am' : 'pm'}`;
 }
 
+/** Step a date forward or back by whole half-days (12 hours per step). */
+export function shiftHalfDay(now: Date, halfDays: number): Date {
+  return new Date(now.getTime() + halfDays * 12 * 60 * 60 * 1000);
+}
+
+const ROTATION_OVERRIDE_KEY = 'madeleine_video_rotation_override';
+
+/**
+ * A parent-set override of the drawing rotation, entered from the terminal.
+ *
+ * It only ever applies to the half-day it was set in (`setDuring`): a read in
+ * any later half-day sees a stale record, discards it, and the normal rotation
+ * resumes on its own — nothing needs to remember to clean up.
+ */
+export interface RotationOverride {
+  setDuring: string;
+  mode: 'shuffle' | 'offset' | 'all';
+  /** Random salt mixed into the seed, so SHUFFLE re-rolls the line-up. */
+  salt?: string;
+  /** Whole half-days away from now: -1 is the previous line-up. */
+  offset?: number;
+}
+
+export function readRotationOverride(now: Date): RotationOverride | null {
+  if (typeof window === 'undefined') return null;
+  const raw = window.localStorage.getItem(ROTATION_OVERRIDE_KEY);
+  if (!raw) return null;
+  try {
+    const override = JSON.parse(raw) as RotationOverride;
+    if (override.setDuring !== halfDaySeed(now)) {
+      window.localStorage.removeItem(ROTATION_OVERRIDE_KEY);
+      return null;
+    }
+    return override;
+  } catch {
+    window.localStorage.removeItem(ROTATION_OVERRIDE_KEY);
+    return null;
+  }
+}
+
+export function writeRotationOverride(
+  override: Omit<RotationOverride, 'setDuring'>,
+  now: Date
+): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(
+    ROTATION_OVERRIDE_KEY,
+    JSON.stringify({ ...override, setDuring: halfDaySeed(now) })
+  );
+}
+
+export function clearRotationOverride(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(ROTATION_OVERRIDE_KEY);
+}
+
+/**
+ * The seed the category screen should rotate on right now, override included.
+ * `null` means "show everything" (the ALL override — getVideosForDisplay
+ * already treats a null seed as the full list).
+ */
+export function effectiveRotationSeed(now: Date): string | null {
+  const override = readRotationOverride(now);
+  if (!override) return halfDaySeed(now);
+  switch (override.mode) {
+    case 'all':
+      return null;
+    case 'offset':
+      return halfDaySeed(shiftHalfDay(now, override.offset ?? 0));
+    case 'shuffle':
+      return `${halfDaySeed(now)}#${override.salt ?? ''}`;
+  }
+}
+
 /** FNV-1a: turns the seed string into the 32-bit number the PRNG wants. */
 function hashSeed(seed: string): number {
   let h = 0x811c9dc5;

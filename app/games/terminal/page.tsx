@@ -4,6 +4,13 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { stickerService } from "@/services";
+import {
+  halfDaySeed,
+  shiftHalfDay,
+  readRotationOverride,
+  writeRotationOverride,
+  clearRotationOverride
+} from "@/services/youtubeService";
 
 const BLOCKED_GAMES_KEY = "madeleine_blocked_games";
 
@@ -121,6 +128,45 @@ export default function Terminal() {
         output = "Sticker collection cleared";
         break;
 
+      case "VIDEOS_SHUFFLE": {
+        writeRotationOverride(
+          { mode: "shuffle", salt: Math.random().toString(36).slice(2, 10) },
+          new Date()
+        );
+        output = "Drawing line-up reshuffled.\nLasts until the next half-day, or VIDEOS_RESET.";
+        break;
+      }
+
+      case "VIDEOS_PREV":
+      case "VIDEOS_NEXT": {
+        const now = new Date();
+        const delta = command === "VIDEOS_PREV" ? -1 : 1;
+        const current = readRotationOverride(now);
+        const offset = (current?.mode === "offset" ? current.offset ?? 0 : 0) + delta;
+        if (offset === 0) {
+          clearRotationOverride();
+          output = `Back to the current line-up (${halfDaySeed(now)})`;
+        } else {
+          writeRotationOverride({ mode: "offset", offset }, now);
+          const target = halfDaySeed(shiftHalfDay(now, offset));
+          const steps = Math.abs(offset);
+          const direction = offset < 0 ? "back" : "ahead";
+          output = `Drawing line-up set to ${target} (${steps} half-day${steps === 1 ? "" : "s"} ${direction}).\nLasts until the next half-day, or VIDEOS_RESET.`;
+        }
+        break;
+      }
+
+      case "VIDEOS_ALL": {
+        writeRotationOverride({ mode: "all" }, new Date());
+        output = "Showing ALL drawing videos.\nLasts until the next half-day, or VIDEOS_RESET.";
+        break;
+      }
+
+      case "VIDEOS_RESET":
+        clearRotationOverride();
+        output = "Drawing line-up back to the normal rotation.";
+        break;
+
       case "HELP":
         output = `Available commands:
 SET_CURRENCY [number] - Set coin amount
@@ -128,18 +174,35 @@ BLOCK [0-6] - Block a game by index
 UNBLOCK [0-6] - Unblock a game by index
 UNLOCK_STICKERS - Unlock the whole sticker collection
 RESET_STICKERS - Clear the sticker collection
+VIDEOS_SHUFFLE - Reshuffle the drawing video line-up
+VIDEOS_PREV - Show the previous half-day's line-up (repeat to go further back)
+VIDEOS_NEXT - Show the next half-day's line-up
+VIDEOS_ALL - Show every drawing video
+VIDEOS_RESET - Back to the normal rotation
+(video overrides reset by themselves at the next half-day)
 RESET - Clear all data (requires confirmation)
 STATUS - Show current system status
 HELP - Show this message`;
         break;
 
-      case "STATUS":
+      case "STATUS": {
         const coins = localStorage.getItem("madeleine_coins") || "10";
+        const now = new Date();
+        const override = readRotationOverride(now);
+        const videosStatus = !override
+          ? `Normal rotation (${halfDaySeed(now)})`
+          : override.mode === "all"
+          ? "Showing all videos"
+          : override.mode === "shuffle"
+          ? "Reshuffled"
+          : `Showing ${halfDaySeed(shiftHalfDay(now, override.offset ?? 0))}`;
         output = `System Status:
 Coins: ${coins}
 Stickers: ${stickerService.getOwnedCount()}/${stickerService.getTotalCount()}
-Blocked Games: ${blockedGames.length > 0 ? blockedGames.join(", ") : "None"}`;
+Blocked Games: ${blockedGames.length > 0 ? blockedGames.join(", ") : "None"}
+Drawing Videos: ${videosStatus}`;
         break;
+      }
 
       default:
         if (trimmedCmd === "") {
