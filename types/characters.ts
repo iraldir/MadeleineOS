@@ -1005,6 +1005,45 @@ export const characters: Character[] = [
       "/images/coloring/atlas4.webp",
     ],
   },
+  // Bowser Junior
+  {
+    id: "bowser-junior",
+    name: "BOWSER JUNIOR",
+    imageUrl: "/images/characters/bowser-junior.webp",
+    franchise: "Nintendo",
+    coloringPages: [
+      "/images/coloring/bowser-junior1.webp",
+      "/images/coloring/bowser-junior2.webp",
+      "/images/coloring/bowser-junior3.webp",
+      "/images/coloring/bowser-junior4.webp",
+    ],
+  },
+  // Bowser
+  {
+    id: "bowser",
+    name: "BOWSER",
+    imageUrl: "/images/characters/bowser.webp",
+    franchise: "Nintendo",
+    coloringPages: [
+      "/images/coloring/bowser1.webp",
+      "/images/coloring/bowser2.webp",
+      "/images/coloring/bowser3.webp",
+      "/images/coloring/bowser4.webp",
+    ],
+  },
+  // Yoshi
+  {
+    id: "yoshi",
+    name: "YOSHI",
+    imageUrl: "/images/characters/yoshi.webp",
+    franchise: "Nintendo",
+    coloringPages: [
+      "/images/coloring/yoshi1.webp",
+      "/images/coloring/yoshi2.webp",
+      "/images/coloring/yoshi3.webp",
+      "/images/coloring/yoshi4.webp",
+    ],
+  },
 ];
 
 export const secretCharacters: Character[] = [

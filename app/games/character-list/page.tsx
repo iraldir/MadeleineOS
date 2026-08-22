@@ -82,15 +82,21 @@ export default function CharacterList() {
               </div>
               {selectedCharacter === character && (
                 <div className={styles.characterName}>
-                  {character.name.toLowerCase().split('').map((letter, index) => (
-                    <span
-                      key={index}
-                      className={styles.letterSpan}
-                      onClick={() => playLetterSound(letter)}
-                    >
-                      {letter}
-                    </span>
-                  ))}
+                  {character.name.toLowerCase().split('').map((letter, index) =>
+                    letter === ' ' ? (
+                      // A space inside a flex item collapses to nothing, which ran
+                      // the words together — give the gap between words a width.
+                      <span key={index} className={styles.wordSpace} aria-hidden="true" />
+                    ) : (
+                      <span
+                        key={index}
+                        className={styles.letterSpan}
+                        onClick={() => playLetterSound(letter)}
+                      >
+                        {letter}
+                      </span>
+                    )
+                  )}
                 </div>
               )}
             </div>
