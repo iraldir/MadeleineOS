@@ -14,7 +14,7 @@ An educational web application designed for young children (ages 3-7) featuring 
 - **Math Games** - Interactive addition and subtraction
 - **Vocabulary Cards** - Multilingual word learning (English, French, Italian)
 - **Coloring Pages** - Creative expression with favorite characters
-- **YouTube Videos** - Curated kid-friendly yoga and drawing tutorials
+- **YouTube Videos** - Curated kid-friendly yoga, drawing and watercolour tutorials
 - **Weather** - Learn about daily weather patterns
 
 ### Parental Controls
@@ -163,6 +163,7 @@ npm run youtube:categories                # Show available categories
 Currently supported categories:
 - `yoga` - Kid-friendly yoga and movement videos
 - `drawing` - Step-by-step drawing tutorials
+- `watercolour` - Paint-along tutorials for kids; five varied lessons from a library of 30 rotate twice daily. See [curation notes](docs/watercolour-videos.md).
 
 **To add new categories:**
 1. Edit `services/youtubeService.ts`

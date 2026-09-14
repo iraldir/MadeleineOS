@@ -158,13 +158,13 @@ export default function Terminal() {
 
       case "VIDEOS_ALL": {
         writeRotationOverride({ mode: "all" }, new Date());
-        output = "Showing ALL drawing videos.\nLasts until the next half-day, or VIDEOS_RESET.";
+        output = "Showing ALL drawing and watercolour videos.\nLasts until the next half-day, or VIDEOS_RESET.";
         break;
       }
 
       case "VIDEOS_RESET":
         clearRotationOverride();
-        output = "Drawing line-up back to the normal rotation.";
+        output = "Tutorial line-ups back to the normal rotation.";
         break;
 
       case "HELP":
@@ -174,10 +174,10 @@ BLOCK [0-6] - Block a game by index
 UNBLOCK [0-6] - Unblock a game by index
 UNLOCK_STICKERS - Unlock the whole sticker collection
 RESET_STICKERS - Clear the sticker collection
-VIDEOS_SHUFFLE - Reshuffle the drawing video line-up
+VIDEOS_SHUFFLE - Reshuffle the drawing and watercolour video line-ups
 VIDEOS_PREV - Show the previous half-day's line-up (repeat to go further back)
 VIDEOS_NEXT - Show the next half-day's line-up
-VIDEOS_ALL - Show every drawing video
+VIDEOS_ALL - Show every drawing and watercolour video
 VIDEOS_RESET - Back to the normal rotation
 (video overrides reset by themselves at the next half-day)
 RESET - Clear all data (requires confirmation)

@@ -360,7 +360,7 @@ youtube
   .command("search")
   .description("Search YouTube and add videos to a category")
   .argument("<query>", "Search query")
-  .option("-c, --category <category>", "Target category (e.g., yoga, drawing)", "drawing")
+  .option("-c, --category <category>", "Target category (e.g., yoga, drawing, watercolour)", "drawing")
   .option("-t, --top <number>", "Number of top results to add", "3")
   .action(async (query, options) => {
     try {
@@ -413,7 +413,7 @@ youtube
   .command("import-playlist")
   .description("Import all videos from a YouTube playlist")
   .argument("<playlist-id>", "YouTube playlist ID or URL")
-  .option("-c, --category <category>", "Target category (e.g., yoga, drawing)", "yoga")
+  .option("-c, --category <category>", "Target category (e.g., yoga, drawing, watercolour)", "yoga")
   .action(async (playlistIdOrUrl, options) => {
     try {
       if (!validateApiKeys()) {

@@ -1,4 +1,4 @@
-export type VideoCategory = 'yoga' | 'drawing' | 'songs';
+export type VideoCategory = 'yoga' | 'drawing' | 'watercolour' | 'songs';
 
 export interface Video {
   id: string;
@@ -7,7 +7,7 @@ export interface Video {
   thumbnail: string;
   duration?: string;
   category: VideoCategory;
-  /** Uploading channel. Used to keep the drawing rotation from stacking up. */
+  /** Uploading channel. Used to keep the tutorial rotation from stacking up. */
   channel?: string;
   /** Franchise / theme tag, e.g. "Pokemon". Same purpose as `channel`. */
   franchise?: string;
@@ -23,13 +23,12 @@ export interface Video {
 /**
  * Categories that show a rotating subset instead of the whole list.
  *
- * Only `drawing` rotates: it is the one category big enough (90+ tutorials)
- * that showing everything is overwhelming. Yoga and songs are small, curated
- * lists where Madeleine expects to find the same video where she left it, so
- * they are deliberately left alone.
+ * Drawing and watercolour refresh twice a day. Watercolour offers five
+ * choices from its curated library. Yoga and songs keep their full lists.
  */
 const ROTATING_CATEGORIES: Record<string, { size: number; maxPerChannel: number; maxPerFranchise: number }> = {
   drawing: { size: 12, maxPerChannel: 3, maxPerFranchise: 3 },
+  watercolour: { size: 5, maxPerChannel: 3, maxPerFranchise: 2 },
 };
 
 /**
@@ -55,7 +54,7 @@ export function shiftHalfDay(now: Date, halfDays: number): Date {
 const ROTATION_OVERRIDE_KEY = 'madeleine_video_rotation_override';
 
 /**
- * A parent-set override of the drawing rotation, entered from the terminal.
+ * A parent-set override of the tutorial rotations, entered from the terminal.
  *
  * It only ever applies to the half-day it was set in (`setDuring`): a read in
  * any later half-day sees a stale record, discards it, and the normal rotation
@@ -237,6 +236,14 @@ class YouTubeService {
       thumbnail: '/images/youtube/drawing-thumb.png'
     },
     {
+      id: 'watercolour',
+      name: 'Watercolour',
+      emoji: '🖌️',
+      icon: '/images/youtube/watercolour-icon.webp',
+      color: '#29847D',
+      thumbnail: '/images/youtube/watercolour-icon.webp'
+    },
+    {
       id: 'songs',
       name: 'Songs',
       emoji: '🎵',
@@ -247,6 +254,341 @@ class YouTubeService {
   ];
 
   private readonly videos: Video[] = [
+    // Curated watercolour lessons; sources and selection notes: docs/watercolour-videos.md
+    {
+      id: 'watercolour-1',
+      youtubeId: '5QMB4WFJt_o',
+      title: 'Easy Watercolor Flowers for Beginners and Kids Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/5QMB4WFJt_o/hqdefault.jpg',
+      duration: '13:16',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Flowers',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-2',
+      youtubeId: 'nykBWOxS5k0',
+      title: 'How to Paint a Mountain Sunset in Watercolors Kids Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/nykBWOxS5k0/hqdefault.jpg',
+      duration: '17:28',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Landscapes',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-3',
+      youtubeId: 'lhKZu9DuBnc',
+      title: 'How to Paint a Watercolor Coneflower KIDS Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/lhKZu9DuBnc/hqdefault.jpg',
+      duration: '14:11',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Flowers',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-4',
+      youtubeId: 'Qwaah1SZbMM',
+      title: 'How to Paint a Beach Landscape Kids Watercolor Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/Qwaah1SZbMM/hqdefault.jpg',
+      duration: '15:43',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Landscapes',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-5',
+      youtubeId: 'sG1rLikSmuA',
+      title: 'Watercolor Watermelon Easy Art Tutorial for Kids',
+      thumbnail: 'https://i.ytimg.com/vi/sG1rLikSmuA/hqdefault.jpg',
+      duration: '13:03',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Food',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-6',
+      youtubeId: 'OOg5f0IZXXc',
+      title: 'How to Paint a Galaxy Night Sky in Watercolor Kids Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/OOg5f0IZXXc/hqdefault.jpg',
+      duration: '10:17',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Sky',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-7',
+      youtubeId: 'z_eh2m-Rrfc',
+      title: 'How to Draw and Paint an Ice Cream Cone KIDS Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/z_eh2m-Rrfc/hqdefault.jpg',
+      duration: '13:13',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Food',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-8',
+      youtubeId: 'sjSpz25M5Ho',
+      title: 'How to Paint a Loose and Expressive Dragonfly Kids Watercolor Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/sjSpz25M5Ho/hqdefault.jpg',
+      duration: '18:30',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-9',
+      youtubeId: '8ZMX_Gc7BDI',
+      subject: 'Tulip',
+      title: 'How to Draw Tulips Kids Watercolor Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/8ZMX_Gc7BDI/hqdefault.jpg',
+      duration: '12:01',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Flowers',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-10',
+      youtubeId: 'Td3tMlboT_I',
+      title: 'Watercolor Roses Easy Watercolor Tutorial for Beginners and Kids',
+      thumbnail: 'https://i.ytimg.com/vi/Td3tMlboT_I/hqdefault.jpg',
+      duration: '14:58',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Flowers',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-11',
+      youtubeId: 'ye23IkKlc-4',
+      title: 'How To Paint With Watercolor (for kids)',
+      thumbnail: 'https://i.ytimg.com/vi/ye23IkKlc-4/hqdefault.jpg',
+      duration: '16:02',
+      category: 'watercolour',
+      channel: 'Art for Kids Hub',
+      franchise: 'Leaves',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-12',
+      youtubeId: 'EJPuP50_ZqM',
+      title: 'How To Paint A Beautiful Landscape (for kids)',
+      thumbnail: 'https://i.ytimg.com/vi/EJPuP50_ZqM/hqdefault.jpg',
+      duration: '9:51',
+      category: 'watercolour',
+      channel: 'Art for Kids Hub',
+      franchise: 'Landscapes',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-13',
+      youtubeId: 'JPm1kgFK2Ts',
+      title: 'Watercolor Landscape Lesson for Kids',
+      thumbnail: 'https://i.ytimg.com/vi/JPm1kgFK2Ts/hqdefault.jpg',
+      duration: '16:27',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Landscapes',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-14',
+      youtubeId: 'sTM83yyCOMU',
+      subject: 'Cat',
+      title: 'Watercolor Black Cat Tutorial - Wet in Wet technique',
+      thumbnail: 'https://i.ytimg.com/vi/sTM83yyCOMU/hqdefault.jpg',
+      duration: '9:32',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-15',
+      youtubeId: 'I5I0lQhKSzs',
+      title: 'Watercolor Pet Portrait Lesson for Kids',
+      thumbnail: 'https://i.ytimg.com/vi/I5I0lQhKSzs/hqdefault.jpg',
+      duration: '11:39',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-16',
+      youtubeId: 'mSe7y-_nK_o',
+      title: 'How to Draw a Lion Face   Kids Watercolor Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/mSe7y-_nK_o/hqdefault.jpg',
+      duration: '16:10',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-17',
+      youtubeId: 'BCyY513N-hE',
+      title: 'How to Draw and Paint a Giraffe EASY Kids Watercolor Painting Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/BCyY513N-hE/hqdefault.jpg',
+      duration: '19:18',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-18',
+      youtubeId: 'QHaznEgGeMc',
+      title: 'How to Draw a Fox Kids Watercolor Art Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/QHaznEgGeMc/hqdefault.jpg',
+      duration: '8:45',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-19',
+      youtubeId: 'VPDWo1xI8HM',
+      title: 'How to Draw An Owl - Watercolor Tutorial for Kids',
+      thumbnail: 'https://i.ytimg.com/vi/VPDWo1xI8HM/hqdefault.jpg',
+      duration: '14:40',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-20',
+      youtubeId: 'fssvCkJoXTs',
+      title: 'Easy Watercolor Bubbles Kids Art Painting Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/fssvCkJoXTs/hqdefault.jpg',
+      duration: '8:32',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Play',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-21',
+      youtubeId: 'Ir7SbQD1rWg',
+      title: 'Watercolor Balloon Painting Tutorial for Kids   How to Paint Light and Dark',
+      thumbnail: 'https://i.ytimg.com/vi/Ir7SbQD1rWg/hqdefault.jpg',
+      duration: '17:11',
+      category: 'watercolour',
+      channel: 'Watercolor4KIDS',
+      franchise: 'Play',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-22',
+      youtubeId: 'w0xR9jUv7lc',
+      title: 'How to Paint a Watercolor Water Lily',
+      thumbnail: 'https://i.ytimg.com/vi/w0xR9jUv7lc/hqdefault.jpg',
+      duration: '16:42',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Flowers',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-23',
+      youtubeId: 'kQ3L4eEn7LY',
+      title: 'How to Draw and Paint a Watercolor Seahorse',
+      thumbnail: 'https://i.ytimg.com/vi/kQ3L4eEn7LY/hqdefault.jpg',
+      duration: '15:44',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-24',
+      youtubeId: 'NScu8Po0R1A',
+      title: 'How to Draw and Paint a Watercolor Flamingo- Beginner',
+      thumbnail: 'https://i.ytimg.com/vi/NScu8Po0R1A/hqdefault.jpg',
+      duration: '16:30',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-25',
+      youtubeId: 'LM0r8gHbc_A',
+      title: 'How to draw and paint a Tulip with watercolors BEGINNER TUTORIAL',
+      thumbnail: 'https://i.ytimg.com/vi/LM0r8gHbc_A/hqdefault.jpg',
+      duration: '15:19',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Flowers',
+      subject: 'Tulip',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-26',
+      youtubeId: 'JNNUmCkiQqc',
+      title: 'How to draw and paint a Watercolor Sunflower',
+      thumbnail: 'https://i.ytimg.com/vi/JNNUmCkiQqc/hqdefault.jpg',
+      duration: '12:19',
+      category: 'watercolour',
+      channel: 'Mr. Otter Art Studio',
+      franchise: 'Flowers',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-27',
+      youtubeId: 'V4gaqIJdqgY',
+      title: 'Rocket Ship 🚀 Easy Watercolor Painting Lesson for Kids by Nicole Miyuki of Let\'s Make Art',
+      thumbnail: 'https://i.ytimg.com/vi/V4gaqIJdqgY/hqdefault.jpg',
+      duration: '22:40',
+      category: 'watercolour',
+      channel: 'Let\'s Make Art',
+      franchise: 'Sky',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-28',
+      youtubeId: 'sMWhGZeN0I0',
+      title: 'Rainbow Lollipop 🍭 Easy Kids Watercolor Art Lesson by Nicole Miyuki of Let\'s Make Art',
+      thumbnail: 'https://i.ytimg.com/vi/sMWhGZeN0I0/hqdefault.jpg',
+      duration: '16:02',
+      category: 'watercolour',
+      channel: 'Let\'s Make Art',
+      franchise: 'Food',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-29',
+      youtubeId: 'JFg84T7dX9o',
+      title: 'Rainbow Parrot | Children\'s Watercolor Art Activity by Nicole Miyuki of Let\'s Make Art',
+      thumbnail: 'https://i.ytimg.com/vi/JFg84T7dX9o/hqdefault.jpg',
+      duration: '19:46',
+      category: 'watercolour',
+      channel: 'Let\'s Make Art',
+      franchise: 'Animals',
+      addedDate: '2026-09-14'
+    },
+    {
+      id: 'watercolour-30',
+      youtubeId: 'vIK0wfbsM74',
+      title: 'Calico Cat 🐈 Easy Kids Watercolor Art Lesson by Nicole Miyuki of Let\'s Make Art',
+      thumbnail: 'https://i.ytimg.com/vi/vIK0wfbsM74/hqdefault.jpg',
+      duration: '16:05',
+      category: 'watercolour',
+      channel: 'Let\'s Make Art',
+      franchise: 'Animals',
+      subject: 'Cat',
+      addedDate: '2026-09-14'
+    },
     {
       id: 'drawing-1',
       youtubeId: 'jBfMs-YskHo',
@@ -1956,8 +2298,8 @@ class YouTubeService {
   /**
    * What the category screen should actually show.
    *
-   * For rotating categories (drawing) this is a seeded, variety-constrained
-   * pick of 12 that changes twice a day; for everything else it is the whole
+   * For drawing and watercolour this is a seeded, variety-constrained
+   * selection that changes twice a day; for everything else it is the whole
    * list. Pass the seed from {@link halfDaySeed}; pass `null` and you get the
    * full list, which is what a render with no clock reading yet should show.
    */

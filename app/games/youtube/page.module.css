@@ -466,3 +466,39 @@
   font-weight: bold;
   color: #ff6b6b;
 }
+
+@media (max-width: 480px) {
+  .categoriesGrid {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 1rem;
+  }
+
+  .categoryCard {
+    min-width: 0;
+    padding: 1rem;
+  }
+
+  .categoryIcon {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+  }
+
+  .categoryName {
+    font-size: 1.5rem;
+  }
+
+  .categoryHeader {
+    gap: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .categoryHeaderIcon {
+    flex-shrink: 0;
+  }
+
+  .categoryTitle {
+    min-width: 0;
+    font-size: 2rem;
+  }
+}
