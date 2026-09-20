@@ -37,7 +37,6 @@ export default function MathGame() {
   const [questionsAnswered, setQuestionsAnswered] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
   const [highScore, setHighScore] = useState<number>(0);
-  const [hasBeatenHighScore, setHasBeatenHighScore] = useState(false);
 
   useEffect(() => {
     // Check if coming from coloring game
@@ -110,13 +109,6 @@ export default function MathGame() {
       setQuestionsAnswered(newQuestionsAnswered);
       setStreak(newStreak);
 
-      // Check if beaten high score and award coin
-      if (newStreak > highScore && !hasBeatenHighScore) {
-        currencyService.addCoins(1);
-        celebrationService.celebrate();
-        setHasBeatenHighScore(true);
-      }
-
       // Award 1 coin for every 5 questions in streak
       if (newStreak % 5 === 0) {
         currencyService.addCoins(1);
@@ -154,7 +146,7 @@ export default function MathGame() {
         setAnswer("");
       }, 500);
     }
-  }, [currentProblem, questionsAnswered, streak, highScore, hasBeatenHighScore, currentIndex, problems.length, fromColoringGame]);
+  }, [currentProblem, questionsAnswered, streak, highScore, currentIndex, problems.length, fromColoringGame]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

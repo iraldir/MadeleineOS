@@ -63,12 +63,11 @@ export default function PhonicsGame() {
     challengeService.recordProgress("phonics");
     const newStreak = streak + 1;
     setStreak(newStreak);
-    // A coin only for a new best. Reading two in a row stopped being an
-    // achievement a while ago, and a reward she cannot fail to get is not
-    // really a reward.
     if (newStreak > highScore) {
       setHighScore(newStreak);
       localStorage.setItem(HIGH_SCORE_KEY, newStreak.toString());
+    }
+    if (newStreak % 5 === 0) {
       currencyService.addCoins(1);
       celebrationService.quickBurst();
     } else {
@@ -185,7 +184,7 @@ export default function PhonicsGame() {
 
       <div className={styles.streakIndicator}>
         <span>Streak: {streak}</span>
-        {streak > 0 && streak % 2 === 0 && (
+        {streak > 0 && streak % 5 === 0 && (
           <span className={styles.coinReward}>+1 🪙</span>
         )}
       </div>

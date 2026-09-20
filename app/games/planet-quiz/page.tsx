@@ -6,7 +6,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Howl } from "howler";
 import PlanetSphere from "@/components/PlanetSphere";
 import { ALL_BODIES, Planet, planetNameUrl } from "@/types/planets";
-import { audioService, celebrationService, challengeService } from "@/services";
+import { audioService, celebrationService, challengeService, currencyService } from "@/services";
 import styles from "./page.module.css";
 
 const HIGH_SCORE_KEY = "planetQuizHighScore";
@@ -88,6 +88,7 @@ export default function PlanetQuiz() {
           setCurrentIndex(nextIndex);
         } else {
           setCompleted(true);
+          currencyService.addCoins(1);
           celebrationService.bigCelebration();
         }
         setIsTransitioning(false);

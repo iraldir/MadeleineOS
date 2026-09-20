@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import styles from "./page.module.css";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { characterService, audioService, celebrationService, challengeService } from "@/services";
+import { characterService, audioService, celebrationService, currencyService, challengeService } from "@/services";
 
 // Get ordered characters from centralized service
 const getOrderedCharacters = () => {
@@ -60,11 +60,15 @@ export default function CharacterRecognition() {
     const currentCharacter = orderedCharacters[currentIndex];
 
     if (currentCharacter && selectedName === currentCharacter.name) {
+      const newStreak = currentIndex + 1;
       // Success case
       setIsTransitioning(true);
       audioService.playSuccess();
       celebrationService.celebrate();
       challengeService.recordProgress("character-recognition");
+      if (newStreak % 5 === 0) {
+        currencyService.addCoins(1);
+      }
 
       setTimeout(() => {
         if (currentIndex < orderedCharacters.length - 1) {

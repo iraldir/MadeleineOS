@@ -43,11 +43,15 @@ export default function CharacterWriting() {
     const currentCharacter = orderedCharacters[currentIndex];
 
     if (currentCharacter && text === currentCharacter.name) {
+      const newStreak = currentIndex + 1;
       // Success case
       setIsTransitioning(true);
       audioService.playSuccess();
       celebrationService.celebrate();
       challengeService.recordProgress("character-writing");
+      if (newStreak % 5 === 0) {
+        currencyService.addCoins(1);
+      }
 
       setTimeout(() => {
         if (currentIndex < orderedCharacters.length - 1) {
@@ -55,15 +59,13 @@ export default function CharacterWriting() {
           const nextIndex = currentIndex + 1;
           setCurrentIndex(nextIndex);
 
-          // Update high score if needed and award coins
+          // Update high score if needed
           if (nextIndex > highScore) {
             setHighScore(nextIndex);
             localStorage.setItem(
               "characterWritingHighScore",
               nextIndex.toString()
             );
-            // Award 2 coins for beating the high score
-            currencyService.addCoins(2);
           }
         } else {
           // Completed all characters
