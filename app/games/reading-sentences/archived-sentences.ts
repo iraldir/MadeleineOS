@@ -1,0 +1,339 @@
+import type { ReadingSentence } from "./sentences";
+
+const storybook =
+  "Children's storybook illustration, hand-painted watercolour and gouache " +
+  "texture, warm bright cheerful colours, soft clean uncluttered background, " +
+  "clear simple readable composition, gentle and friendly. " +
+  "No text, no letters, no words, no speech bubbles, no captions.";
+
+const scene = (subject: string) => `${subject} ${storybook}`;
+
+/** Original medium and hard sentences, retained for future use only. */
+export const ARCHIVED_SENTENCES: ReadingSentence[] = [
+  // -------------------------------------------------------------- medium
+  {
+    id: "dragon-rock",
+    text: "The dragon sat on a big rock.",
+    alternates: { dragon: ["draggon", "dragging"] },
+    imagePrompt: scene("A friendly little green dragon perched on a huge grey boulder, tail curled around it."),
+    level: "medium",
+  },
+  {
+    id: "ship-sea",
+    text: "A ship sails on the blue sea.",
+    imagePrompt: scene("A wooden sailing ship with white sails gliding over rolling blue ocean waves."),
+    level: "medium",
+  },
+  {
+    id: "shark-teeth",
+    text: "The shark has lots of sharp teeth.",
+    imagePrompt: scene("A friendly cartoon shark grinning underwater showing rows of white pointy teeth."),
+    level: "medium",
+  },
+  {
+    id: "sheep-tree",
+    text: "Six sheep sleep under a tree.",
+    imagePrompt: scene("Six fluffy white sheep dozing in the shade of a big leafy tree in a green field."),
+    level: "medium",
+  },
+  {
+    id: "brush-teeth",
+    text: "I brush my teeth every night.",
+    imagePrompt: scene("A child in pyjamas brushing their teeth at a bathroom sink with a foamy toothbrush."),
+    level: "medium",
+  },
+  {
+    id: "chick-shell",
+    text: "The chick came out of the shell.",
+    imagePrompt: scene("A tiny fluffy yellow chick stepping out of a cracked white eggshell in a straw nest."),
+    level: "medium",
+  },
+  {
+    id: "picnic-park",
+    text: "We had a picnic in the park.",
+    imagePrompt: scene("A checked picnic blanket in a sunny park with a basket, fruit and sandwiches laid out."),
+    level: "medium",
+  },
+  {
+    id: "snail-slow",
+    text: "The snail is slow but happy.",
+    imagePrompt: scene("A smiling snail with a swirly striped shell inching along a garden path."),
+    level: "medium",
+  },
+  {
+    id: "snake-pond",
+    text: "A green snake slid past the pond.",
+    imagePrompt: scene("A long friendly green snake gliding through grass beside a little pond."),
+    level: "medium",
+  },
+  {
+    id: "king-crown",
+    text: "The king wears a shiny gold crown.",
+    imagePrompt: scene("A jolly bearded king on a throne wearing a gleaming golden crown."),
+    level: "medium",
+  },
+  {
+    id: "kite-wind",
+    text: "My kite flew up in the wind.",
+    imagePrompt: scene("A bright diamond kite with a ribbon tail flying high in a breezy blue sky."),
+    level: "medium",
+  },
+  {
+    id: "train-track",
+    text: "The train goes fast down the track.",
+    imagePrompt: scene("A colourful steam train puffing along a railway track through green countryside."),
+    level: "medium",
+  },
+  {
+    id: "rain-umbrella",
+    text: "Rain drops fall on my umbrella.",
+    imagePrompt: scene("A child under a rainbow striped umbrella with raindrops bouncing off it."),
+    level: "medium",
+  },
+  {
+    id: "crab-beach",
+    text: "The crab walks on the sandy beach.",
+    imagePrompt: scene("A little red crab scuttling sideways across golden sand by the sea."),
+    level: "medium",
+  },
+  {
+    id: "tent-sticks",
+    text: "We made a tent out of sticks.",
+    imagePrompt: scene("Two children beside a den made of leaning sticks and a blanket in a garden."),
+    level: "medium",
+  },
+  {
+    id: "clock-three",
+    text: "The clock on the wall says three.",
+    imagePrompt: scene("A round wall clock with big black hands pointing to three o'clock."),
+    level: "medium",
+  },
+  {
+    id: "bird-branch",
+    text: "A little bird sings on the branch.",
+    imagePrompt: scene("A small blue bird singing on a leafy tree branch with tiny music notes around it."),
+    level: "medium",
+  },
+  {
+    id: "goat-grass",
+    text: "The goat ate all the green grass.",
+    imagePrompt: scene("A white goat with curly horns munching bright green grass in a meadow."),
+    level: "medium",
+  },
+  {
+    id: "shell-beach",
+    text: "I found a shell on the beach.",
+    imagePrompt: scene("A child's hand holding a pretty pink spiral seashell above golden sand."),
+    level: "medium",
+  },
+  {
+    id: "peach-kart",
+    text: "Peach and Luigi ride a red kart.",
+    alternates: { peach: ["peaches", "beach"], luigi: ["louis", "luiggi", "lweegee"] },
+    imagePrompt: scene("Princess Peach and Luigi from Nintendo riding a bright red go-kart around a bend."),
+    level: "medium",
+  },
+  {
+    id: "pikachu-tree",
+    text: "Pikachu sleeps under a big tree.",
+    alternates: { pikachu: ["pikatchu", "picachu", "peekachu"] },
+    imagePrompt: scene("Pikachu the yellow Pokemon curled up asleep in the shade of a big leafy tree."),
+    level: "medium",
+  },
+  {
+    id: "yoshi-hills",
+    text: "Yoshi runs across the green hills.",
+    alternates: { yoshi: ["yosi", "yoshee", "joshy"] },
+    imagePrompt: scene("Yoshi the green dinosaur from Nintendo running happily over rolling green hills."),
+    level: "medium",
+  },
+  {
+    id: "woody-buzz",
+    text: "Woody and Buzz play in the box.",
+    alternates: { woody: ["woodie", "would he"], buzz: ["bus", "buzzed"] },
+    imagePrompt: scene("a cowboy rag doll toy in a plaid shirt and a toy astronaut in a silver spacesuit, playing together inside a big cardboard box."),
+    level: "medium",
+  },
+  {
+    id: "totoro-rain",
+    text: "Totoro waits in the rain with me.",
+    alternates: { totoro: ["toto", "tortoro", "to toro"] },
+    imagePrompt: scene("Totoro the big grey forest spirit from Studio Ghibli standing in the rain at a bus stop holding a leaf over his head."),
+    level: "medium",
+  },
+  {
+    id: "moon-boat",
+    text: "The little boat floats past the moon.",
+    imagePrompt: scene("A small wooden rowing boat drifting on calm water beneath a huge glowing moon."),
+    level: "medium",
+  },
+  {
+    id: "cake-candles",
+    text: "The cake has seven pink candles.",
+    imagePrompt: scene("A birthday cake with white icing, sprinkles and seven lit pink candles."),
+    level: "medium",
+  },
+
+  // ---------------------------------------------------------------- hard
+  {
+    id: "dragon-castle",
+    text: "The little dragon flew over the tall castle.",
+    alternates: { dragon: ["draggon"] },
+    imagePrompt: scene("A small friendly dragon flying above a fairytale castle with tall towers and fluttering flags."),
+    level: "hard",
+  },
+  {
+    id: "rocket-sky",
+    text: "A rocket blasted off into the dark sky.",
+    imagePrompt: scene("A red and white rocket launching upward on a plume of flame into a deep blue starry sky."),
+    level: "hard",
+  },
+  {
+    id: "elephant-splash",
+    text: "The elephant splashed water on his back.",
+    imagePrompt: scene("A happy grey elephant standing in a river spraying water over its own back with its trunk."),
+    level: "hard",
+  },
+  {
+    id: "butterfly-garden",
+    text: "Butterflies danced around the flowers in the garden.",
+    imagePrompt: scene("Several colourful butterflies fluttering above a bed of bright flowers in a sunny garden."),
+    level: "hard",
+  },
+  {
+    id: "pirate-treasure",
+    text: "The pirate found a chest full of treasure.",
+    imagePrompt: scene("A jolly pirate with an eye patch opening a wooden chest spilling gold coins and jewels on a beach."),
+    level: "hard",
+  },
+  {
+    id: "thunder-rain",
+    text: "Thunder rumbled and the rain came down hard.",
+    imagePrompt: scene("A dramatic dark storm cloud with a yellow lightning bolt and heavy rain over a small cottage."),
+    level: "hard",
+  },
+  {
+    id: "robot-dance",
+    text: "My robot friend can dance and sing songs.",
+    imagePrompt: scene("A friendly boxy robot with antennae dancing with its arms up, little music notes around it."),
+    level: "hard",
+  },
+  {
+    id: "unicorn-rainbow",
+    text: "The unicorn galloped under a bright rainbow.",
+    imagePrompt: scene("A white unicorn with a rainbow mane galloping across a meadow beneath a big arching rainbow."),
+    level: "hard",
+  },
+  {
+    id: "chocolate-party",
+    text: "We ate chocolate cupcakes at the birthday party.",
+    imagePrompt: scene("A table of chocolate cupcakes with swirly frosting at a cheerful birthday party with bunting."),
+    level: "hard",
+  },
+  {
+    id: "monster-bed",
+    text: "A friendly monster hid under my bed.",
+    imagePrompt: scene("A silly furry purple monster with big googly eyes peeking out from under a child's bed."),
+    level: "hard",
+  },
+  {
+    id: "penguin-hill",
+    text: "The penguin slid down the icy hill.",
+    imagePrompt: scene("A chubby penguin sliding on its tummy down a snowy slope, snow spraying behind it."),
+    level: "hard",
+  },
+  {
+    id: "dolphin-jump",
+    text: "Dolphins jumped high out of the blue water.",
+    imagePrompt: scene("Two dolphins leaping together out of sparkling blue sea water against a sunny sky."),
+    level: "hard",
+  },
+  {
+    id: "wizard-wand",
+    text: "The wizard waved his wand and smiled.",
+    imagePrompt: scene("A kindly old wizard in a pointy hat waving a glowing wand with sparkles trailing from it."),
+    level: "hard",
+  },
+  {
+    id: "mermaid-waves",
+    text: "A mermaid sang a song beneath the waves.",
+    imagePrompt: scene("A smiling mermaid with a shimmering tail singing underwater among coral and little fish."),
+    level: "hard",
+  },
+  {
+    id: "tractor-field",
+    text: "The tractor drove slowly across the muddy field.",
+    imagePrompt: scene("A red farm tractor with big wheels driving over a brown ploughed field."),
+    level: "hard",
+  },
+  {
+    id: "rapunzel-hair",
+    text: "Rapunzel let down her very long hair.",
+    alternates: { rapunzel: ["repunzel", "rapunsel", "rapunzo"] },
+    imagePrompt: scene("a princess leaning out of a tall stone tower window with her extremely long golden hair tumbling far down."),
+    level: "hard",
+  },
+  {
+    id: "moana-ocean",
+    text: "Moana sailed her boat across the ocean.",
+    alternates: { moana: ["moanna", "mowana", "banana"] },
+    imagePrompt: scene("a brave Polynesian island girl steering her small wooden sailing canoe over bright ocean waves."),
+    level: "hard",
+  },
+  {
+    id: "bloom-magic",
+    text: "Bloom used her fire magic to help her friends.",
+    alternates: { bloom: ["blume", "broom", "blooms"] },
+    imagePrompt: scene("Bloom the fire fairy from the 2025 CGI Winx Club reboot in her winged fairy form, orange hair glowing, casting warm orange fire magic."),
+    level: "hard",
+  },
+  {
+    id: "ponyo-waves",
+    text: "Ponyo ran along the top of the waves.",
+    alternates: { ponyo: ["ponio", "pony", "pony o"] },
+    imagePrompt: scene("Ponyo the little red-haired girl from Studio Ghibli running joyfully over the crests of big blue waves."),
+    level: "hard",
+  },
+  {
+    id: "dinosaur-forest",
+    text: "The dinosaur stomped through the big green forest.",
+    imagePrompt: scene("A friendly spotted green dinosaur walking between tall trees in a lush forest."),
+    level: "hard",
+  },
+  {
+    id: "helicopter-mountain",
+    text: "The helicopter flew over the snowy mountain.",
+    imagePrompt: scene("A little blue helicopter flying past a tall snow-capped mountain peak."),
+    level: "hard",
+  },
+  {
+    id: "princess-garden",
+    text: "The princess planted flowers in her secret garden.",
+    imagePrompt: scene("A smiling princess in a simple gown kneeling to plant bright flowers in a walled garden."),
+    level: "hard",
+  },
+  {
+    id: "balloon-clouds",
+    text: "The red balloon floated up past the clouds.",
+    imagePrompt: scene("A single bright red balloon drifting high above fluffy white clouds in a blue sky."),
+    level: "hard",
+  },
+  {
+    id: "fairy-mushroom",
+    text: "A tiny fairy slept inside a spotted mushroom.",
+    imagePrompt: scene("A tiny winged fairy curled up asleep under the cap of a red mushroom with white spots."),
+    level: "hard",
+  },
+  {
+    id: "sandcastle-sea",
+    text: "We built a sandcastle beside the sea.",
+    imagePrompt: scene("Two children beside a tall sandcastle with towers and a flag on a sunny beach by the waves."),
+    level: "hard",
+  },
+  {
+    id: "owl-night",
+    text: "The wise old owl watched the quiet night.",
+    imagePrompt: scene("A big round owl with wide eyes perched on a branch under a starry night sky."),
+    level: "hard",
+  },
+];

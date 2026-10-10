@@ -8,6 +8,8 @@ import {
   ReadingSentence,
   pickNextSentence,
   sentenceImage,
+  hasSentenceImage,
+  SENTENCES,
 } from "./sentences";
 import { displayWords, useSpeechRecognition } from "@/lib/speech";
 import { playWordChime, playSentenceComplete } from "./wordChime";
@@ -20,8 +22,7 @@ import {
 
 const HIGH_SCORE_KEY = "readingSentences_highScore";
 const LISTEN_MS = 60000;
-/** How many sentences to keep out of the bag before they can come round again. */
-const RECENT_MEMORY = 12;
+const READING_HISTORY_KEY = "readingSentences_history_v1";
 
 type Phase = "ready" | "listening" | "success" | "retry" | "gameover";
 
@@ -29,8 +30,7 @@ export default function ReadingSentencesGame() {
   const [isMounted, setIsMounted] = useState(false);
   const [streak, setStreak] = useState(0);
   const [highScore, setHighScore] = useState(0);
-  // Only ever read inside the setState updater below, never during render.
-  const [, setRecent] = useState<string[]>([]);
+  const recentRef = useRef<string[]>([]);
   const [sentence, setSentence] = useState<ReadingSentence | null>(null);
   const [phase, setPhase] = useState<Phase>("ready");
   const [matchedWords, setMatchedWords] = useState<boolean[]>([]);
@@ -45,28 +45,46 @@ export default function ReadingSentencesGame() {
   const highScoreRef = useRef(0);
   highScoreRef.current = highScore;
 
-  useEffect(() => {
-    setIsMounted(true);
-    const saved = localStorage.getItem(HIGH_SCORE_KEY);
-    if (saved) setHighScore(parseInt(saved) || 0);
-    setSentence(pickNextSentence(0, []));
+  const rememberSentence = useCallback((next: ReadingSentence) => {
+    const previous = recentRef.current;
+    const complete = SENTENCES.every((item) => previous.includes(item.id));
+    recentRef.current = [next.id, ...(complete ? [] : previous.filter((id) => id !== next.id))];
+    try {
+      localStorage.setItem(READING_HISTORY_KEY, JSON.stringify(recentRef.current));
+    } catch {
+      // Session history still works when browser storage is unavailable.
+    }
   }, []);
 
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const saved = localStorage.getItem(HIGH_SCORE_KEY);
+      if (saved) setHighScore(parseInt(saved) || 0);
+      const stored: unknown = JSON.parse(localStorage.getItem(READING_HISTORY_KEY) ?? "[]");
+      const activeIds = new Set(SENTENCES.map((item) => item.id));
+      recentRef.current = Array.isArray(stored)
+        ? [...new Set(stored.filter((id): id is string => typeof id === "string" && activeIds.has(id)))]
+        : [];
+    } catch {
+      recentRef.current = [];
+    }
+    const first = pickNextSentence(0, recentRef.current);
+    setSentence(first);
+    rememberSentence(first);
+  }, [rememberSentence]);
+
   const advance = useCallback(
-    (current: ReadingSentence | null, nextStreak: number) => {
-      setRecent((previous) => {
-        const nextRecent = current
-          ? [current.id, ...previous].slice(0, RECENT_MEMORY)
-          : previous;
-        setSentence(pickNextSentence(nextStreak, nextRecent));
-        return nextRecent;
-      });
+    (nextStreak: number) => {
+      const next = pickNextSentence(nextStreak, recentRef.current);
+      setSentence(next);
+      rememberSentence(next);
       setPhase("ready");
       setMatchedWords([]);
       setLastHeard("");
       setImageBroken(false);
     },
-    []
+    [rememberSentence]
   );
 
   const handleSuccess = useCallback(() => {
@@ -91,7 +109,7 @@ export default function ReadingSentencesGame() {
 
     setMatchedWords(displayWords(current.text).map(() => true));
     setPhase("success");
-    setTimeout(() => advance(current, newStreak), 6000);
+    setTimeout(() => advance(newStreak), 6000);
   }, [advance]);
 
   const handleFailure = useCallback(() => {
@@ -133,12 +151,8 @@ export default function ReadingSentencesGame() {
 
   const handlePlayAgain = useCallback(() => {
     setStreak(0);
-    setRecent([]);
-    setSentence(pickNextSentence(0, []));
-    setMatchedWords([]);
-    setLastHeard("");
-    setPhase("ready");
-  }, []);
+    advance(0);
+  }, [advance]);
 
   /**
    * Dev-only escape hatch: speech recognition cannot be driven headlessly, so
@@ -240,7 +254,7 @@ export default function ReadingSentencesGame() {
       ) : phase === "success" ? (
         <div className={styles.successOverlay}>
           <div className={styles.successImageWrap}>
-            {imageBroken ? (
+            {imageBroken || !hasSentenceImage(sentence) ? (
               <div className={styles.successFallback}>⭐️</div>
             ) : (
               <Image
@@ -266,7 +280,7 @@ export default function ReadingSentencesGame() {
             something the <Image> below never asks for. Same `sizes`, same
             candidate, one download.
           */}
-          {!imageBroken && (
+          {!imageBroken && hasSentenceImage(sentence) && (
             <div className={styles.rewardPreload} aria-hidden="true">
               <Image
                 src={sentenceImage(sentence)}

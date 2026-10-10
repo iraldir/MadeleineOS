@@ -1,4 +1,8 @@
+import { pickBalancedDrawingRotation } from './drawingRotation';
+
 export type VideoCategory = 'yoga' | 'drawing' | 'watercolour' | 'songs';
+
+export type DrawingKind = 'character' | 'generic';
 
 export interface Video {
   id: string;
@@ -7,14 +11,16 @@ export interface Video {
   thumbnail: string;
   duration?: string;
   category: VideoCategory;
+  /** Required on drawing videos; independent of their franchise or theme. */
+  drawingKind?: DrawingKind;
   /** Uploading channel. Used to keep the tutorial rotation from stacking up. */
   channel?: string;
   /** Franchise / theme tag, e.g. "Pokemon". Same purpose as `channel`. */
   franchise?: string;
   /**
-   * Who or what gets drawn, for videos where more than one channel teaches the
-   * same character (two Charizards, three Rosalinas). Only set where it needs
-   * to group; unset means "nothing else in the list draws this".
+   * Normalized subject key on every drawing video. Alternate tutorials share
+   * a key; character/generic prefixes distinguish names such as Princess
+   * Peach from the fruit. Other categories may use their existing labels.
    */
   subject?: string;
   addedDate?: string;
@@ -596,8 +602,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/jBfMs-YskHo/hqdefault.jpg',
       duration: '9:09',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
+      subject: 'character:ariel',
       addedDate: '2026-05-17'
     },
     {
@@ -607,9 +615,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/twAox47nBes/hqdefault.jpg',
       duration: '10:59',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
-      subject: 'Moana',
+      subject: 'character:moana',
       addedDate: '2026-05-17'
     },
     {
@@ -619,8 +628,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/kvpkTj-6EZw/hqdefault.jpg',
       duration: '7:13',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
+      subject: 'character:jasmine',
       addedDate: '2026-05-17'
     },
     {
@@ -630,8 +641,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/YBwoGTvsA2Q/hqdefault.jpg',
       duration: '10:43',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
+      subject: 'character:tiana',
       addedDate: '2026-05-17'
     },
     {
@@ -641,8 +654,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/hky2ggpPM88/hqdefault.jpg',
       duration: '11:29',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
+      subject: 'character:belle',
       addedDate: '2026-05-16'
     },
     {
@@ -652,9 +667,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/Tg64kM4Q8ek/hqdefault.jpg',
       duration: '13:04',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
-      subject: 'Elsa',
+      subject: 'character:elsa',
       addedDate: '2026-08-08'
     },
     {
@@ -664,8 +680,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/GcpXN_FFFVg/hqdefault.jpg',
       duration: '12:34',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
+      subject: 'character:anna',
       addedDate: '2026-08-08'
     },
     {
@@ -675,8 +693,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/AbH7lCWaDX0/hqdefault.jpg',
       duration: '6:44',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Disney',
+      subject: 'character:mulan',
       addedDate: '2026-08-08'
     },
     {
@@ -686,8 +706,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/R4TgExfr12I/hqdefault.jpg',
       duration: '9:31',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
+      subject: 'character:rapunzel',
       addedDate: '2026-05-17'
     },
     {
@@ -697,8 +719,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/aeJQsbPAEhc/hqdefault.jpg',
       duration: '14:41',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
+      subject: 'character:cinderella',
       addedDate: '2026-05-16'
     },
     {
@@ -708,9 +732,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/80mkqBe4TsQ/hqdefault.jpg',
       duration: '19:29',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
-      subject: 'Elsa',
+      subject: 'character:elsa',
       addedDate: '2026-08-08'
     },
     {
@@ -720,8 +745,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/zrLIop2WukM/hqdefault.jpg',
       duration: '15:34',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
+      subject: 'character:snow-white',
       addedDate: '2026-08-08'
     },
     {
@@ -731,9 +758,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/VlazaMYoIjs/hqdefault.jpg',
       duration: '15:19',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
-      subject: 'Moana',
+      subject: 'character:moana',
       addedDate: '2026-08-08'
     },
     {
@@ -743,8 +771,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/7H1fm0SEVcY/hqdefault.jpg',
       duration: '15:01',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
+      subject: 'character:merida',
       addedDate: '2026-08-08'
     },
     {
@@ -754,9 +784,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/CNb2cV24wr0/hqdefault.jpg',
       duration: '13:55',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Disney',
-      subject: 'Mirabel',
+      subject: 'character:mirabel',
       addedDate: '2026-08-08'
     },
     {
@@ -766,9 +797,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/ZHZ5qrogCOE/hqdefault.jpg',
       duration: '29:46',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Disney',
-      subject: 'Mirabel',
+      subject: 'character:mirabel',
       addedDate: '2026-08-08'
     },
     {
@@ -778,9 +810,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/FObW5ynBbVg/hqdefault.jpg',
       duration: '17:07',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
-      subject: 'Peach',
+      subject: 'character:peach',
       addedDate: '2026-05-16'
     },
     {
@@ -790,9 +823,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/OukDd4qFjM8/hqdefault.jpg',
       duration: '13:26',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
-      subject: 'Rosalina',
+      subject: 'character:rosalina',
       addedDate: '2026-08-08'
     },
     {
@@ -802,8 +836,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/QGMz2e3MFxY/hqdefault.jpg',
       duration: '16:06',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:bowser',
       addedDate: '2026-05-16'
     },
     {
@@ -813,8 +849,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/tWYhAy8K0Eg/hqdefault.jpg',
       duration: '10:50',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:mario',
       addedDate: '2026-05-16'
     },
     {
@@ -824,8 +862,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/Kchg3IK7mFM/hqdefault.jpg',
       duration: '11:01',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:luigi',
       addedDate: '2026-05-16'
     },
     {
@@ -835,8 +875,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/iPJeemfinZ8/hqdefault.jpg',
       duration: '8:16',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:yoshi',
       addedDate: '2026-05-16'
     },
     {
@@ -846,8 +888,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/2yxnq_Q_bsI/hqdefault.jpg',
       duration: '12:53',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:bowser-jr',
       addedDate: '2026-05-16'
     },
     {
@@ -857,8 +901,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/JwSVs1aRs9A/hqdefault.jpg',
       duration: '8:47',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:king-boo',
       addedDate: '2026-05-16'
     },
     {
@@ -868,8 +914,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/q15P6OE0EGk/hqdefault.jpg',
       duration: '10:52',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:kamek',
       addedDate: '2026-05-16'
     },
     {
@@ -879,8 +927,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/IrQ_BcEAR3A/hqdefault.jpg',
       duration: '18:27',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
+      subject: 'character:kirby',
       addedDate: '2026-05-16'
     },
     {
@@ -890,9 +940,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/4eIMePaqk5A/hqdefault.jpg',
       duration: '32:04',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
-      subject: 'Link',
+      subject: 'character:link',
       addedDate: '2026-05-16'
     },
     {
@@ -902,9 +953,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/AQIx4UfYrJI/hqdefault.jpg',
       duration: '10:47',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Nintendo',
-      subject: 'Link',
+      subject: 'character:link',
       addedDate: '2026-05-16'
     },
     {
@@ -914,9 +966,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/_aHGaUZnRJc/hqdefault.jpg',
       duration: '11:19',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Nintendo',
-      subject: 'Peach',
+      subject: 'character:peach',
       addedDate: '2026-05-17'
     },
     {
@@ -926,9 +979,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/K0VSVYmPcbI/hqdefault.jpg',
       duration: '13:51',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Nintendo',
-      subject: 'Rosalina',
+      subject: 'character:rosalina',
       addedDate: '2026-08-08'
     },
     {
@@ -938,9 +992,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/rA06Tpnx44E/hqdefault.jpg',
       duration: '12:29',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Nintendo',
-      subject: 'Daisy',
+      subject: 'character:daisy',
       addedDate: '2026-08-08'
     },
     {
@@ -950,9 +1005,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/7x5v_tt1az0/hqdefault.jpg',
       duration: '15:01',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Nintendo',
-      subject: 'Link',
+      subject: 'character:link',
       addedDate: '2026-05-17'
     },
     {
@@ -962,9 +1018,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/TDxVwg3BwAo/hqdefault.jpg',
       duration: '11:01',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Nintendo',
-      subject: 'Rosalina',
+      subject: 'character:rosalina',
       addedDate: '2026-08-08'
     },
     {
@@ -974,9 +1031,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/T-TqSyNKYfk/hqdefault.jpg',
       duration: '10:13',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Nintendo',
-      subject: 'Daisy',
+      subject: 'character:daisy',
       addedDate: '2026-08-08'
     },
     {
@@ -986,9 +1044,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/-RRw77w183w/hqdefault.jpg',
       duration: '25:08',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
-      subject: 'Charizard',
+      subject: 'character:charizard',
       addedDate: '2026-05-16'
     },
     {
@@ -998,8 +1057,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/1zX0hLFrlbQ/hqdefault.jpg',
       duration: '22:17',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:ash-ketchum',
       addedDate: '2026-05-16'
     },
     {
@@ -1009,9 +1070,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/HXW6W1eVo3c/hqdefault.jpg',
       duration: '13:16',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
-      subject: 'Eevee',
+      subject: 'character:eevee',
       addedDate: '2026-05-16'
     },
     {
@@ -1021,8 +1083,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/6IeaiSVU7Cc/hqdefault.jpg',
       duration: '17:26',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:squirtle',
       addedDate: '2026-05-16'
     },
     {
@@ -1032,8 +1096,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/hbo1WnqlMrc/hqdefault.jpg',
       duration: '15:57',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:charmander',
       addedDate: '2026-05-16'
     },
     {
@@ -1043,8 +1109,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/8Hi-04JwsuM/hqdefault.jpg',
       duration: '32:20',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:blastoise',
       addedDate: '2026-05-16'
     },
     {
@@ -1054,8 +1122,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/K48siVDktpI/hqdefault.jpg',
       duration: '11:37',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:bulbasaur',
       addedDate: '2026-05-16'
     },
     {
@@ -1065,8 +1135,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/U4uf_F6JY1M/hqdefault.jpg',
       duration: '28:48',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:mewtwo',
       addedDate: '2026-05-16'
     },
     {
@@ -1076,8 +1148,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/j3RafPJ3iWY/hqdefault.jpg',
       duration: '14:44',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:vaporeon',
       addedDate: '2026-05-16'
     },
     {
@@ -1087,8 +1161,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/zsrFZMVxBs8/hqdefault.jpg',
       duration: '15:30',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:sprigatito',
       addedDate: '2026-05-16'
     },
     {
@@ -1098,8 +1174,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/WoV4f1ncE7U/hqdefault.jpg',
       duration: '7:58',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Pokemon',
+      subject: 'character:pikachu',
       addedDate: '2026-05-16'
     },
     {
@@ -1109,9 +1187,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/yLmPwjDtMnQ/hqdefault.jpg',
       duration: '13:32',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Pokemon',
-      subject: 'Charizard',
+      subject: 'character:charizard',
       addedDate: '2026-05-16'
     },
     {
@@ -1121,9 +1200,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/aN-HP2z2MF4/hqdefault.jpg',
       duration: '9:12',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Pokemon',
-      subject: 'Eevee',
+      subject: 'character:eevee',
       addedDate: '2026-05-17'
     },
     {
@@ -1133,8 +1213,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/jCCPBGOCo6Q/hqdefault.jpg',
       duration: '13:34',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Pokemon',
+      subject: 'character:vulpix',
       addedDate: '2026-05-16'
     },
     {
@@ -1144,8 +1226,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/fqGlGkI6LAk/hqdefault.jpg',
       duration: '10:51',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Pokemon',
+      subject: 'character:sylveon',
       addedDate: '2026-08-08'
     },
     {
@@ -1155,8 +1239,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/XtPfR_D8BC0/hqdefault.jpg',
       duration: '9:06',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Pokemon',
+      subject: 'character:espeon',
       addedDate: '2026-08-08'
     },
     {
@@ -1166,8 +1252,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/9wzr0PRok2w/hqdefault.jpg',
       duration: '10:00',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Pokemon',
+      subject: 'character:umbreon',
       addedDate: '2026-08-08'
     },
     {
@@ -1177,9 +1265,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/NW20U356pmA/hqdefault.jpg',
       duration: '11:35',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Ghibli',
-      subject: 'Totoro',
+      subject: 'character:totoro',
       addedDate: '2026-08-08'
     },
     {
@@ -1189,8 +1278,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/bpXEx0Ypeiw/hqdefault.jpg',
       duration: '12:17',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Ghibli',
+      subject: 'character:kiki',
       addedDate: '2026-08-08'
     },
     {
@@ -1200,8 +1291,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/Vg7wVaiSXJs/hqdefault.jpg',
       duration: '11:56',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Ghibli',
+      subject: 'character:chihiro',
       addedDate: '2026-08-08'
     },
     {
@@ -1211,8 +1304,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/hutTbIT8pPc/hqdefault.jpg',
       duration: '9:24',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Ghibli',
+      subject: 'character:jiji',
       addedDate: '2026-08-08'
     },
     {
@@ -1222,9 +1317,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/Q3lsif7GkI0/hqdefault.jpg',
       duration: '28:18',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Ghibli',
-      subject: 'Totoro',
+      subject: 'character:totoro',
       addedDate: '2026-08-08'
     },
     {
@@ -1234,8 +1330,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/_24oxPpE9kY/hqdefault.jpg',
       duration: '6:16',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Ghibli',
+      subject: 'character:no-face',
       addedDate: '2026-08-08'
     },
     {
@@ -1245,8 +1343,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/FM0n1aq1ROw/hqdefault.jpg',
       duration: '13:08',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Quick Doodle',
       franchise: 'Ghibli',
+      subject: 'character:ponyo',
       addedDate: '2026-08-08'
     },
     {
@@ -1256,9 +1356,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/2zZadXzXgKo/hqdefault.jpg',
       duration: '7:52',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Toy Story',
-      subject: 'Woody',
+      subject: 'character:woody',
       addedDate: '2026-08-08'
     },
     {
@@ -1268,8 +1369,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/0srd_PwKUaU/hqdefault.jpg',
       duration: '12:56',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Toy Story',
+      subject: 'character:buzz-lightyear',
       addedDate: '2026-08-08'
     },
     {
@@ -1279,9 +1382,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/bayiwrmYilg/hqdefault.jpg',
       duration: '10:40',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Toy Story',
-      subject: 'Jessie',
+      subject: 'character:jessie',
       addedDate: '2026-08-08'
     },
     {
@@ -1291,9 +1395,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/9ilXZhSwRn4/hqdefault.jpg',
       duration: '15:38',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Toy Story',
-      subject: 'Woody',
+      subject: 'character:woody',
       addedDate: '2026-08-08'
     },
     {
@@ -1303,9 +1408,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/QafsWEkdNlM/hqdefault.jpg',
       duration: '18:14',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Toy Story',
-      subject: 'Jessie',
+      subject: 'character:jessie',
       addedDate: '2026-08-08'
     },
     {
@@ -1315,8 +1421,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/5F7XT-MFy_s/hqdefault.jpg',
       duration: '15:36',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Toy Story',
+      subject: 'character:bo-peep',
       addedDate: '2026-08-08'
     },
     {
@@ -1326,9 +1434,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/YCSieMazLi8/hqdefault.jpg',
       duration: '16:41',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Cartooning Club How to Draw',
       franchise: 'Toy Story',
-      subject: 'Woody',
+      subject: 'character:woody',
       addedDate: '2026-08-08'
     },
     {
@@ -1338,9 +1447,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/5rEzWsuYXCc/hqdefault.jpg',
       duration: '22:08',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Avatar',
-      subject: 'Aang',
+      subject: 'character:aang',
       addedDate: '2026-08-08'
     },
     {
@@ -1350,9 +1460,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/WsgEs8tIra0/hqdefault.jpg',
       duration: '10:49',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Avatar',
-      subject: 'Katara',
+      subject: 'character:katara',
       addedDate: '2026-08-08'
     },
     {
@@ -1362,8 +1473,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/XAtY402mTlY/hqdefault.jpg',
       duration: '22:27',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Avatar',
+      subject: 'character:appa',
       addedDate: '2026-08-08'
     },
     {
@@ -1373,9 +1486,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/qhE3w81K4LU/hqdefault.jpg',
       duration: '13:45',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Avatar',
-      subject: 'Aang',
+      subject: 'character:aang',
       addedDate: '2026-08-08'
     },
     {
@@ -1385,9 +1499,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/8dZJK8i-KFM/hqdefault.jpg',
       duration: '13:20',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Avatar',
-      subject: 'Katara',
+      subject: 'character:katara',
       addedDate: '2026-08-08'
     },
     {
@@ -1397,8 +1512,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/WiW0t9ic7_s/hqdefault.jpg',
       duration: '14:18',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art.Simple.',
       franchise: 'Avatar',
+      subject: 'character:zuko',
       addedDate: '2026-08-08'
     },
     {
@@ -1408,9 +1525,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/KO2yNtHs5lg/hqdefault.jpg',
       duration: '22:43',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Winx Club',
-      subject: 'Bloom',
+      subject: 'character:bloom',
       addedDate: '2026-08-08'
     },
     {
@@ -1420,9 +1538,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/7ryzgt0XN6s/hqdefault.jpg',
       duration: '18:03',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Winx Club',
-      subject: 'Bloom',
+      subject: 'character:bloom',
       addedDate: '2026-08-08'
     },
     {
@@ -1432,8 +1551,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/UJ2EfvqWn9I/hqdefault.jpg',
       duration: '11:13',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Discover to Draw',
       franchise: 'Winx Club',
+      subject: 'character:stella',
       addedDate: '2026-08-08'
     },
     {
@@ -1443,8 +1564,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/q3DGqCBnuco/hqdefault.jpg',
       duration: '27:07',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Discover to Draw',
       franchise: 'Winx Club',
+      subject: 'character:musa',
       addedDate: '2026-08-08'
     },
     {
@@ -1454,8 +1577,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/qz5I8OXMW-o/hqdefault.jpg',
       duration: '30:39',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Winx Club Official',
       franchise: 'Winx Club',
+      subject: 'character:winx-fairies',
       addedDate: '2026-08-08'
     },
     {
@@ -1465,8 +1590,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/qc5uz9uXNj4/hqdefault.jpg',
       duration: '7:19',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Winx Club Official',
       franchise: 'Winx Club',
+      subject: 'character:aisha',
       addedDate: '2026-08-08'
     },
     {
@@ -1476,9 +1603,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/lSSYciuiKSA/hqdefault.jpg',
       duration: '8:44',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Bluey',
-      subject: 'Bluey',
+      subject: 'character:bluey',
       addedDate: '2026-08-08'
     },
     {
@@ -1488,9 +1616,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/5mA03XDIRUg/hqdefault.jpg',
       duration: '8:34',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Bluey',
-      subject: 'Bluey',
+      subject: 'character:bluey',
       addedDate: '2026-08-08'
     },
     {
@@ -1500,9 +1629,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/l_4ZAq5zyJM/hqdefault.jpg',
       duration: '10:31',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Draw So Cute',
       franchise: 'Bluey',
-      subject: 'Bluey',
+      subject: 'character:bluey',
       addedDate: '2026-05-16'
     },
     {
@@ -1512,9 +1642,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/yGIUAkEbwpY/hqdefault.jpg',
       duration: '11:06',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Bluey - Official Channel',
       franchise: 'Bluey',
-      subject: 'Bluey',
+      subject: 'character:bluey',
       addedDate: '2026-08-08'
     },
     {
@@ -1524,8 +1655,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/eFHwTD9eHyw/hqdefault.jpg',
       duration: '16:01',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:dragon',
       addedDate: '2026-05-16'
     },
     {
@@ -1535,8 +1668,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/TzifMl12ahk/hqdefault.jpg',
       duration: '17:12',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:dragon',
       addedDate: '2026-05-16'
     },
     {
@@ -1546,8 +1681,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/ANcwbdO-QYM/hqdefault.jpg',
       duration: '22:40',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:dragon',
       addedDate: '2026-05-16'
     },
     {
@@ -1557,8 +1694,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/TBH3-tjHNHY/hqdefault.jpg',
       duration: '13:32',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:griffin',
       addedDate: '2026-05-16'
     },
     {
@@ -1568,8 +1707,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/14L8XVjus3U/hqdefault.jpg',
       duration: '15:13',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:phoenix',
       addedDate: '2026-05-16'
     },
     {
@@ -1579,8 +1720,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/KUXOQfh0ZKY/hqdefault.jpg',
       duration: '10:45',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:alicorn',
       addedDate: '2026-05-16'
     },
     {
@@ -1590,8 +1733,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/9U1zQ_oX5LU/hqdefault.jpg',
       duration: '8:31',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:fairy',
       addedDate: '2026-05-16'
     },
     {
@@ -1601,8 +1746,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/KRAarF177Y4/hqdefault.jpg',
       duration: '20:28',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art for Kids Hub',
       franchise: 'Mythical',
+      subject: 'generic:dragon',
       addedDate: '2026-05-16'
     },
     {
@@ -1612,8 +1759,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/LNJqyHm95w0/hqdefault.jpg',
       duration: '13:51',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Harry Potter',
+      subject: 'character:harry-potter',
       addedDate: '2026-05-16'
     },
     {
@@ -1623,8 +1772,10 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/T37o30V69YQ/hqdefault.jpg',
       duration: '19:57',
       category: 'drawing',
+      drawingKind: 'character',
       channel: 'Art for Kids Hub',
       franchise: 'Sonic',
+      subject: 'character:sonic',
       addedDate: '2026-05-16'
     },
     {
@@ -1634,9 +1785,1207 @@ class YouTubeService {
       thumbnail: 'https://i.ytimg.com/vi/fgr9KZ64TXc/hqdefault.jpg',
       duration: '22:46',
       category: 'drawing',
+      drawingKind: 'generic',
       channel: 'Art.Simple.',
       franchise: 'Dinosaurs',
+      subject: 'generic:tyrannosaurus-rex',
       addedDate: '2026-05-16'
+    },
+    {
+      id: 'drawing-93',
+      youtubeId: 'MX3vHndP4YM',
+      title: 'How To Draw A Flower (Tulip)- Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/MX3vHndP4YM/hqdefault.jpg',
+      duration: '4:51',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:tulip',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-94',
+      youtubeId: 'ao2IP7f23-8',
+      title: 'How To Draw A Hibiscus Flower 🌺',
+      thumbnail: 'https://i.ytimg.com/vi/ao2IP7f23-8/hqdefault.jpg',
+      duration: '4:47',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:hibiscus',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-95',
+      youtubeId: 'KB_RQACWFbg',
+      title: 'How To Draw A Lotus Flower',
+      thumbnail: 'https://i.ytimg.com/vi/KB_RQACWFbg/hqdefault.jpg',
+      duration: '8:57',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:lotus',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-96',
+      youtubeId: 'TMYhplLC9oo',
+      title: 'How To Draw A Daisy Flower',
+      thumbnail: 'https://i.ytimg.com/vi/TMYhplLC9oo/hqdefault.jpg',
+      duration: '7:40',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:daisy',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-97',
+      youtubeId: 'i_pQWFkZJrc',
+      title: 'How To Draw A Sunflower',
+      thumbnail: 'https://i.ytimg.com/vi/i_pQWFkZJrc/hqdefault.jpg',
+      duration: '5:30',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:sunflower',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-98',
+      youtubeId: '0-jHiAovALE',
+      title: 'How To Draw A Flower Bouquet',
+      thumbnail: 'https://i.ytimg.com/vi/0-jHiAovALE/hqdefault.jpg',
+      duration: '9:48',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:flower-bouquet',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-99',
+      youtubeId: 'gExU54kVM0o',
+      title: 'How To Draw A Tree',
+      thumbnail: 'https://i.ytimg.com/vi/gExU54kVM0o/hqdefault.jpg',
+      duration: '8:20',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:tree',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-100',
+      youtubeId: '6sAdj6NoLzA',
+      title: 'How To Draw A Fall Tree',
+      thumbnail: 'https://i.ytimg.com/vi/6sAdj6NoLzA/hqdefault.jpg',
+      duration: '6:59',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:tree',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-101',
+      youtubeId: 'HccklAXTlrE',
+      title: 'How To Draw A Palm Tree 🌴',
+      thumbnail: 'https://i.ytimg.com/vi/HccklAXTlrE/hqdefault.jpg',
+      duration: '5:56',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:palm-tree',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-102',
+      youtubeId: '88K3ytkQlek',
+      title: 'How To Draw A Cherry Blossom Spring Tree',
+      thumbnail: 'https://i.ytimg.com/vi/88K3ytkQlek/hqdefault.jpg',
+      duration: '6:21',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:cherry-tree',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-103',
+      youtubeId: 'gmIYMCs-LGk',
+      title: 'How to Draw a Lily Flower Easy',
+      thumbnail: 'https://i.ytimg.com/vi/gmIYMCs-LGk/hqdefault.jpg',
+      duration: '10:41',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Plants',
+      subject: 'generic:lily',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-104',
+      youtubeId: 'umpCpkxzpDc',
+      title: 'How to Draw a Flower Easy and Cute',
+      thumbnail: 'https://i.ytimg.com/vi/umpCpkxzpDc/hqdefault.jpg',
+      duration: '6:38',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Plants',
+      subject: 'generic:flower',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-105',
+      youtubeId: 'abj3jziG-2c',
+      title: 'How to Draw an Aloe Plant in a Pot 🌱| Cute Pun Art #4',
+      thumbnail: 'https://i.ytimg.com/vi/abj3jziG-2c/hqdefault.jpg',
+      duration: '7:51',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Plants',
+      subject: 'generic:aloe',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-106',
+      youtubeId: 'kS80xQbLoH0',
+      title: 'How to Draw a Rose step by step Easy',
+      thumbnail: 'https://i.ytimg.com/vi/kS80xQbLoH0/hqdefault.jpg',
+      duration: '6:35',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Plants',
+      subject: 'generic:rose',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-107',
+      youtubeId: 'wLr8Kn9NqH4',
+      title: 'How To Draw Simple Lilies',
+      thumbnail: 'https://i.ytimg.com/vi/wLr8Kn9NqH4/hqdefault.jpg',
+      duration: '7:48',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art Hub Plus',
+      franchise: 'Plants',
+      subject: 'generic:lily',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-108',
+      youtubeId: 'ozNI7LXpkxU',
+      title: 'How To Draw A Peony Flower',
+      thumbnail: 'https://i.ytimg.com/vi/ozNI7LXpkxU/hqdefault.jpg',
+      duration: '9:35',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Plants',
+      subject: 'generic:peony',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-109',
+      youtubeId: '55FhQH0jMaY',
+      title: 'How to Draw an Orchid Flower Easy',
+      thumbnail: 'https://i.ytimg.com/vi/55FhQH0jMaY/hqdefault.jpg',
+      duration: '11:17',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Plants',
+      subject: 'generic:orchid',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-110',
+      youtubeId: 'EoY7g-P-aDc',
+      title: 'How to Draw a Hydrangea Flower Easy',
+      thumbnail: 'https://i.ytimg.com/vi/EoY7g-P-aDc/hqdefault.jpg',
+      duration: '14:04',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Plants',
+      subject: 'generic:hydrangea',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-111',
+      youtubeId: '2iF-9DAqYu8',
+      title: 'How To Draw A Baby Axolotl',
+      thumbnail: 'https://i.ytimg.com/vi/2iF-9DAqYu8/hqdefault.jpg',
+      duration: '4:54',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:axolotl',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-112',
+      youtubeId: 'j7CjkMtWJrw',
+      title: 'How To Draw A Dachshund',
+      thumbnail: 'https://i.ytimg.com/vi/j7CjkMtWJrw/hqdefault.jpg',
+      duration: '6:42',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:dachshund',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-113',
+      youtubeId: '5GOFwmqQ7oU',
+      title: 'How To Draw A Cartoon Baby Chick',
+      thumbnail: 'https://i.ytimg.com/vi/5GOFwmqQ7oU/hqdefault.jpg',
+      duration: '3:36',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:chick',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-114',
+      youtubeId: 'ou7NitF6gkU',
+      title: 'How To Draw A Cartoon Dolphin',
+      thumbnail: 'https://i.ytimg.com/vi/ou7NitF6gkU/hqdefault.jpg',
+      duration: '6:22',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:dolphin',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-115',
+      youtubeId: 'fGqtZbdjhNU',
+      title: 'How To Draw A Cartoon Turtle',
+      thumbnail: 'https://i.ytimg.com/vi/fGqtZbdjhNU/hqdefault.jpg',
+      duration: '9:21',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:turtle',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-116',
+      youtubeId: 're4aKD1mHAg',
+      title: 'How To Draw The Cutest Puppy',
+      thumbnail: 'https://i.ytimg.com/vi/re4aKD1mHAg/hqdefault.jpg',
+      duration: '5:44',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:puppy',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-117',
+      youtubeId: 'M0qfztDSL3I',
+      title: 'How To Draw A Sleeping Black Cat',
+      thumbnail: 'https://i.ytimg.com/vi/M0qfztDSL3I/hqdefault.jpg',
+      duration: '4:57',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:cat',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-118',
+      youtubeId: 'XbmCDPn_HuM',
+      title: 'How To Draw A Great White Shark',
+      thumbnail: 'https://i.ytimg.com/vi/XbmCDPn_HuM/hqdefault.jpg',
+      duration: '6:09',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:shark',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-119',
+      youtubeId: '53rZ7cOroKM',
+      title: 'How to Draw a Bunny Easy 🌸🐰 Spring',
+      thumbnail: 'https://i.ytimg.com/vi/53rZ7cOroKM/hqdefault.jpg',
+      duration: '7:29',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:bunny',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-120',
+      youtubeId: 'ReQT_be_SoU',
+      title: 'How to Draw a Duck Super Easy and Cute',
+      thumbnail: 'https://i.ytimg.com/vi/ReQT_be_SoU/hqdefault.jpg',
+      duration: '5:27',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:duck',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-121',
+      youtubeId: 'JVze438WC1Q',
+      title: 'How to Draw a Highland Cow',
+      thumbnail: 'https://i.ytimg.com/vi/JVze438WC1Q/hqdefault.jpg',
+      duration: '12:18',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:highland-cow',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-122',
+      youtubeId: '69TL8p8Qdts',
+      title: 'How to Draw a Husky Puppy Easy',
+      thumbnail: 'https://i.ytimg.com/vi/69TL8p8Qdts/hqdefault.jpg',
+      duration: '10:36',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:husky',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-123',
+      youtubeId: '6foVH8tbOEc',
+      title: 'How to Draw a Cheetah Easy | Cute Cartoon Animal',
+      thumbnail: 'https://i.ytimg.com/vi/6foVH8tbOEc/hqdefault.jpg',
+      duration: '10:32',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:cheetah',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-124',
+      youtubeId: 'CYcIMHepH60',
+      title: 'How to Draw an Arctic Fox Easy',
+      thumbnail: 'https://i.ytimg.com/vi/CYcIMHepH60/hqdefault.jpg',
+      duration: '11:08',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:arctic-fox',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-125',
+      youtubeId: '99qBQKSB7i8',
+      title: 'How to Draw a Hamster Drinking Boba Slush Drink 🧋🐹',
+      thumbnail: 'https://i.ytimg.com/vi/99qBQKSB7i8/hqdefault.jpg',
+      duration: '11:34',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:hamster',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-126',
+      youtubeId: 'Ie-fgG2QOKs',
+      title: 'How To Draw A Lion - Letter L - Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/Ie-fgG2QOKs/hqdefault.jpg',
+      duration: '5:47',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:lion',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-127',
+      youtubeId: 'OFvmH70UsCA',
+      title: 'How To Draw A Panda - Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/OFvmH70UsCA/hqdefault.jpg',
+      duration: '5:15',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:panda',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-128',
+      youtubeId: 'nNc9vMQc3dc',
+      title: 'How To Draw A Grasshopper - Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/nNc9vMQc3dc/hqdefault.jpg',
+      duration: '5:08',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:grasshopper',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-129',
+      youtubeId: '3gzTJxjRCG0',
+      title: 'How To Draw A Caterpillar',
+      thumbnail: 'https://i.ytimg.com/vi/3gzTJxjRCG0/hqdefault.jpg',
+      duration: '11:05',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:caterpillar',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-130',
+      youtubeId: '3AYB6JNHM0c',
+      title: 'How To Draw An Ant (Young Artists)',
+      thumbnail: 'https://i.ytimg.com/vi/3AYB6JNHM0c/hqdefault.jpg',
+      duration: '6:45',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:ant',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-131',
+      youtubeId: 'ho29DN263QM',
+      title: 'How To Draw A Cartoon Ladybug',
+      thumbnail: 'https://i.ytimg.com/vi/ho29DN263QM/hqdefault.jpg',
+      duration: '4:37',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:ladybug',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-132',
+      youtubeId: 'eEenczJV_l8',
+      title: 'How to Draw a Penguin | Animals Drawings Easy Step-by-Step Tutorial!',
+      thumbnail: 'https://i.ytimg.com/vi/eEenczJV_l8/hqdefault.jpg',
+      duration: '2:39',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Animals',
+      subject: 'generic:penguin',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-133',
+      youtubeId: '1j5EO59Rhq4',
+      title: 'How to Draw a Bird | Super Easy Step-by-Step Tutorial!',
+      thumbnail: 'https://i.ytimg.com/vi/1j5EO59Rhq4/hqdefault.jpg',
+      duration: '2:23',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Animals',
+      subject: 'generic:bird',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-134',
+      youtubeId: 'G4Xlglmlpdg',
+      title: 'How to Draw a Bear Easy | Animals Drawings for Beginners',
+      thumbnail: 'https://i.ytimg.com/vi/G4Xlglmlpdg/hqdefault.jpg',
+      duration: '2:15',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Animals',
+      subject: 'generic:bear',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-135',
+      youtubeId: 'QtGeB5tu2xU',
+      title: 'How to draw a Fish Step by Step | Drawings Tutorials for Kids',
+      thumbnail: 'https://i.ytimg.com/vi/QtGeB5tu2xU/hqdefault.jpg',
+      duration: '2:18',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'DrawinGeek',
+      franchise: 'Animals',
+      subject: 'generic:fish',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-136',
+      youtubeId: 'tQNbRUuzLXw',
+      title: 'How to Draw a Horse',
+      thumbnail: 'https://i.ytimg.com/vi/tQNbRUuzLXw/hqdefault.jpg',
+      duration: '9:38',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Animals',
+      subject: 'generic:horse',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-137',
+      youtubeId: 'IubXiox8KSQ',
+      title: 'How To Draw A Cool Bald Eagle',
+      thumbnail: 'https://i.ytimg.com/vi/IubXiox8KSQ/hqdefault.jpg',
+      duration: '7:07',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Animals',
+      subject: 'generic:bald-eagle',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-138',
+      youtubeId: 'UW6H5dAPuhY',
+      title: 'How To Draw A Cute Ice Cream Cone',
+      thumbnail: 'https://i.ytimg.com/vi/UW6H5dAPuhY/hqdefault.jpg',
+      duration: '3:33',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Food',
+      subject: 'generic:ice-cream',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-139',
+      youtubeId: '7coSy4lzav4',
+      title: 'How to Draw a Birthday Cupcake Easy',
+      thumbnail: 'https://i.ytimg.com/vi/7coSy4lzav4/hqdefault.jpg',
+      duration: '8:14',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:cupcake',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-140',
+      youtubeId: '9QaO7H-3ZbM',
+      title: 'How to Draw a Bowl of Fruit Easy',
+      thumbnail: 'https://i.ytimg.com/vi/9QaO7H-3ZbM/hqdefault.jpg',
+      duration: '10:57',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:fruit-bowl',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-141',
+      youtubeId: '66yTF6Udkt4',
+      title: 'How to Draw a Peach Easy and Cute | Cartoon Fruit',
+      thumbnail: 'https://i.ytimg.com/vi/66yTF6Udkt4/hqdefault.jpg',
+      duration: '5:34',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:peach',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-142',
+      youtubeId: 'm6tRM1uBhTU',
+      title: 'How to Draw a Pineapple Easy 🍍 Cute Fruit Art',
+      thumbnail: 'https://i.ytimg.com/vi/m6tRM1uBhTU/hqdefault.jpg',
+      duration: '6:59',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:pineapple',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-143',
+      youtubeId: 'Y8xSRhgxyLo',
+      title: 'How to Draw Grapes Easy 🍇 Cute Fruit Pun Art',
+      thumbnail: 'https://i.ytimg.com/vi/Y8xSRhgxyLo/hqdefault.jpg',
+      duration: '10:23',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:grapes',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-144',
+      youtubeId: 'Gn3IdOuUsMk',
+      title: 'How to Draw a Lemon 🍋 Cute Fruit Pun Art',
+      thumbnail: 'https://i.ytimg.com/vi/Gn3IdOuUsMk/hqdefault.jpg',
+      duration: '7:07',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:lemon',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-145',
+      youtubeId: '90CaHw6HAsQ',
+      title: 'How to Draw a Banana Easy 🍌Cute Fruit Art',
+      thumbnail: 'https://i.ytimg.com/vi/90CaHw6HAsQ/hqdefault.jpg',
+      duration: '5:14',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:banana',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-146',
+      youtubeId: '6kIWWLZql3c',
+      title: 'How to Draw a Strawberry Easy - Cute Fruit',
+      thumbnail: 'https://i.ytimg.com/vi/6kIWWLZql3c/hqdefault.jpg',
+      duration: '9:09',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:strawberry',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-147',
+      youtubeId: 'PTOG4KLGi-k',
+      title: 'How to Draw a Rainbow Fruit Smoothie 🍓 Cute Drink Art',
+      thumbnail: 'https://i.ytimg.com/vi/PTOG4KLGi-k/hqdefault.jpg',
+      duration: '9:03',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:smoothie',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-148',
+      youtubeId: 'f8cWZvMjMrI',
+      title: 'How to Draw a Watermelon Slice 🍉Cute Pun Art #2',
+      thumbnail: 'https://i.ytimg.com/vi/f8cWZvMjMrI/hqdefault.jpg',
+      duration: '6:53',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:watermelon',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-149',
+      youtubeId: 'zoVuOnfADNU',
+      title: 'How to Draw a Mango 🥭 Cute Fruit Pun Art',
+      thumbnail: 'https://i.ytimg.com/vi/zoVuOnfADNU/hqdefault.jpg',
+      duration: '9:13',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Food',
+      subject: 'generic:mango',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-150',
+      youtubeId: '1gTJQOChf94',
+      title: 'How To Draw Pizza - Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/1gTJQOChf94/hqdefault.jpg',
+      duration: '9:23',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Food',
+      subject: 'generic:pizza',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-151',
+      youtubeId: 'X-5TV2X2eMw',
+      title: 'How to draw a Cup of Coffee | Coffee Cup Easy Draw Tutorial',
+      thumbnail: 'https://i.ytimg.com/vi/X-5TV2X2eMw/hqdefault.jpg',
+      duration: '1:02',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'DrawinGeek',
+      franchise: 'Food',
+      subject: 'generic:coffee-cup',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-152',
+      youtubeId: 'Ysz-gkTATg8',
+      title: 'How to Draw a Laptop Computer Easy and Cute',
+      thumbnail: 'https://i.ytimg.com/vi/Ysz-gkTATg8/hqdefault.jpg',
+      duration: '6:44',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Objects',
+      subject: 'generic:laptop',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-153',
+      youtubeId: 'i6z5ySP6-rg',
+      title: 'How to Draw a Backpack Cute and Easy | Back to School Supplies',
+      thumbnail: 'https://i.ytimg.com/vi/i6z5ySP6-rg/hqdefault.jpg',
+      duration: '8:49',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Objects',
+      subject: 'generic:backpack',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-154',
+      youtubeId: 'JuetpYnQwbg',
+      title: 'How to Draw a Book Easy | Cute Back to School Supplies',
+      thumbnail: 'https://i.ytimg.com/vi/JuetpYnQwbg/hqdefault.jpg',
+      duration: '6:46',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Objects',
+      subject: 'generic:book',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-155',
+      youtubeId: '5HHB1X0i1FQ',
+      title: 'How to Draw a Bookmark Easy  | Cute Back to School Supplies',
+      thumbnail: 'https://i.ytimg.com/vi/5HHB1X0i1FQ/hqdefault.jpg',
+      duration: '7:15',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Objects',
+      subject: 'generic:bookmark',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-156',
+      youtubeId: 'kKHrRQ1KUtc',
+      title: 'How to Draw School Supplies | I ❤️ School Art',
+      thumbnail: 'https://i.ytimg.com/vi/kKHrRQ1KUtc/hqdefault.jpg',
+      duration: '9:59',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Objects',
+      subject: 'generic:school-supplies',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-157',
+      youtubeId: 'DcHWr651ddA',
+      title: 'How To Draw A Funny School Notebook',
+      thumbnail: 'https://i.ytimg.com/vi/DcHWr651ddA/hqdefault.jpg',
+      duration: '8:22',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:notebook',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-158',
+      youtubeId: 'lqNzTm2q2N4',
+      title: 'HOW TO DRAW A DIAMOND STEP BY STEP : EASY DRAWING TUTORIAL - By Rizzo Chris',
+      thumbnail: 'https://i.ytimg.com/vi/lqNzTm2q2N4/hqdefault.jpg',
+      duration: '4:04',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Happy Drawings',
+      franchise: 'Objects',
+      subject: 'generic:diamond',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-159',
+      youtubeId: '77Gyjq5hx-Y',
+      title: 'How to draw a Fishing Rod Step by Step | Easy drawings',
+      thumbnail: 'https://i.ytimg.com/vi/77Gyjq5hx-Y/hqdefault.jpg',
+      duration: '1:13',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'DrawinGeek',
+      franchise: 'Objects',
+      subject: 'generic:fishing-rod',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-160',
+      youtubeId: 'tJu0A42Xk_I',
+      title: 'How To Draw A Basketball   For Young Artists!',
+      thumbnail: 'https://i.ytimg.com/vi/tJu0A42Xk_I/hqdefault.jpg',
+      duration: '3:51',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:basketball',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-161',
+      youtubeId: '_vqnIBPk9fU',
+      title: 'How To Draw A Soccer Ball',
+      thumbnail: 'https://i.ytimg.com/vi/_vqnIBPk9fU/hqdefault.jpg',
+      duration: '7:38',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:soccer-ball',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-162',
+      youtubeId: 'X_kxH8ukVCM',
+      title: 'How To Draw A Gold Medal',
+      thumbnail: 'https://i.ytimg.com/vi/X_kxH8ukVCM/hqdefault.jpg',
+      duration: '5:23',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:gold-medal',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-163',
+      youtubeId: 's_2d0N9u2rA',
+      title: 'How To Draw A Tennis Racket And Ball',
+      thumbnail: 'https://i.ytimg.com/vi/s_2d0N9u2rA/hqdefault.jpg',
+      duration: '7:47',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:tennis-racket',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-164',
+      youtubeId: 'PGwTPsyyS9M',
+      title: 'How To Draw A Funny Bowling Ball And Pin',
+      thumbnail: 'https://i.ytimg.com/vi/PGwTPsyyS9M/hqdefault.jpg',
+      duration: '8:47',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:bowling',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-165',
+      youtubeId: 'pLVxc-_XX2I',
+      title: 'How To Draw A Kite',
+      thumbnail: 'https://i.ytimg.com/vi/pLVxc-_XX2I/hqdefault.jpg',
+      duration: '5:07',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Objects',
+      subject: 'generic:kite',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-166',
+      youtubeId: 'QjZFHR8EQrc',
+      title: 'How to Draw Umbrella | Super Easy Stuff Drawing | Step-by-Step Tutorial!',
+      thumbnail: 'https://i.ytimg.com/vi/QjZFHR8EQrc/hqdefault.jpg',
+      duration: '1:46',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Objects',
+      subject: 'generic:umbrella',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-167',
+      youtubeId: 'cW_FxzH8pc4',
+      title: 'How To Draw A Toy Car',
+      thumbnail: 'https://i.ytimg.com/vi/cW_FxzH8pc4/hqdefault.jpg',
+      duration: '5:10',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:car',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-168',
+      youtubeId: 'MuB9ZP8QtEU',
+      title: 'How To Draw A Race Car (For Young Artists)',
+      thumbnail: 'https://i.ytimg.com/vi/MuB9ZP8QtEU/hqdefault.jpg',
+      duration: '9:10',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:car',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-169',
+      youtubeId: 'Pf6p2WsI83M',
+      title: 'How To Draw An Airplane',
+      thumbnail: 'https://i.ytimg.com/vi/Pf6p2WsI83M/hqdefault.jpg',
+      duration: '8:26',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:airplane',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-170',
+      youtubeId: 'SOc3238Z3vM',
+      title: 'How To Draw A Train',
+      thumbnail: 'https://i.ytimg.com/vi/SOc3238Z3vM/hqdefault.jpg',
+      duration: '12:47',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:train',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-171',
+      youtubeId: 'PJRwU9ODlVc',
+      title: 'How To Draw A Cruise Ship',
+      thumbnail: 'https://i.ytimg.com/vi/PJRwU9ODlVc/hqdefault.jpg',
+      duration: '5:35',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:cruise-ship',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-172',
+      youtubeId: 'P1qqxWUSjVY',
+      title: 'How To Draw A Double Decker Bus',
+      thumbnail: 'https://i.ytimg.com/vi/P1qqxWUSjVY/hqdefault.jpg',
+      duration: '10:24',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:bus',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-173',
+      youtubeId: 'v5IvT8eNqao',
+      title: 'How To Draw A Submarine (For Young Artists)',
+      thumbnail: 'https://i.ytimg.com/vi/v5IvT8eNqao/hqdefault.jpg',
+      duration: '10:44',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Vehicles',
+      subject: 'generic:submarine',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-174',
+      youtubeId: 'AWQaqQz4Tg0',
+      title: 'How to Draw a Moped | Easy Vehicle Step-by-Step Tutorial!',
+      thumbnail: 'https://i.ytimg.com/vi/AWQaqQz4Tg0/hqdefault.jpg',
+      duration: '3:20',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Vehicles',
+      subject: 'generic:moped',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-175',
+      youtubeId: 'zhrUVnW_jp4',
+      title: 'How to Draw a Rocket Cartoon drawings for kids step by step super easy',
+      thumbnail: 'https://i.ytimg.com/vi/zhrUVnW_jp4/hqdefault.jpg',
+      duration: '1:34',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Vehicles',
+      subject: 'generic:rocket',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-176',
+      youtubeId: 'pYeDfMyBPEI',
+      title: 'How to Draw a Car  | Super Easy Step-by-Step Tutorial!',
+      thumbnail: 'https://i.ytimg.com/vi/pYeDfMyBPEI/hqdefault.jpg',
+      duration: '2:07',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Mister Brush',
+      franchise: 'Vehicles',
+      subject: 'generic:car',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-177',
+      youtubeId: 'HtBiY_ihVCA',
+      title: 'How To Draw A Treehouse - Preschool',
+      thumbnail: 'https://i.ytimg.com/vi/HtBiY_ihVCA/hqdefault.jpg',
+      duration: '6:18',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Buildings',
+      subject: 'generic:treehouse',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-178',
+      youtubeId: 'ikqkCEdcr8k',
+      title: 'How To Draw A Cozy Fall Cabin',
+      thumbnail: 'https://i.ytimg.com/vi/ikqkCEdcr8k/hqdefault.jpg',
+      duration: '8:30',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Buildings',
+      subject: 'generic:cabin',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-179',
+      youtubeId: 'OBqtEVGDMGE',
+      title: 'Easy HOUSE Drawing for Kids! Step by Step Lessons',
+      thumbnail: 'https://i.ytimg.com/vi/OBqtEVGDMGE/hqdefault.jpg',
+      duration: '4:48',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Easy Kids Drawings',
+      franchise: 'Buildings',
+      subject: 'generic:house',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-180',
+      youtubeId: 'xEROfbsXEOY',
+      title: 'How To Draw A Gingerbread House',
+      thumbnail: 'https://i.ytimg.com/vi/xEROfbsXEOY/hqdefault.jpg',
+      duration: '8:16',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Buildings',
+      subject: 'generic:gingerbread-house',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-181',
+      youtubeId: 'Dt4SD4e2Z6E',
+      title: 'How to Draw a Rainbow and Clouds Easy with Coloring',
+      thumbnail: 'https://i.ytimg.com/vi/Dt4SD4e2Z6E/hqdefault.jpg',
+      duration: '9:07',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Draw So Cute',
+      franchise: 'Weather',
+      subject: 'generic:rainbow',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-182',
+      youtubeId: 'a3P3kHoLvAY',
+      title: 'How To Draw A Rain Cloud + Spotlight',
+      thumbnail: 'https://i.ytimg.com/vi/a3P3kHoLvAY/hqdefault.jpg',
+      duration: '5:28',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Art for Kids Hub',
+      franchise: 'Weather',
+      subject: 'generic:rain-cloud',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-183',
+      youtubeId: 'sYyb95LRTM4',
+      title: 'How to Draw a Colorful Rainbow for Kids | Draw Along with Bri Reads',
+      thumbnail: 'https://i.ytimg.com/vi/sYyb95LRTM4/hqdefault.jpg',
+      duration: '9:24',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Bri Reads',
+      franchise: 'Weather',
+      subject: 'generic:rainbow',
+      addedDate: '2026-10-10'
+    },
+    {
+      id: 'drawing-184',
+      youtubeId: 'B2lpZWGGjz0',
+      title: 'How To Draw A Rainbow 🌈 Drawings and Coloring for Kids',
+      thumbnail: 'https://i.ytimg.com/vi/B2lpZWGGjz0/hqdefault.jpg',
+      duration: '2:54',
+      category: 'drawing',
+      drawingKind: 'generic',
+      channel: 'Super Easy Drawings',
+      franchise: 'Weather',
+      subject: 'generic:rainbow',
+      addedDate: '2026-10-10'
     },
     {
       id: 'yoga-1',
@@ -2307,6 +3656,13 @@ class YouTubeService {
     const all = this.getVideosByCategory(category);
     const rotation = ROTATING_CATEGORIES[category];
     if (!rotation || !seed) return all;
+    if (category === 'drawing') {
+      const random = mulberry32(hashSeed(seed));
+      const picks = pickBalancedDrawingRotation(
+        seededShuffle(all, random), rotation.size, rotation.maxPerChannel, rotation.maxPerFranchise
+      );
+      return seededShuffle(picks, random);
+    }
     return pickRotation(all, rotation.size, seed, rotation.maxPerChannel, rotation.maxPerFranchise);
   }
 

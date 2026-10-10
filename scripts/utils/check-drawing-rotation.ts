@@ -6,9 +6,16 @@
  *
  * Run: npx tsx scripts/utils/check-drawing-rotation.ts
  */
+import assert from "node:assert/strict";
+import { pickBalancedDrawingRotation } from "../../services/drawingRotation";
 import { youtubeService, halfDaySeed, Video } from "../../services/youtubeService";
 
 const pool = youtubeService.getVideosByCategory("drawing");
+assert.equal(pool.length, 184);
+assert.equal(new Set(pool.map(v => v.youtubeId)).size, pool.length);
+assert(pool.every(v => v.drawingKind && v.subject && v.channel));
+assert.equal(pool.filter(v => v.drawingKind === "character").length, 83);
+assert.equal(pool.filter(v => v.drawingKind === "generic").length, 101);
 const index = new Map(pool.map((v, i) => [v.id, i]));
 const seen: string[][] = [];
 let failures = 0;
@@ -21,6 +28,8 @@ for (let day = 0; day < 20; day++) {
     const seed = halfDaySeed(when);
     const picks = youtubeService.getVideosForDisplay("drawing", seed);
 
+    if (picks.filter(v => v.drawingKind === "character").length !== 6 ||
+        picks.filter(v => v.drawingKind === "generic").length !== 6) fail(`${seed}: not six of each kind`);
     if (picks.length !== 12) fail(`${seed}: got ${picks.length} videos`);
     if (new Set(picks.map(p => p.id)).size !== picks.length) fail(`${seed}: duplicates`);
 
@@ -61,6 +70,31 @@ for (let i = 1; i < seen.length; i++) {
 const uniqueSets = new Set(seen.map(s => [...s].sort().join()));
 if (uniqueSets.size !== seen.length) fail(`only ${uniqueSets.size} distinct sets in ${seen.length} half-days`);
 
+// The all-library override is intentionally unrestricted; shuffled/offset seeds balance.
+assert.equal(youtubeService.getVideosForDisplay("drawing", null).length, 184);
+for (const seed of ["2026-10-10-am#shuffle-test", "2026-10-09-pm", "2026-10-11-am"]) {
+  const picks = youtubeService.getVideosForDisplay("drawing", seed);
+  assert.equal(picks.filter(v => v.drawingKind === "character").length, 6);
+  assert.equal(picks.filter(v => v.drawingKind === "generic").length, 6);
+}
+const fixture = (id: string, kind: "character" | "generic", subject = id): Video => ({
+  id, youtubeId: id, title: id, thumbnail: "", category: "drawing",
+  drawingKind: kind, subject, channel: "same-channel", franchise: "same-theme",
+});
+const small = [fixture("c1", "character"), fixture("g1", "generic"), fixture("c2", "character")];
+assert.equal(pickBalancedDrawingRotation(small, 12, 3, 3).length, 2);
+assert.deepEqual(pickBalancedDrawingRotation(small.filter(v => v.drawingKind === "character"), 12, 3, 3), []);
+assert.deepEqual(pickBalancedDrawingRotation([], 12, 3, 3), []);
+const duplicates = [...small, fixture("c3", "character", "c1"), fixture("g2", "generic", "g1")];
+assert.equal(pickBalancedDrawingRotation(duplicates, 12, 3, 3).length, 2);
+const lopsided = Array.from({ length: 12 }, (_, i) => fixture(`v${i}`, i < 6 ? "character" : "generic"));
+const relaxed = pickBalancedDrawingRotation(lopsided, 12, 3, 3);
+assert.equal(relaxed.length, 12);
+assert.equal(relaxed.filter(v => v.drawingKind === "character").length, 6);
+assert.equal(new Set(relaxed.map(v => v.subject)).size, 12);
+// A greedy first character choice blocks the only generic; backtrack to c2.
+const blocked = [fixture("c1", "character", "shared"), fixture("g1", "generic", "shared"), fixture("c2", "character", "other")];
+assert.deepEqual(pickBalancedDrawingRotation(blocked, 2, 3, 3).map(v => v.id), ["g1", "c2"]);
 const coverage = new Set(seen.flat()).size;
 console.log(`\n${seen.length} half-days, ${uniqueSets.size} distinct line-ups, ${coverage}/${pool.length} of the pool shown`);
 console.log(failures === 0 ? "ALL CHECKS PASSED" : `${failures} FAILURES`);
