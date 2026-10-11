@@ -21,9 +21,11 @@ dotenv.config();
 const execAsync = promisify(exec);
 
 let cachedAuth: { token: string; project: string } | null = null;
+let authCachedAt = 0;
+let nextRequestAt = 0;
 
 export async function getVertexAuth(): Promise<{ token: string; project: string }> {
-  if (!cachedAuth) {
+  if (!cachedAuth || Date.now() - authCachedAt > 45 * 60 * 1000) {
     const { stdout: token } = await execAsync("gcloud auth print-access-token");
     let project = CONFIG.api.googleCloudProject;
     if (!project) {
@@ -33,6 +35,7 @@ export async function getVertexAuth(): Promise<{ token: string; project: string 
       project = stdout.trim();
     }
     cachedAuth = { token: token.trim(), project };
+    authCachedAt = Date.now();
   }
   return cachedAuth;
 }
@@ -59,6 +62,10 @@ export interface VertexImageOptions {
   /** How the generated image is fitted into width x height. */
   fit?: "cover" | "contain";
   location?: string;
+  /** Optional Nano Banana model override; keeps the configured default otherwise. */
+  model?: string;
+  /** Request composition in the intended frame before resizing. */
+  aspectRatio?: "1:1" | "3:2" | "2:3" | "16:9" | "9:16";
 }
 
 /** One shot at the model. Throws on anything that is not a picture. */
@@ -74,14 +81,21 @@ export async function generateImage(options: VertexImageOptions): Promise<void> 
   } = options;
 
   const { token, project } = await getVertexAuth();
-  const model = CONFIG.models.imageGeneration;
+  const model = options.model ?? CONFIG.models.imageGeneration;
   const host =
     location === "global"
       ? "https://aiplatform.googleapis.com"
-      : `https://${location}-aiplatform.googleapis.com`;
+      : location === "us" || location === "eu"
+        ? `https://aiplatform.${location}.rep.googleapis.com`
+        : `https://${location}-aiplatform.googleapis.com`;
   const url =
     `${host}/v1/projects/${project}/locations/${location}` +
     `/publishers/google/models/${model}:generateContent`;
+
+  // Keep parallel batches and retries below the approximate ten/minute quota.
+  const requestAt = Math.max(Date.now(), nextRequestAt);
+  nextRequestAt = requestAt + 6500;
+  await new Promise((resolve) => setTimeout(resolve, Math.max(0, requestAt - Date.now())));
 
   const response = await fetch(url, {
     method: "POST",
@@ -91,7 +105,10 @@ export async function generateImage(options: VertexImageOptions): Promise<void> 
     },
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+      generationConfig: {
+        responseModalities: ["TEXT", "IMAGE"],
+        ...(options.aspectRatio ? { imageConfig: { aspectRatio: options.aspectRatio } } : {}),
+      },
     }),
   });
 
@@ -103,7 +120,7 @@ export async function generateImage(options: VertexImageOptions): Promise<void> 
   const result = await response.json();
   const parts = result.candidates?.[0]?.content?.parts ?? [];
   for (const part of parts) {
-    if (part.inlineData?.data) {
+    if (!part.thought && part.inlineData?.data) {
       await sharp(Buffer.from(part.inlineData.data, "base64"))
         .resize(width, height, {
           fit,
@@ -132,12 +149,15 @@ export async function generateImageWithRetry(
   attempts = LOCATIONS.length * 2,
   onAttemptFailed?: (attempt: number, message: string) => void
 ): Promise<boolean> {
+  // Each worker must visit every region even if another worker succeeds meanwhile.
+  const locations = options.location ? [options.location] : LOCATIONS;
+  const startingLocation = options.location ? 0 : preferredLocation;
   for (let attempt = 1; attempt <= attempts; attempt++) {
-    const index = (preferredLocation + attempt - 1) % LOCATIONS.length;
-    const location = LOCATIONS[index];
+    const index = (startingLocation + attempt - 1) % locations.length;
+    const location = locations[index];
     try {
       await generateImage({ ...options, location });
-      preferredLocation = index;
+      if (!options.location) preferredLocation = index;
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -145,7 +165,7 @@ export async function generateImageWithRetry(
       if (attempt === attempts) return false;
       const throttled =
         message.includes("429") || message.includes("RESOURCE_EXHAUSTED");
-      const wentRoundOnce = attempt % LOCATIONS.length === 0;
+      const wentRoundOnce = attempt % locations.length === 0;
       if (throttled && !wentRoundOnce) continue;
       await new Promise((r) =>
         setTimeout(r, throttled ? 20000 : 4000 * Math.ceil(attempt / 2))

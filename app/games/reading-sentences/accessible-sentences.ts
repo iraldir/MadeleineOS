@@ -260,9 +260,15 @@ const illustrationStyle =
   "clear simple readable composition, gentle and friendly. " +
   "No text, no letters, no words, no speech bubbles, no captions.";
 
+// Clarify scenes where the short reading sentence leaves visual ambiguity.
+const illustrationScenes: Record<string, string> = {
+  "easy-bath-plug": "A fully clothed child and parent stand beside a bathtub. The parent lifts the bath plug by its chain, and the shallow bath water drains down the plughole. The bathroom floor is completely dry. Nobody is in the bath.",
+  "easy-peach-stone": "Two cut halves of one ripe peach rest on a kitchen table. Exactly one brown peach stone is visible in one half; the other half has an empty hollow where that same stone was. No second stone.",
+};
+
 export const ACCESSIBLE_SENTENCES: ReadingSentence[] = entries.map(([id, text]) => ({
   id,
   text,
-  imagePrompt: `Illustrate this single everyday scene literally: ${text} ${illustrationStyle}`,
+  imagePrompt: `Illustrate this single everyday scene literally: ${illustrationScenes[id] ?? text} ${illustrationStyle}`,
   level: "easy",
 }));

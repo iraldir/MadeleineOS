@@ -35,6 +35,7 @@
     "planets:clouds": "tsx scripts/derive-cloud-maps.ts",
     "phonics:images": "tsx scripts/generate-phonics-images.ts",
     "sentences:images": "tsx scripts/generate-sentence-images.ts",
+    "sentences:images:batch": "tsx scripts/generate-sentence-image-sheets.ts",
     "sentences:check-speech": "tsx scripts/check-scribe-matching.ts",
     "sentences:check-matching": "tsx scripts/check-alignment.ts",
     "media:ready": "tsx scripts/generate-ready-media.ts",

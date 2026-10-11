@@ -8,7 +8,8 @@
  * which matters, because the Vertex quota is roughly ten images a minute and a
  * full pass takes a while.
  *
- * Usage: pnpm sentences:images [-- --only <id>] [-- --limit <n>] [-- --force]
+ * Usage: pnpm sentences:images [-- --only <id>] [-- --limit <n>] [-- --force] [-- --concurrency <1-4>]
+ *        [-- --model <model-id>] [-- --location <region>]
  */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
@@ -47,6 +48,12 @@ async function main() {
   const limitArg = arg("--limit");
   const limit = limitArg ? parseInt(limitArg, 10) : Infinity;
   const force = args.includes("--force");
+  const model = arg("--model") ?? undefined;
+  const location = arg("--location") ?? undefined;
+  const concurrency = Number(arg("--concurrency") ?? "1");
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 4) {
+    throw new Error("--concurrency must be an integer from 1 to 4");
+  }
 
   try {
     await getVertexAuth();
@@ -77,36 +84,45 @@ async function main() {
   let generated = 0;
   const failures: string[] = [];
 
-  for (let i = 0; i < todo.length; i++) {
-    const sentence = todo[i];
-    const outputPath = path.join(OUTPUT_DIR, `${sentence.id}.webp`);
-    const label = `[${i + 1}/${todo.length}] ${sentence.id}`;
+  let nextIndex = 0;
+  async function worker() {
+    while (nextIndex < todo.length) {
+      const i = nextIndex++;
+      const sentence = todo[i];
+      const outputPath = path.join(OUTPUT_DIR, `${sentence.id}.webp`);
+      const label = `[${i + 1}/${todo.length}] ${sentence.id}`;
 
-    const ok = await generateImageWithRetry(
-      {
-        prompt: sentence.imagePrompt,
-        outputPath,
-        width: WIDTH,
-        height: HEIGHT,
-        quality: 88,
-      },
-      5,
-      (attempt, message) =>
-        console.error(
-          formatError(`${label} attempt ${attempt}: ${message.slice(0, 140)}`)
-        )
-    );
+      const ok = await generateImageWithRetry(
+        {
+          prompt: `${sentence.imagePrompt} Landscape composition. Keep the main subjects fully inside the frame with a little clear space around them.`,
+          outputPath,
+          width: WIDTH,
+          height: HEIGHT,
+          quality: 88,
+          aspectRatio: "3:2",
+          model,
+          location,
+          fit: "contain",
+        },
+        10,
+        (attempt, message) =>
+          console.error(
+            formatError(`${label} attempt ${attempt}: ${message.slice(0, 140)}`)
+          )
+      );
 
-    if (ok) {
-      generated++;
-      console.log(formatSuccess(`${label} — "${sentence.text}"`));
-    } else {
-      failures.push(sentence.id);
-      console.error(formatError(`${label} gave up`));
+      if (ok) {
+        generated++;
+        console.log(formatSuccess(`${label} — "${sentence.text}"`));
+      } else {
+        failures.push(sentence.id);
+        console.error(formatError(`${label} gave up`));
+      }
+
+      if (i < todo.length - 1) await new Promise((r) => setTimeout(r, SPACING_MS));
     }
-
-    if (i < todo.length - 1) await new Promise((r) => setTimeout(r, SPACING_MS));
   }
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
 
   console.log(
     formatInfo(
